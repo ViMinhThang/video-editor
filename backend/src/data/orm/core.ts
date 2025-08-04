@@ -11,7 +11,7 @@ import {
 
 import { readFileSync } from "fs";
 
-const config = getConfig("video:orm_repo");
+const config = getConfig("videos:orm_repo");
 
 const logging = config.logging
   ? { logging: console.log, logQueryParameters: true }
@@ -26,7 +26,7 @@ export class BaseRepo {
   async initModelsAndDatabase(): Promise<void> {
     initializeModels(this.sequelize);
     if (config.reset_db) {
-      await this.sequelize.drop();
+      await this.dropAllModels();
       await this.sequelize.sync();
       await this.addSeedData();
     } else {
@@ -41,6 +41,12 @@ export class BaseRepo {
       await TrackModel.bulkCreate(data.tracks, { transaction });
       await TrackItemModel.bulkCreate(data.track_items, { transaction });
     });
+  }
+  private async dropAllModels(): Promise<void> {
+    await TrackItemModel.drop({ cascade: true });
+    await TrackModel.drop({ cascade: true });
+    await ProjectModel.drop({ cascade: true });
+    await UserModel.drop({ cascade: true });
   }
 }
 export type Constructor<T = {}> = new (...args: any[]) => T;

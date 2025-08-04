@@ -1,4 +1,4 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import { Calendar, Home, Inbox, Plus, Search, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -9,28 +9,41 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Button } from "./ui/button";
+import CreateProjectDialog from "./create-project";
+import axios from "axios";
+import { useState } from "react";
 
-// Menu items.
-const items = [
-  {
-    title: "WorkSpace",
-    url: "#",
-    icon: Home,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
+interface SidebarItem {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+}
 
-export function AppSidebar() {
+export function AppSidebar({
+  projects,
+  refetchProjects,
+}: {
+  projects: SidebarItem[];
+  refetchProjects: () => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const items = [
+    ...projects,
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings,
+    },
+  ];
+
   return (
     <Sidebar className="bg-white">
       <SidebarContent className="fixed top-18">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="w-60 h-20">
+            <SidebarMenu className="w-60">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -41,6 +54,13 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <CreateProjectDialog
+                  isOpen={open}
+                  setIsOpen={setOpen}
+                  refetchProjects={refetchProjects}
+                />
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

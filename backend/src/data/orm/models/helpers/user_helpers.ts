@@ -10,7 +10,7 @@ export const initializeUserModels = (sequelize: Sequelize) => {
       password: { type: DataTypes.STRING },
       email: { type: DataTypes.STRING },
     },
-    { sequelize }
+    { sequelize,tableName:"users" }
   );
 };
 export const associateUserModels = () => {

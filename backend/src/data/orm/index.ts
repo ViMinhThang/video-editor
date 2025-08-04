@@ -1,6 +1,6 @@
 import { BaseRepo } from "./core";
 import { AddQueries } from "./queries";
-
-const VideoRepo = AddQueries(BaseRepo);
+import { AddStorage } from "./storage";
+const VideoRepo = AddStorage(AddQueries(BaseRepo));
 
 export const VideoRepoImpl = VideoRepo;

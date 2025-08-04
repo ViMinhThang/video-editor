@@ -3,7 +3,7 @@ import { config as dotenvconfig } from "dotenv";
 import { getEnvironment, Env } from "./environment";
 import { merge } from "./merge";
 
-const file = process.env.SERVER_CONFIG ?? "server.config.json";
+const file = process.env.SERVER_CONFIG ?? "backend/server.config.json";
 const data = JSON.parse(readFileSync(file).toString());
 
 dotenvconfig({

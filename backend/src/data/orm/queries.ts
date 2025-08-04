@@ -6,7 +6,6 @@ export function AddQueries<TBase extends Constructor<BaseRepo>>(Base: TBase) {
     async getProjects(params?: any) {
       const result = await ProjectModel.findAll({
         include: [{ model: TrackModel, as: "tracks" }],
-        raw: true,
         nest: true,
         where: {
           user_id: params.user_id,
