@@ -1,0 +1,24 @@
+{
+  "http": {
+    "port": 5000
+  },
+  "errors": {
+    "400": "not_found",
+    "500": "error"
+  },
+  "videos": {
+    "orm_repo": {
+      "settings": {
+        "dialect": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "database": "capcut_clone",
+        "username": "fragile",
+        "password": "204863"
+      },
+      "logging": true,
+      "reset_db": true,
+      "seed_file": "seed_data.json"
+    }
+  }
+}

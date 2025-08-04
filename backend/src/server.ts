@@ -1,14 +1,19 @@
-import express from 'express';
+import { createServer } from "http";
+import express, { Express } from "express";
+import { getConfig } from "./config";
+import helmet from "helmet";
+import { createErrorHandlers } from "./errors";
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const port = getConfig("http:port", 3000);
 
-app.use(express.json());
+const expressApp: Express = express();
 
-app.get('/', (_req, res) => {
-  res.send('Hello from Express + TypeScript!');
-});
+expressApp.use(helmet());
+expressApp.use(express.json());
+expressApp.use(express.urlencoded({ extended: true }));
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+createErrorHandlers(expressApp);
+
+const server = createServer(expressApp);
+
+server.listen(port, () => console.log(`HTTP Server listening on port ${port}`));
