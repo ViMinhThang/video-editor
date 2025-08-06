@@ -4,7 +4,7 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { TrackItem } from "../../track_items_models";
+import { TrackItem } from "../../models/track_items_models";
 
 export class TrackItemModel
   extends Model<
@@ -16,6 +16,7 @@ export class TrackItemModel
   declare id: CreationOptional<number>;
   declare track_id: number;
   declare start_time: number;
+  declare url?: string | undefined;
   declare end_time: number;
   declare x: number;
   declare y: number;

@@ -1,5 +1,5 @@
 import { CreationOptional, InferAttributes, InferCreationAttributes, Model } from "sequelize";
-import { Project } from "../../project_models";
+import { Project } from "../../models/project_models";
 
 
 

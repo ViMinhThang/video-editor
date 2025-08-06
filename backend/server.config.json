@@ -17,7 +17,7 @@
         "password": "204863"
       },
       "logging": true,
-      "reset_db": true,
+      "reset_db": false,
       "seed_file": "backend/seed_data.json"
     }
   }

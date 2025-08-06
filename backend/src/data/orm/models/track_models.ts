@@ -1,5 +1,5 @@
 import { CreationOptional, InferAttributes, InferCreationAttributes, Model } from "sequelize";
-import { Track, typeEnum } from "../../track_models";
+import { Track, typeEnum } from "../../models/track_models";
 
 
 

@@ -1,6 +1,6 @@
 import { DataTypes, Sequelize } from "sequelize";
 import { TrackModel } from "../track_models";
-import { typeEnum } from "../../../track_models";
+import { typeEnum } from "../../../models/track_models";
 import { TrackItemModel } from "../track_items_models";
 import { UserModel } from "../user_models";
 import { ProjectModel } from "../project_models";

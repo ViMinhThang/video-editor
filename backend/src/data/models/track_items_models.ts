@@ -2,6 +2,7 @@ export interface TrackItem{
     id?:number
     track_id : number
     start_time:number
+    url?:string
     end_time:number
     x:number
     y:number

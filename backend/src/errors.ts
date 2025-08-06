@@ -4,8 +4,7 @@ import { getConfig } from "./config";
 export const createErrorHandlers = (app: Express) => {
   // 404 Handler
   app.use((req, res) => {
-    res.status(404);
-    res.render("error", { message: "Not Found", status: 404 });
+    res.status(404).json({ message: "Not Found", status: 404 });
   });
 
   const handler: ErrorRequestHandler = (error, req, res, next) => {

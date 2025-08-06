@@ -1,9 +1,9 @@
-import { Transaction } from "sequelize";
-import { ProjectModel, TrackModel } from "./models";
-import { BaseRepo, Constructor } from "./core";
-import { Project } from "../project_models";
+import { ProjectModel } from "../models";
+import { BaseRepo, Constructor } from "../core";
+import { Project } from "../../models/project_models";
 
-export function AddStorage<TBase extends Constructor<BaseRepo>>(Base: TBase) {
+
+export function AddProjectStorage<TBase extends Constructor<BaseRepo>>(Base: TBase) {
   return class extends Base {
     storeProject(p: Project) {
       return this.sequelize.transaction(async (transaction) => {
@@ -16,7 +16,7 @@ export function AddStorage<TBase extends Constructor<BaseRepo>>(Base: TBase) {
           },
           { transaction }
         );
-        return stored;
+        return stored.id;
       });
     }
   };

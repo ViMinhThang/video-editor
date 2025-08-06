@@ -1,15 +1,18 @@
 {
   "dependencies": {
+    "@feathersjs/express": "^5.0.34",
+    "@feathersjs/feathers": "^5.0.34",
     "@tsconfig/node20": "^20.1.6",
     "concurrently": "^9.2.0",
     "dotenv": "^17.2.1",
-    "express": "^5.1.0",
+    "express": "^4.21.2",
+    "fast-json-patch": "^3.1.1",
     "helmet": "^8.1.0",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
+    "@types/express": "^4.17.23",
     "@types/node": "^24.1.0",
     "@types/sequelize": "^4.28.20",
     "nodemon": "^3.1.10",

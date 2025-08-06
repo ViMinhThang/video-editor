@@ -4,7 +4,7 @@ import {
   InferAttributes,
   InferCreationAttributes,
 } from "sequelize";
-import { User } from "../../user_models";
+import { User } from "../../models/user_models";
 
 export class UserModel
   extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>>

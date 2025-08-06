@@ -25,7 +25,7 @@ const CreateProjectDialog = ({ isOpen, setIsOpen, refetchProjects }: Props) => {
 
   const handleCreateProject = async () => {
     try {
-      await axios.post("/api/projects", { title: projectName });
+      await axios.post("/api/projects", { title: projectName,user_id:1 });
       setIsOpen(false);
       setProjectName("");
       refetchProjects();

@@ -4,6 +4,7 @@ import { getConfig } from "./config";
 import helmet from "helmet";
 import { createErrorHandlers } from "./errors";
 import { createRoutes } from "./routes";
+import { createFeathersServices } from "./api";
 
 const port = getConfig("http:port", 3000);
 
@@ -13,6 +14,7 @@ expressApp.use(helmet());
 expressApp.use(express.json());
 expressApp.use(express.urlencoded({ extended: true }));
 
+createFeathersServices(expressApp)
 createRoutes(expressApp);
 
 createErrorHandlers(expressApp);
