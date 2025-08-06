@@ -39,11 +39,9 @@ export class BaseRepo {
       await UserModel.bulkCreate(data.users, { transaction });
       await ProjectModel.bulkCreate(data.projects, { transaction });
       await TrackModel.bulkCreate(data.tracks, { transaction });
-      await TrackItemModel.bulkCreate(data.track_items, { transaction });
     });
   }
   private async dropAllModels(): Promise<void> {
-    await TrackItemModel.drop({ cascade: true });
     await TrackModel.drop({ cascade: true });
     await ProjectModel.drop({ cascade: true });
     await UserModel.drop({ cascade: true });

@@ -52,43 +52,5 @@
       "type": "text",
       "order": 0
     }
-  ],
-  "track_items": [
-    {
-      "id": 1,
-      "track_id": 1,
-      "start_time": 0,
-      "end_time": 10,
-      "x": 0,
-      "y": 0,
-      "scale": 1,
-      "rotation": 0,
-      "text_content": "",
-      "create_at": "2025-08-04T10:00:00Z"
-    },
-    {
-      "id": 2,
-      "track_id": 2,
-      "start_time": 2,
-      "end_time": 12,
-      "x": 0,
-      "y": 0,
-      "scale": 1,
-      "rotation": 0,
-      "text_content": "",
-      "create_at": "2025-08-04T10:10:00Z"
-    },
-    {
-      "id": 3,
-      "track_id": 3,
-      "start_time": 1,
-      "end_time": 5,
-      "x": 100,
-      "y": 200,
-      "scale": 1.2,
-      "rotation": 15,
-      "text_content": "Hello world!",
-      "create_at": "2025-08-04T10:20:00Z"
-    }
   ]
 }

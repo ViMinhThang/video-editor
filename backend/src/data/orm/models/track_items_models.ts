@@ -4,7 +4,7 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { TrackItem } from "../../models/track_items_models";
+import { Asset, TrackItem } from "../../models/track_items_models";
 
 export class TrackItemModel
   extends Model<
@@ -16,6 +16,7 @@ export class TrackItemModel
   declare id: CreationOptional<number>;
   declare track_id: number;
   declare start_time: number;
+  declare asset_id?: number | undefined;
   declare url?: string | undefined;
   declare end_time: number;
   declare x: number;
@@ -24,4 +25,22 @@ export class TrackItemModel
   declare rotation: number;
   declare text_content: string;
   declare create_at?: Date;
+}
+
+export class AssetModel
+  extends Model<
+    InferAttributes<AssetModel>,
+    InferCreationAttributes<AssetModel>
+  >
+  implements Asset
+{
+  declare id: CreationOptional<number>;
+  declare file_name: string;
+  declare original_name: string;
+  declare mime_type: string;
+  declare size: number;
+  declare duration?: number | undefined;
+  declare width?: number | undefined;
+  declare height?: number | undefined;
+  declare created_at: Date;
 }

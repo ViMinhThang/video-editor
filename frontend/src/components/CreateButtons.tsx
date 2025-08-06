@@ -10,24 +10,20 @@ type Props = {
 const iconMap = {
   video: <Video className="w-5 h-5 text-cyan-600" />,
   image: <ImageIcon className="w-5 h-5 text-violet-600" />,
-  media: <FileUp className="w-5 h-5" />,
 };
 
 const textMap = {
   video: "Tạo video",
   image: "Tạo hình ảnh",
-  media: "Tải lên phương tiện",
 };
 
 const bgMap = {
   video: "bg-cyan-100 hover:bg-cyan-200",
   image: "bg-violet-100 hover:bg-violet-200",
-  media: "bg-gray-100 hover:bg-gray-200 h-12 mt-5",
 };
 const fontMap = {
   video: "text-lg",
   image: "text-lg",
-  media: "text-sm",
 };
 export function CreateCardButton({ type, onClick }: Props) {
   return (

@@ -1,6 +1,6 @@
-import { VideoRepoImpl } from "./orm";
-import { VideoRepository } from "./video_repository";
+import { ProjectRepoImpl } from "./orm";
+import { ProjectRepository } from "./project_repository";
 
-const repo = new VideoRepoImpl();
+const repo = new ProjectRepoImpl();
 
-export const video_repository: VideoRepository = repo;
+export const project_repo: ProjectRepository = repo;

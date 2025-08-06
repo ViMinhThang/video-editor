@@ -1,11 +1,10 @@
 import { BaseRepo } from "./core";
-import { AddProjectDeletion } from "./video_repo/proejct_deletion";
-import { AddProjectQueries } from "./video_repo/project_query";
-import { AddProjectStorage } from "./video_repo/project_storage";
-import { AddProjectUpdate } from "./video_repo/project_update";
+import { AddProjectDeletion, AddProjectStorage, AddProjectUpdate } from "./project_repo/mutation";
+import { AddProjectQueries } from "./project_repo/queries";
 
-const VideoRepo = AddProjectUpdate(
+
+const ProjectRepo = AddProjectUpdate(
   AddProjectDeletion(AddProjectStorage(AddProjectQueries(BaseRepo)))
 );
 
-export const VideoRepoImpl = VideoRepo;
+export const ProjectRepoImpl = ProjectRepo;
