@@ -39,8 +39,10 @@ export class AssetModel
   declare original_name: string;
   declare mime_type: string;
   declare size: number;
+  declare thumbnail?: string | undefined;
   declare duration?: number | undefined;
   declare width?: number | undefined;
   declare height?: number | undefined;
+  declare url: string;
   declare created_at: Date;
 }

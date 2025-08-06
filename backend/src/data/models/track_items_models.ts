@@ -15,6 +15,8 @@ export interface TrackItem {
 export interface Asset {
   id?: number;
   original_name: string;
+  url:string
+  thumbnail?:string
   file_name: string;
   mime_type: string;
   size: number;

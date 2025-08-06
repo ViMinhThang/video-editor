@@ -55,6 +55,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       ...primaryKey,
       original_name: { type: DataTypes.STRING },
       file_name: { type: DataTypes.STRING },
+      url:{type:DataTypes.STRING},
       mime_type: { type: DataTypes.STRING },
       size: { type: DataTypes.STRING },
       duration: { type: DataTypes.INTEGER },
