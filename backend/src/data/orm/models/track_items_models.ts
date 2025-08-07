@@ -15,16 +15,15 @@ export class TrackItemModel
 {
   declare id: CreationOptional<number>;
   declare track_id: number;
-  declare start_time: number;
+  declare start_time?: number | undefined;
+  declare end_time: number | undefined;
   declare asset_id?: number | undefined;
-  declare url?: string | undefined;
-  declare end_time: number;
-  declare x: number;
-  declare y: number;
-  declare scale: number;
-  declare rotation: number;
-  declare text_content: string;
-  declare create_at?: Date;
+  declare x?: number | undefined;
+  declare y?: number | undefined;
+  declare scale?: number | undefined;
+  declare rotation?: number | undefined;
+  declare text_content?: string | undefined;
+  declare created_at?: Date | undefined;
 }
 
 export class AssetModel

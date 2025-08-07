@@ -35,9 +35,11 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("project_id", projectId);
+    formData.append("project_id", projectId); 
+
     try {
       const res = await axios.post("/api/upload", formData);
       console.log(res.data);
@@ -45,6 +47,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
       console.log(error);
     }
   };
+
   return (
     <div className="w-[1600px]">
       <input

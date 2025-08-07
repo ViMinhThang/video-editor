@@ -25,13 +25,34 @@ export class BaseRepo {
   }
   async initModelsAndDatabase(): Promise<void> {
     initializeModels(this.sequelize);
-    if (config.reset_db) {
-      await this.dropAllModels();
-      await this.sequelize.sync();
-      await this.addSeedData();
-    } else {
-      await this.sequelize.sync();
-    }
+
+    //     if (config.reset_db) {
+    //       await this.sequelize.query(`
+
+    // SELECT 'SELECT SETVAL(' ||
+    //        quote_literal(quote_ident(PGT.schemaname) || '.' || quote_ident(S.relname)) ||
+    //        ', COALESCE(MAX(' ||quote_ident(C.attname)|| '), 1) ) FROM ' ||
+    //        quote_ident(PGT.schemaname)|| '.'||quote_ident(T.relname)|| ';'
+    // FROM pg_class AS S,
+    //      pg_depend AS D,
+    //      pg_class AS T,
+    //      pg_attribute AS C,
+    //      pg_tables AS PGT
+    // WHERE S.relkind = 'S'
+    //     AND S.oid = D.objid
+    //     AND D.refobjid = T.oid
+    //     AND D.refobjid = C.attrelid
+    //     AND D.refobjsubid = C.attnum
+    //     AND T.relname = PGT.tablename
+    // ORDER BY S.relname;
+
+    //         `);
+    //       await this.sequelize.drop();
+    //       await this.sequelize.sync();
+    //       await this.addSeedData();
+    //     } else {
+          await this.sequelize.sync();
+    //     }
   }
   async addSeedData() {
     const data = JSON.parse(readFileSync(config.seed_file).toString());
@@ -39,9 +60,11 @@ export class BaseRepo {
       await UserModel.bulkCreate(data.users, { transaction });
       await ProjectModel.bulkCreate(data.projects, { transaction });
       await TrackModel.bulkCreate(data.tracks, { transaction });
+      await TrackItemModel.bulkCreate(data.track_items, { transaction });
     });
   }
   private async dropAllModels(): Promise<void> {
+    await TrackItemModel.drop({ cascade: true });
     await TrackModel.drop({ cascade: true });
     await ProjectModel.drop({ cascade: true });
     await UserModel.drop({ cascade: true });

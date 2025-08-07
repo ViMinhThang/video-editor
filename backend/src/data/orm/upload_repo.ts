@@ -5,7 +5,7 @@ export function AddUploadMedia<TBase extends Constructor<BaseRepo>>(
   Base: TBase
 ) {
   return class extends Base {
-    async storeAsset(a: AssetModel): Promise<boolean> {
+    async storeAsset(a: AssetModel): Promise<number> {
       return this.sequelize.transaction(async (transaction) => {
         const [_asset, created] = await AssetModel.upsert(
           {
@@ -22,7 +22,7 @@ export function AddUploadMedia<TBase extends Constructor<BaseRepo>>(
           },
           { transaction }
         );
-        return created ?? false;
+        return _asset.id;
       });
     }
   };

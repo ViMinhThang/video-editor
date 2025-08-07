@@ -1,6 +1,5 @@
 import { DataTypes, Sequelize } from "sequelize";
 import { TrackModel } from "../track_models";
-import { typeEnum } from "../../../models/track_models";
 import { AssetModel, TrackItemModel } from "../track_items_models";
 import { UserModel } from "../user_models";
 import { ProjectModel } from "../project_models";
@@ -14,7 +13,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
     {
       ...primaryKey,
       project_id: { type: DataTypes.INTEGER },
-      type: DataTypes.ENUM("video", "audio", "text"),
+      type: { type: DataTypes.STRING },
       order: { type: DataTypes.INTEGER },
     },
     { sequelize, tableName: "tracks" }
@@ -37,7 +36,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
           model: "assets",
           key: "id",
         },
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
       },
       start_time: { type: DataTypes.FLOAT },
       end_time: { type: DataTypes.FLOAT },
@@ -46,7 +45,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       scale: { type: DataTypes.FLOAT },
       rotation: { type: DataTypes.FLOAT },
       text_content: { type: DataTypes.STRING },
-      create_at: { type: DataTypes.DATE },
+      created_at: { type: DataTypes.DATE },
     },
     { sequelize, tableName: "track_items" }
   );
@@ -55,7 +54,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       ...primaryKey,
       original_name: { type: DataTypes.STRING },
       file_name: { type: DataTypes.STRING },
-      url:{type:DataTypes.STRING},
+      url: { type: DataTypes.STRING },
       mime_type: { type: DataTypes.STRING },
       size: { type: DataTypes.STRING },
       duration: { type: DataTypes.INTEGER },
@@ -67,7 +66,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
   );
 };
 export const associateTrackModels = () => {
-  TrackItemModel.belongsTo(AssetModel, { foreignKey: "asset_id", as: "asset" });
+  TrackItemModel.belongsTo(AssetModel, { foreignKey: "asset_id"});
   AssetModel.hasMany(TrackItemModel, {
     foreignKey: "asset_id",
     as: "usedInTrackItems",

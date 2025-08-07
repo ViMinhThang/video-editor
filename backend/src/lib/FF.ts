@@ -55,7 +55,7 @@ const getDimension = (
     });
   });
 };
-const getDuration = (fullPath: string) => {
+const getDuration = (fullPath: string): Promise<number> => {
   return new Promise((resolve, reject) => {
     const ffprobe = spawn("ffprobe", [
       "-v",
@@ -66,18 +66,24 @@ const getDuration = (fullPath: string) => {
       "default=noprint_wrappers=1:nokey=1",
       fullPath,
     ]);
-    let duration = 0;
+
+    let output = "";
+
     ffprobe.stdout.on("data", (data) => {
-      duration += data.toString("utf-8");
+      output += data.toString("utf-8");
     });
+
     ffprobe.on("close", (code) => {
       if (code === 0) {
-        resolve({
-          duration,
-        });
+        const duration = parseFloat(output.trim());
+        resolve(duration);
       } else {
-        reject(`FFprob existed with this code: ${code}`);
+        reject(new Error(`ffprobe exited with code ${code}`));
       }
+    });
+
+    ffprobe.on("error", (err) => {
+      reject(err);
     });
   });
 };
