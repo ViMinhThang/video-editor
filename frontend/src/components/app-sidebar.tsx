@@ -9,23 +9,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Button } from "./ui/button";
 import CreateProjectDialog from "./create-project";
-import axios from "axios";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
-interface SidebarItem {
-  title: string;
-  url: string;
-  icon: React.ElementType;
-}
+import { Project } from "@/types";
 
 export function AppSidebar({
   projects,
   refetchProjects,
 }: {
-  projects: SidebarItem[];
+  projects: Project[];
   refetchProjects: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);

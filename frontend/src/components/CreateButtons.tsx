@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Video, ImageIcon, Plus, SquareLibrary, FileUp } from "lucide-react";
+import { Video, ImageIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {

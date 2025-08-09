@@ -80,7 +80,6 @@ export const createUploadRoutes = (app: Express) => {
           size: file.size,
           thumbnail: `/uploads/projects/${project_id}/thumb-${file.filename}.jpg`,
           url: `/uploads/projects/${project_id}/${file.filename}`,
-          created_at: new Date(),
         };
         console.log(asset);
         const assetId = await asset_repo.storeAsset(asset);

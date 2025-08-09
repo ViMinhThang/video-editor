@@ -1,4 +1,4 @@
-import { AddDeletionAsset } from "./asset_repo/mutation";
+import { AddDeletionAsset, AddStoreAsset } from "./asset_repo/mutation";
 import { AddQueriesAsset } from "./asset_repo/queries";
 import { BaseRepo } from "./core";
 import {
@@ -13,18 +13,15 @@ import {
   AddTrackDeletion,
 } from "./track_repo/mutation";
 import { AddQueriesTrack } from "./track_repo/queries";
-import { AddUploadMedia } from "./upload_repo";
 
 const projectRepo = AddProjectUpdate(
   AddProjectDeletion(AddProjectStorage(AddProjectQueries(BaseRepo)))
 );
 
-const assetRepo = AddDeletionAsset(AddQueriesAsset(projectRepo));
+const assetRepo = AddStoreAsset(AddDeletionAsset(AddQueriesAsset(projectRepo)));
 
 const trackRepo = AddTrackDeletion(
-  AddStorageTrack(
-    AddUploadMedia(AddQueriesTrack(AddStorageTrackItem(assetRepo)))
-  )
+  AddStorageTrack(AddQueriesTrack(AddStorageTrackItem(assetRepo)))
 );
 
 export const videoRepoImpl = trackRepo;

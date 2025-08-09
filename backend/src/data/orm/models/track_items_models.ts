@@ -25,7 +25,8 @@ export class TrackItemModel
   declare scale?: number | undefined;
   declare rotation?: number | undefined;
   declare text_content?: string | undefined;
-  declare created_at?: Date | undefined;
+  declare created_at?: CreationOptional<Date>;
+  declare updated_at?: CreationOptional<Date>;
 }
 
 export class AssetModel
@@ -38,10 +39,11 @@ export class AssetModel
   declare id: CreationOptional<number>;
   declare file_name: string;
   declare original_name: string;
-  declare project_id:number;
+  declare project_id: number;
   declare mime_type: string;
   declare size: number;
   declare thumbnail?: string | undefined;
   declare url: string;
-  declare created_at: Date;
+  declare created_at?: CreationOptional<Date>;
+  declare updated_at?: CreationOptional<Date>;
 }

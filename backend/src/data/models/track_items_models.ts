@@ -11,7 +11,8 @@ export interface TrackItem {
   scale?: number;
   rotation?: number;
   text_content?: string;
-  created_at?: Date;
+    created_at?: Date;
+  updated_at?: Date;
 }
 
 export interface Asset {
@@ -23,5 +24,6 @@ export interface Asset {
   project_id:number
   mime_type: string;
   size: number;
-  created_at: Date;
+    created_at?: Date;
+  updated_at?: Date;
 }

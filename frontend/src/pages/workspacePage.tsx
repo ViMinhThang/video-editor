@@ -1,34 +1,15 @@
 import Cardmodi from "@/components/card-custom";
 import { CreateCardButton } from "@/components/CreateButtons";
 import { Button } from "@/components/ui/button";
+import { Asset, Project } from "@/types";
 import axios from "axios";
 import { FileUp, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export interface AssetModel {
-  id:number
-  mime_type: string;
-  thumbnail: string;
-  original_name: string;
-}
-
-interface TrackItem {
-  AssetModel: AssetModel;
-}
-
-export interface Track {
-  id: number;
-  items: TrackItem[];
-}
-
-interface ProjectType {
-  id: number;
-  title: string;
-}
 
 export default function WorkspacePage({ projectId }: { projectId: string }) {
-  const [project, setProject] = useState<ProjectType | null>(null);
-  const [assets, setAssets] = useState<AssetModel[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUploadFile = () => {

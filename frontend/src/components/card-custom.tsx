@@ -5,16 +5,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AssetModel } from "@/pages/workspacePage";
 import { Ellipsis } from "lucide-react";
-
+import { timeSince } from "@/lib/utils";
+import { Asset } from "@/types";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface CardmodiProps {
-  assets: AssetModel[];
+  assets: Asset[];
   onDelete: (trackId: number) => void;
 }
-function AssetThumbnail({ asset }: { asset: AssetModel }) {
+function AssetThumbnail({ asset }: { asset: Asset }) {
   const mimeType = asset.mime_type;
 
   if (mimeType === "video/mp4") {
@@ -22,7 +22,7 @@ function AssetThumbnail({ asset }: { asset: AssetModel }) {
       <img
         src={API_BASE_URL + asset.thumbnail}
         alt="Video thumbnail"
-        className="w-full h-40 object-cover rounded"
+        className="w-full h-40 object-cover rounded-xl"
       />
     );
   }
@@ -32,7 +32,7 @@ function AssetThumbnail({ asset }: { asset: AssetModel }) {
       <img
         src="/placeholder-image.png"
         alt="Image placeholder"
-        className="w-full h-40 object-cover rounded"
+        className="w-full h-40 object-cover rounded-xl"
       />
     );
   }
@@ -42,7 +42,7 @@ function AssetThumbnail({ asset }: { asset: AssetModel }) {
   }
 
   return (
-    <div className="w-full h-40 bg-gray-200 flex items-center justify-center rounded">
+    <div className="w-full h-40 bg-gray-200 flex items-center justify-center rounded-xl">
       <span className="text-gray-500">No preview available</span>
     </div>
   );
@@ -54,15 +54,19 @@ export default function Cardmodi({ assets, onDelete }: CardmodiProps) {
       {assets?.map((asset, index) => (
         <Card
           key={index}
-          className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 rounded-xl bg-gray-100"
+          className="w-[300px] pt-0 shadow-none border-white rounded-xl hover:bg-blue-100 p-2 duration-200 cursor-pointer"
         >
-          <CardContent className="p-2">
+          <CardContent className="bg-gray-100 p-2 rounded-xl">
             <AssetThumbnail asset={asset} />
           </CardContent>
-          <CardFooter className="px-4 py-1 flex items-center gap-3">
-            <h1 className="font-semibold text-sm truncate max-w-[180px]">
-              {asset.original_name}
-            </h1>
+          <CardFooter className="px-4 flex items-center gap-3">
+            <div className="flex flex-col">
+              <h1 className="font-semibold text-sm truncate max-w-[180px]">
+                {asset.original_name}
+              </h1>
+              <p className="text-sm"> {timeSince(asset.created_at)}</p>
+            </div>
+
             <div className="ml-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger className="hover:bg-gray-100 p-2 rounded-full">

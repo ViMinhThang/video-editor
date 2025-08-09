@@ -19,7 +19,6 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
             scale: ti?.scale,
             rotation: ti?.rotation,
             text_content: ti?.text_content,
-            created_at: ti.created_at,
           },
           { transaction }
         );

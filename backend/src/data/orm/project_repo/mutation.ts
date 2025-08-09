@@ -21,8 +21,6 @@ export function AddProjectStorage<TBase extends Constructor<BaseRepo>>(Base: TBa
           {
             user_id: 1,
             title: p.title,
-            create_at: new Date(),
-            update_at: new Date(),
           },
           { transaction }
         );
@@ -38,7 +36,6 @@ export function AddProjectUpdate<TBase extends Constructor<BaseRepo>>(Base: TBas
       const [count] = await ProjectModel.update(
         {
           ...data,
-          update_at: new Date(),
         },
         {
           where: { id },

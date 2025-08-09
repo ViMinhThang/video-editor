@@ -15,7 +15,12 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       type: { type: DataTypes.STRING },
       order: { type: DataTypes.INTEGER },
     },
-    { sequelize, tableName: "tracks" }
+    {
+      sequelize,
+      tableName: "tracks",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }
   );
   TrackItemModel.init(
     {
@@ -46,9 +51,13 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       width: { type: DataTypes.FLOAT },
       height: { type: DataTypes.FLOAT },
       text_content: { type: DataTypes.STRING },
-      created_at: { type: DataTypes.DATE },
     },
-    { sequelize, tableName: "track_items" }
+    {
+      sequelize,
+      tableName: "track_items",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }
   );
   AssetModel.init(
     {
@@ -68,9 +77,13 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       mime_type: { type: DataTypes.STRING },
       thumbnail: { type: DataTypes.STRING },
       size: { type: DataTypes.STRING },
-      created_at: { type: DataTypes.DATE },
     },
-    { sequelize, tableName: "assets" }
+    {
+      sequelize,
+      tableName: "assets",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }
   );
 };
 export const associateTrackModels = () => {
