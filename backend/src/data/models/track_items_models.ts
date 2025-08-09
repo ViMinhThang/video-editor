@@ -20,6 +20,7 @@ export interface Asset {
   url:string
   thumbnail?:string
   file_name: string;
+  project_id:number
   mime_type: string;
   size: number;
   created_at: Date;

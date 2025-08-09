@@ -5,23 +5,22 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Track } from "@/pages/workspacePage";
-import axios from "axios";
+import { AssetModel } from "@/pages/workspacePage";
 import { Ellipsis } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface CardmodiProps {
-  tracks: Track[];
+  assets: AssetModel[];
   onDelete: (trackId: number) => void;
 }
-function TrackThumbnail({ track }: { track: Track }) {
-  const mimeType = track.items[0].AssetModel.mime_type;
+function AssetThumbnail({ asset }: { asset: AssetModel }) {
+  const mimeType = asset.mime_type;
 
   if (mimeType === "video/mp4") {
     return (
       <img
-        src={API_BASE_URL + track.items[0].AssetModel.thumbnail}
+        src={API_BASE_URL + asset.thumbnail}
         alt="Video thumbnail"
         className="w-full h-40 object-cover rounded"
       />
@@ -49,20 +48,20 @@ function TrackThumbnail({ track }: { track: Track }) {
   );
 }
 
-export default function Cardmodi({ tracks, onDelete }: CardmodiProps) {
+export default function Cardmodi({ assets, onDelete }: CardmodiProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5">
-      {tracks?.map((track, index) => (
+      {assets?.map((asset, index) => (
         <Card
           key={index}
           className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 rounded-xl bg-gray-100"
         >
           <CardContent className="p-2">
-            <TrackThumbnail track={track} />
+            <AssetThumbnail asset={asset} />
           </CardContent>
-          <CardFooter className="px-4 py-3 flex items-center gap-3">
+          <CardFooter className="px-4 py-1 flex items-center gap-3">
             <h1 className="font-semibold text-sm truncate max-w-[180px]">
-              {track.items[0].AssetModel.original_name}
+              {asset.original_name}
             </h1>
             <div className="ml-auto">
               <DropdownMenu>
@@ -72,7 +71,7 @@ export default function Cardmodi({ tracks, onDelete }: CardmodiProps) {
                 <DropdownMenuContent className="z-50">
                   <DropdownMenuLabel
                     className="text-sm text-red-500 cursor-pointer hover:bg-red-50"
-                    onClick={() => onDelete(track.id)}
+                    onClick={() => onDelete(asset.id)}
                   >
                     Xóa
                   </DropdownMenuLabel>

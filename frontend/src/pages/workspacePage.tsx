@@ -5,7 +5,8 @@ import axios from "axios";
 import { FileUp, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-interface AssetModel {
+export interface AssetModel {
+  id:number
   mime_type: string;
   thumbnail: string;
   original_name: string;
@@ -27,7 +28,7 @@ interface ProjectType {
 
 export default function WorkspacePage({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<ProjectType | null>(null);
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [assets, setAssets] = useState<AssetModel[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleUploadFile = () => {
@@ -43,19 +44,19 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
     }
   };
 
-  const fetchTracks = async () => {
+  const fetchAssets = async () => {
     try {
-      const res = await axios.get(`/api/projects/${projectId}/tracks-preview`);
-      setTracks(res.data);
+      const res = await axios.get(`/api/projects/${projectId}/assets`);
+      setAssets(res.data);
       console.log(res.data);
     } catch (error) {
       console.log("Error fetching tracks");
     }
   };
-  const deleteTrack = async (trackId: number) => {
+  const deleteAsset = async (assetId: number) => {
     try {
-      await axios.delete(`/api/tracks/${trackId}`);
-      await fetchTracks();
+      await axios.delete(`/api/assets/${assetId}`);
+      await fetchAssets();
     } catch (error) {
       console.error("Failed to delete track", error);
     }
@@ -63,7 +64,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     fetchProject();
-    fetchTracks();
+    fetchAssets();
   }, [projectId]);
 
   const handleFileChange = async (
@@ -78,7 +79,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
 
     try {
       await axios.post("/api/upload", formData);
-      await fetchTracks(); // Refresh danh sách ngay lập tức
+      await fetchAssets();
     } catch (error) {
       console.log(error);
     }
@@ -118,7 +119,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
           </span>
         </Button>
 
-        <Cardmodi tracks={tracks} onDelete={deleteTrack} />
+        <Cardmodi assets={assets} onDelete={deleteAsset} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
-import { project_repo } from "../data";
-import { Project } from "../data/models/project_models";
-import { WebService } from "./web_service";
+import { project_repo } from "../../data";
+import { Project } from "../../data/models/project_models";
+import { WebService } from "../web_service";
 import * as jsonpatch from "fast-json-patch";
 
 export class ProjectWebService implements WebService<Project> {

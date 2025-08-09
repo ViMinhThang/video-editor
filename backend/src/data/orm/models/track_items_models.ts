@@ -38,6 +38,7 @@ export class AssetModel
   declare id: CreationOptional<number>;
   declare file_name: string;
   declare original_name: string;
+  declare project_id:number;
   declare mime_type: string;
   declare size: number;
   declare thumbnail?: string | undefined;

@@ -3,7 +3,7 @@ import fs from "fs";
 import multer from "multer";
 import { Express, Request, Response } from "express";
 import FF from "../lib/FF";
-import { upload_repo } from "../data";
+import { asset_repo } from "../data";
 
 const uploadDir = path.join(__dirname, "../../uploads/projects");
 const tempDir = path.join(uploadDir, "tmp");
@@ -74,30 +74,31 @@ export const createUploadRoutes = (app: Express) => {
         // 1. Tạo asset
         const asset = {
           original_name: file.originalname,
+          project_id: project_id,
           file_name: file.filename,
           mime_type: file.mimetype,
           size: file.size,
-          thumbnail:`/uploads/projects/${project_id}/thumb-${file.filename}.jpg`,
+          thumbnail: `/uploads/projects/${project_id}/thumb-${file.filename}.jpg`,
           url: `/uploads/projects/${project_id}/${file.filename}`,
           created_at: new Date(),
         };
-        console.log(asset)
-        const assetId = await upload_repo.storeAsset(asset);
-        
-        const track = await upload_repo.storeTrack({
-          project_id: parseInt(project_id),
-          type: file.mimetype,
-        });
+        console.log(asset);
+        const assetId = await asset_repo.storeAsset(asset);
 
-        await upload_repo.storeTrackItem({
-          track_id: track.id!,
-          asset_id: assetId,
-          start_time: 0,
-          width,
-          height,
-          end_time: duration,
-          created_at: new Date(),
-        });
+        // const track = await upload_repo.storeTrack({
+        //   project_id: parseInt(project_id),
+        //   type: file.mimetype,
+        // });
+
+        // await upload_repo.storeTrackItem({
+        //   track_id: track.id!,
+        //   asset_id: assetId,
+        //   start_time: 0,
+        //   width,
+        //   height,
+        //   end_time: duration,
+        //   created_at: new Date(),
+        // });
 
         return res.status(201).json({
           message: "Upload successful",
