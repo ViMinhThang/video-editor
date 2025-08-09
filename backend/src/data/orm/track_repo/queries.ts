@@ -1,30 +1,45 @@
+import { Track } from "../../models/track_models";
 import { BaseRepo, Constructor } from "../core";
-import { TrackModel } from "../models";
+import { TrackItemModel, TrackModel } from "../models";
+import { AssetModel } from "../models/track_items_models";
 
 export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
   Base: Tbase
 ) {
   return class extends Base {
-    async findOrCreate({
-      project_id,
-      type,
-    }: {
-      project_id: number;
-      type: string;
-    }): Promise<TrackModel> {
-      const [track, created] = await TrackModel.findOrCreate({
-        where: {
-          project_id,
-          type,
-        },
-        defaults: {
-          project_id,
-          type,
-          order: 0,
-        },
+    async getTrackById(id: any): Promise<Track | undefined> {
+      const result = await TrackModel.findOne({ where: { id: id } });
+      return result ?? undefined;
+    }
+    async getTracks(query: any): Promise<Track[]> {
+      const result = await TrackModel.findAll({
+        where: { project_id: query.project_id },
+        include: [{ model: TrackItemModel, as: "items" }],
+        nest: true,
+      });
+      return result;
+    }
+    async getTracksWithOneItem(project_id: number) {
+      const tracks = await TrackModel.findAll({
+        where: { project_id },
+        include: [
+          {
+            model: TrackItemModel,
+            as: "items",
+            separate: true,
+            limit: 1,
+            order: [["id", "ASC"]],
+            include: [
+              {
+                model: AssetModel,
+              },
+            ],
+          },
+        ],
+        order: [["id", "ASC"]],
       });
 
-      return track;
+      return tracks;
     }
   };
 }

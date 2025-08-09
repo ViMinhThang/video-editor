@@ -5,29 +5,65 @@ import axios from "axios";
 import { FileUp, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+interface AssetModel {
+  mime_type: string;
+  thumbnail: string;
+  original_name: string;
+}
+
+interface TrackItem {
+  AssetModel: AssetModel;
+}
+
+export interface Track {
+  id: number;
+  items: TrackItem[];
+}
+
 interface ProjectType {
   id: number;
   title: string;
-  tracks: any[];
 }
 
 export default function WorkspacePage({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<ProjectType | null>(null);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const handleUploadFile = () => {
     fileInputRef.current?.click();
   };
+
   const fetchProject = async () => {
     try {
-      const response = await axios.get(`/api/project/${projectId}`);
-      setProject(response.data);
+      const res = await axios.get(`/api/project/${projectId}`);
+      setProject(res.data);
     } catch (error) {
       console.log("Project not found");
     }
   };
 
+  const fetchTracks = async () => {
+    try {
+      const res = await axios.get(`/api/projects/${projectId}/tracks-preview`);
+      setTracks(res.data);
+      console.log(res.data);
+    } catch (error) {
+      console.log("Error fetching tracks");
+    }
+  };
+  const deleteTrack = async (trackId: number) => {
+    try {
+      await axios.delete(`/api/tracks/${trackId}`);
+      await fetchTracks();
+    } catch (error) {
+      console.error("Failed to delete track", error);
+    }
+  };
+
   useEffect(() => {
     fetchProject();
+    fetchTracks();
   }, [projectId]);
 
   const handleFileChange = async (
@@ -38,11 +74,11 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("project_id", projectId); 
+    formData.append("project_id", projectId);
 
     try {
-      const res = await axios.post("/api/upload", formData);
-      console.log(res.data);
+      await axios.post("/api/upload", formData);
+      await fetchTracks(); // Refresh danh sách ngay lập tức
     } catch (error) {
       console.log(error);
     }
@@ -82,7 +118,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
           </span>
         </Button>
 
-        <Cardmodi />
+        <Cardmodi tracks={tracks} onDelete={deleteTrack} />
       </div>
     </div>
   );

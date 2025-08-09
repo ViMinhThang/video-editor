@@ -13,10 +13,10 @@
         "host": "localhost",
         "port": 5432,
         "database": "capcut_clone",
-        "username": "postgres",
-        "password": ""
+        "username": "fragile",
+        "password": "204863"
       },
-      "logging": true,
+      "logging": false,
       "reset_db": true,
       "seed_file": "backend/seed_data.json"
     }

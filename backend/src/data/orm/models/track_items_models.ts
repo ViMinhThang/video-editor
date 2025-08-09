@@ -18,6 +18,8 @@ export class TrackItemModel
   declare start_time?: number | undefined;
   declare end_time: number | undefined;
   declare asset_id?: number | undefined;
+  declare width?: number | undefined;
+  declare height?: number | undefined;
   declare x?: number | undefined;
   declare y?: number | undefined;
   declare scale?: number | undefined;
@@ -39,9 +41,6 @@ export class AssetModel
   declare mime_type: string;
   declare size: number;
   declare thumbnail?: string | undefined;
-  declare duration?: number | undefined;
-  declare width?: number | undefined;
-  declare height?: number | undefined;
   declare url: string;
   declare created_at: Date;
 }

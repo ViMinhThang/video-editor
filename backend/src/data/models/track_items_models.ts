@@ -3,6 +3,8 @@ export interface TrackItem {
   track_id: number;
   asset_id?: number;
   start_time?: number;
+  width?:number,
+  height?:number
   end_time?: number;
   x?: number;
   y?: number;
@@ -20,8 +22,5 @@ export interface Asset {
   file_name: string;
   mime_type: string;
   size: number;
-  duration?: number;
-  width?: number;
-  height?: number;
   created_at: Date;
 }

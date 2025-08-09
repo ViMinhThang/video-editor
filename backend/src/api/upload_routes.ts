@@ -5,19 +5,21 @@ import { Express, Request, Response } from "express";
 import FF from "../lib/FF";
 import { upload_repo } from "../data";
 
-const uploadDir = path.join(__dirname, "../../uploads");
-
+const uploadDir = path.join(__dirname, "../../uploads/projects");
+const tempDir = path.join(uploadDir, "tmp");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 const storage = multer.diskStorage({
   destination(req, file, callback) {
-    callback(null, uploadDir);
+    fs.mkdirSync(tempDir, { recursive: true });
+    callback(null, tempDir);
   },
   filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e4);
     const ext = path.extname(file.originalname);
-    cb(null, `${file.filename}-${uniqueSuffix}${ext}`);
+    const basename = path.basename(file.originalname, ext);
+    cb(null, `${basename}-${uniqueSuffix}${ext}`);
   },
 });
 
@@ -28,6 +30,7 @@ export const createUploadRoutes = (app: Express) => {
     "/api/upload",
     upload.single("file"),
     async (req: Request, res: Response) => {
+      console.log(req.file);
       try {
         if (!req.file) {
           return res.status(400).json({ message: "No file uploaded" });
@@ -41,8 +44,13 @@ export const createUploadRoutes = (app: Express) => {
         }
 
         const file = req.file;
-        const folder = `/uploads/projects/${project_id}`;
-        const fileUrl = `${folder}/${file.filename}`;
+        const projectDir = path.join(uploadDir, project_id);
+        fs.mkdirSync(projectDir, { recursive: true });
+
+        const oldPath = req.file.path; // file o73 uploads/tmp
+        const newPath = path.join(projectDir, req.file.filename); // tao folder
+
+        fs.renameSync(oldPath, newPath); // di chuyen file
 
         let width: number | undefined;
         let height: number | undefined;
@@ -51,10 +59,11 @@ export const createUploadRoutes = (app: Express) => {
 
         if (file.mimetype.includes("mp4")) {
           try {
-            thumbnail = `${folder}/thumb-${file.filename}.jpg`;
-            await FF.makeThumbnail(fileUrl, thumbnail);
-            const dimensions = await FF.getDimension(fileUrl);
-            duration = await FF.getDuration(fileUrl);
+            thumbnail = `${projectDir}/thumb-${file.filename}.jpg`;
+            fs.mkdirSync(path.dirname(thumbnail), { recursive: true });
+            await FF.makeThumbnail(newPath, thumbnail);
+            const dimensions = await FF.getDimension(newPath);
+            duration = await FF.getDuration(newPath);
             width = dimensions.width;
             height = dimensions.height;
           } catch (err) {
@@ -68,16 +77,14 @@ export const createUploadRoutes = (app: Express) => {
           file_name: file.filename,
           mime_type: file.mimetype,
           size: file.size,
-          width,
-          height,
-          duration,
-          thumbnail,
-          url: fileUrl,
+          thumbnail:`/uploads/projects/${project_id}/thumb-${file.filename}.jpg`,
+          url: `/uploads/projects/${project_id}/${file.filename}`,
           created_at: new Date(),
         };
+        console.log(asset)
         const assetId = await upload_repo.storeAsset(asset);
-
-        const track = await upload_repo.findOrCreate({
+        
+        const track = await upload_repo.storeTrack({
           project_id: parseInt(project_id),
           type: file.mimetype,
         });
@@ -86,6 +93,8 @@ export const createUploadRoutes = (app: Express) => {
           track_id: track.id!,
           asset_id: assetId,
           start_time: 0,
+          width,
+          height,
           end_time: duration,
           created_at: new Date(),
         });
@@ -93,7 +102,7 @@ export const createUploadRoutes = (app: Express) => {
         return res.status(201).json({
           message: "Upload successful",
           asset_id: assetId,
-          url: fileUrl,
+          url: newPath,
           thumbnail,
         });
       } catch (error) {

@@ -1,28 +1,42 @@
 import { spawn } from "child_process";
+import fs from "fs";
 
 const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
   return new Promise<void>((resolve, reject) => {
+    console.log("=== FFmpeg makeThumbnail Debug ===");
+    console.log("Full video path:", fullPath);
+    console.log("Thumbnail output path:", thumbnailPath);
+    console.log("File exists?", fs.existsSync(fullPath));
+    if (fs.existsSync(fullPath)) {
+      console.log("File size:", fs.statSync(fullPath).size);
+    }
+    console.log("============================");
+
     const ffmpeg = spawn("ffmpeg", [
       "-i",
       fullPath,
       "-ss",
       "5",
-      "vframes",
+      "-vframes",
       "1",
       thumbnailPath,
     ]);
+
+
     ffmpeg.on("close", (code) => {
-      if (code == 0) {
+      if (code === 0) {
         resolve();
       } else {
-        reject(`FFmpeg existed with this code:${code}`);
+        reject(`FFmpeg exited with code: ${code}`);
       }
     });
+
     ffmpeg.on("error", (err) => {
       reject(err);
     });
   });
 };
+
 const getDimension = (
   fullPath: string
 ): Promise<{ width: number; height: number }> => {

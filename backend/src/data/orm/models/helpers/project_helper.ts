@@ -17,6 +17,7 @@ export const initializeProjectModel = (sequelize: Sequelize) => {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
+      
       title: { type: DataTypes.STRING },
       create_at: { type: DataTypes.DATE },
       update_at: { type: DataTypes.DATE },

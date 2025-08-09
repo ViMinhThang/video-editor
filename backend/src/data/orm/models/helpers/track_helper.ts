@@ -44,6 +44,8 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       y: { type: DataTypes.FLOAT },
       scale: { type: DataTypes.FLOAT },
       rotation: { type: DataTypes.FLOAT },
+      width: { type: DataTypes.FLOAT },
+      height: { type: DataTypes.FLOAT },
       text_content: { type: DataTypes.STRING },
       created_at: { type: DataTypes.DATE },
     },
@@ -56,17 +58,15 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
       file_name: { type: DataTypes.STRING },
       url: { type: DataTypes.STRING },
       mime_type: { type: DataTypes.STRING },
+      thumbnail: { type: DataTypes.STRING },
       size: { type: DataTypes.STRING },
-      duration: { type: DataTypes.INTEGER },
-      width: { type: DataTypes.INTEGER },
-      height: { type: DataTypes.INTEGER },
       created_at: { type: DataTypes.DATE },
     },
     { sequelize, tableName: "assets" }
   );
 };
 export const associateTrackModels = () => {
-  TrackItemModel.belongsTo(AssetModel, { foreignKey: "asset_id"});
+  TrackItemModel.belongsTo(AssetModel, { foreignKey: "asset_id" });
   AssetModel.hasMany(TrackItemModel, {
     foreignKey: "asset_id",
     as: "usedInTrackItems",
