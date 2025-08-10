@@ -11,7 +11,6 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
   TrackModel.init(
     {
       ...primaryKey,
-      project_id: { type: DataTypes.INTEGER },
       type: { type: DataTypes.STRING },
       order: { type: DataTypes.INTEGER },
     },

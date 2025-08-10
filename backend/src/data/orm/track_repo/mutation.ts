@@ -1,4 +1,4 @@
-import { Track } from "../../models/track_models";
+import { TrackItem } from "../../models/track_items_models";
 import { BaseRepo, Constructor } from "../core";
 import { TrackItemModel, TrackModel } from "../models";
 
@@ -6,7 +6,7 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
   Base: Tbase
 ) {
   return class extends Base {
-    async storeTrackItem(ti: TrackItemModel): Promise<boolean> {
+    async storeTrackItem(ti: TrackItem): Promise<boolean> {
       return this.sequelize.transaction(async (transaction) => {
         const [_track_item, created] = await TrackItemModel.upsert(
           {
@@ -36,7 +36,6 @@ export function AddStorageTrack<TBase extends Constructor<BaseRepo>>(
       return this.sequelize.transaction(async (transaction) => {
         const [stored] = await TrackModel.upsert(
           {
-            project_id: p.project_id,
             type: p.type,
             order: 1,
           },

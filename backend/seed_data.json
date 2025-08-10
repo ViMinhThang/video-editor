@@ -32,5 +32,22 @@
       "created_at": "2025-08-04T09:00:00Z",
       "updated_at": "2025-08-04T09:15:00Z"
     }
+  ],
+  "tracks": [
+    {
+      "id": 0,
+      "type": "text",
+      "order": "0"
+    },
+    {
+      "id": 1,
+      "type": "video",
+      "order": "1"
+    },
+    {
+      "id": 2,
+      "type": "sound",
+      "order": "2"
+    }
   ]
 }

@@ -14,7 +14,6 @@ export class TrackModel
   implements Track
 {
   declare id: CreationOptional<number>;
-  declare project_id: number;
   declare type: string;
   declare order: number;
   declare created_at?: CreationOptional<Date>;

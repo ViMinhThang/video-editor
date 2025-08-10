@@ -18,10 +18,12 @@ const projectRepo = AddProjectUpdate(
   AddProjectDeletion(AddProjectStorage(AddProjectQueries(BaseRepo)))
 );
 
-const assetRepo = AddStoreAsset(AddDeletionAsset(AddQueriesAsset(projectRepo)));
+const assetRepo = AddStorageTrackItem(
+  AddStoreAsset(AddDeletionAsset(AddQueriesAsset(projectRepo)))
+);
 
-const trackRepo = AddTrackDeletion(
-  AddStorageTrack(AddQueriesTrack(AddStorageTrackItem(assetRepo)))
+const trackRepo = AddStorageTrack(
+  AddTrackDeletion(AddQueriesTrack(AddStorageTrackItem(assetRepo)))
 );
 
 export const videoRepoImpl = trackRepo;

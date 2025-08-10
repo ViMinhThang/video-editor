@@ -56,9 +56,10 @@ export const createUploadRoutes = (app: Express) => {
         let height: number | undefined;
         let thumbnail: string | undefined;
         let duration: number | undefined;
-
+        let track_id: number | undefined;
         if (file.mimetype.includes("mp4")) {
           try {
+            track_id = 1;
             thumbnail = `${projectDir}/thumb-${file.filename}.jpg`;
             fs.mkdirSync(path.dirname(thumbnail), { recursive: true });
             await FF.makeThumbnail(newPath, thumbnail);
@@ -71,7 +72,6 @@ export const createUploadRoutes = (app: Express) => {
           }
         }
 
-        // 1. Tạo asset
         const asset = {
           original_name: file.originalname,
           project_id: project_id,
@@ -82,28 +82,20 @@ export const createUploadRoutes = (app: Express) => {
           url: `/uploads/projects/${project_id}/${file.filename}`,
         };
         console.log(asset);
-        const assetId = await asset_repo.storeAsset(asset);
+        const created = await asset_repo.storeAsset(asset);
 
-        // const track = await upload_repo.storeTrack({
-        //   project_id: parseInt(project_id),
-        //   type: file.mimetype,
-        // });
 
-        // await upload_repo.storeTrackItem({
-        //   track_id: track.id!,
-        //   asset_id: assetId,
-        //   start_time: 0,
-        //   width,
-        //   height,
-        //   end_time: duration,
-        //   created_at: new Date(),
-        // });
+        await asset_repo.storeTrackItem({
+          track_id: track_id!,
+          asset_id: created?.id!,
+          start_time: 0,
+          width,
+          height,
+          end_time: duration,
+        });
 
         return res.status(201).json({
           message: "Upload successful",
-          asset_id: assetId,
-          url: newPath,
-          thumbnail,
         });
       } catch (error) {
         console.error("Upload error:", error);

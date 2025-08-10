@@ -13,15 +13,15 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
     }
     async getTracks(query: any): Promise<Track[]> {
       const result = await TrackModel.findAll({
-        where: { project_id: query.project_id },
+        where: { id: query.id },
         include: [{ model: TrackItemModel, as: "items" }],
         nest: true,
       });
       return result;
     }
-    async getTracksWithOneItem(project_id: number) {
+    async getTracksWithOneItem(id: number) {
       const tracks = await TrackModel.findAll({
-        where: { project_id },
+        where: { id },
         include: [
           {
             model: TrackItemModel,

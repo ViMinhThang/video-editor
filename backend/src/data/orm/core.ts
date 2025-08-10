@@ -39,6 +39,7 @@ export class BaseRepo {
     await this.sequelize.transaction(async (transaction) => {
       await UserModel.bulkCreate(data.users, { transaction });
       await ProjectModel.bulkCreate(data.projects, { transaction });
+      await TrackModel.bulkCreate(data.tracks, { transaction });
     });
   }
   private async dropAllModels(): Promise<void> {
