@@ -1,52 +1,35 @@
+import {
+  fetchAssets,
+  uploadAsset,
+  deleteAsset as deleteAssetService,
+} from "@/services/assetsServices";
+import { Asset, Project } from "@/types";
+import { FileUp, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Cardmodi from "@/components/card-custom";
 import { CreateCardButton } from "@/components/CreateButtons";
 import { Button } from "@/components/ui/button";
-import { Asset, Project } from "@/types";
 import axios from "axios";
-import { FileUp, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-
 
 export default function WorkspacePage({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<Project | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const handleUploadFile = () => {
-    fileInputRef.current?.click();
-  };
+  const navigate = useNavigate();
 
   const fetchProject = async () => {
     try {
       const res = await axios.get(`/api/project/${projectId}`);
       setProject(res.data);
-    } catch (error) {
+    } catch {
       console.log("Project not found");
     }
   };
 
-  const fetchAssets = async () => {
-    try {
-      const res = await axios.get(`/api/projects/${projectId}/assets`);
-      setAssets(res.data);
-      console.log(res.data);
-    } catch (error) {
-      console.log("Error fetching tracks");
-    }
+  const handleUploadFile = () => {
+    fileInputRef.current?.click();
   };
-  const deleteAsset = async (assetId: number) => {
-    try {
-      await axios.delete(`/api/assets/${assetId}`);
-      await fetchAssets();
-    } catch (error) {
-      console.error("Failed to delete track", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProject();
-    fetchAssets();
-  }, [projectId]);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -54,16 +37,32 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("project_id", projectId);
-
     try {
-      await axios.post("/api/upload", formData);
-      await fetchAssets();
+      await uploadAsset(file, projectId);
+      const updatedAssets = await fetchAssets(projectId);
+      setAssets(updatedAssets);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleDeleteAsset = async (assetId: number) => {
+    try {
+      await deleteAssetService(assetId);
+      const updatedAssets = await fetchAssets(projectId);
+      setAssets(updatedAssets);
+    } catch (error) {
+      console.error("Failed to delete asset", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProject();
+    fetchAssets(projectId).then(setAssets).catch(console.log);
+  }, [projectId]);
+
+  const handleCreateVideo = () => {
+    navigate(`/projects/${projectId}/editor`);
   };
 
   return (
@@ -78,7 +77,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
       <div className="flex flex-col mt-[80px] ml-5">
         <h1 className="font-bold text-lg mb-5">{project?.title}</h1>
         <div className="flex gap-4 mb-5">
-          <CreateCardButton type="video" />
+          <CreateCardButton type="video" onClick={handleCreateVideo} />
           <CreateCardButton type="image" />
         </div>
       </div>
@@ -100,7 +99,7 @@ export default function WorkspacePage({ projectId }: { projectId: string }) {
           </span>
         </Button>
 
-        <Cardmodi assets={assets} onDelete={deleteAsset} />
+        <Cardmodi assets={assets} onDelete={handleDeleteAsset} />
       </div>
     </div>
   );

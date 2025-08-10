@@ -14,7 +14,7 @@ interface CardmodiProps {
   assets: Asset[];
   onDelete: (trackId: number) => void;
 }
-function AssetThumbnail({ asset }: { asset: Asset }) {
+export function AssetThumbnail({ asset }: { asset: Asset }) {
   const mimeType = asset.mime_type;
 
   if (mimeType === "video/mp4") {
@@ -22,7 +22,7 @@ function AssetThumbnail({ asset }: { asset: Asset }) {
       <img
         src={API_BASE_URL + asset.thumbnail}
         alt="Video thumbnail"
-        className="w-full h-40 object-cover rounded-xl"
+        className="w-full h-40 object-cover rounded-sm"
       />
     );
   }
