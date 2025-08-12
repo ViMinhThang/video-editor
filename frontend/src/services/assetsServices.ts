@@ -17,3 +17,8 @@ export const uploadAsset = async (file: File, projectId: string) => {
 export const deleteAsset = async (assetId: number) => {
   await axios.delete(`/api/assets/${assetId}`);
 };
+
+export const fetchProject = async (projectId: string) => {
+  const res = await axios.get(`/api/projects/${projectId}`);
+  return res.data;
+};

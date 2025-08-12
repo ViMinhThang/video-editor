@@ -1,70 +1,39 @@
-import {
-  fetchAssets,
-  uploadAsset,
-  deleteAsset as deleteAssetService,
-} from "@/services/assetsServices";
-import { Asset, Project } from "@/types";
-import { FileUp, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Cardmodi from "@/components/card-custom";
 import { CreateCardButton } from "@/components/CreateButtons";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import { useEditor } from "@/hooks/use-editor";
+import { deleteAsset } from "@/services/assetsServices";
+import { FileUp, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function WorkspacePage({ projectId }: { projectId: string }) {
-  const [project, setProject] = useState<Project | null>(null);
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+export default function WorkspacePage() {
+  const {
+    project,
+    assets,
+    reloadAssets,
+    handleUploadFile,
+    handleFileChange,
+    fileInputRef,
+    loading,
+  } = useEditor();
+
   const navigate = useNavigate();
-
-  const fetchProject = async () => {
-    try {
-      const res = await axios.get(`/api/project/${projectId}`);
-      setProject(res.data);
-    } catch {
-      console.log("Project not found");
-    }
-  };
-
-  const handleUploadFile = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      await uploadAsset(file, projectId);
-      const updatedAssets = await fetchAssets(projectId);
-      setAssets(updatedAssets);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const handleDeleteAsset = async (assetId: number) => {
     try {
-      await deleteAssetService(assetId);
-      const updatedAssets = await fetchAssets(projectId);
-      setAssets(updatedAssets);
+      await deleteAsset(assetId);
+      await reloadAssets(project.id);
     } catch (error) {
       console.error("Failed to delete asset", error);
     }
   };
 
-  useEffect(() => {
-    fetchProject();
-    fetchAssets(projectId).then(setAssets).catch(console.log);
-  }, [projectId]);
-
   const handleCreateVideo = () => {
-    navigate(`/projects/${projectId}/editor`);
+    navigate(`/projects/${project.id}/editor`);
   };
-
+  if (loading) {
+    return <div>Loading project data...</div>;
+  }
   return (
     <div className="w-[1600px]">
       <input

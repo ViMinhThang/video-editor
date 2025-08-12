@@ -7,7 +7,7 @@ import {
   Type,
   Wand2,
 } from "lucide-react";
-import { ItemProps } from "layout/editor-layout";
+import { ItemProps } from "@/layout/editor-layout";
 interface Props {
   item: ItemProps;
   setItem: React.Dispatch<React.SetStateAction<ItemProps>>;

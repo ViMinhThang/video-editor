@@ -31,7 +31,7 @@ export function CreateCardButton({ type, onClick }: Props) {
       onClick={onClick}
       variant="ghost"
       className={cn(
-        "flex items-center justify-between px-4 py-3 w-60 h-20 rounded-2xl transition",
+        "flex items-center justify-between px-4 py-3 w-60 h-20 rounded-2xl transition cursor-pointer",
         bgMap[type]
       )}
     >

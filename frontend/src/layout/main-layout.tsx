@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
-import Topbar from "../src/components/topbar";
+import Topbar from "../components/topbar";
 
 export default function Layout() {
   const [projects, setProjects] = useState([]);

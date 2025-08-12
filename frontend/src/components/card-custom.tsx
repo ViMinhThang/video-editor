@@ -30,7 +30,7 @@ export function AssetThumbnail({ asset }: { asset: Asset }) {
   if (mimeType.startsWith("image/")) {
     return (
       <img
-        src="/placeholder-image.png"
+        src={API_BASE_URL + asset.thumbnail}
         alt="Image placeholder"
         className="w-full h-40 object-cover rounded-xl"
       />
@@ -50,7 +50,7 @@ export function AssetThumbnail({ asset }: { asset: Asset }) {
 
 export default function Cardmodi({ assets, onDelete }: CardmodiProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-5">
+    <div className="flex flex-wrap gap-3">
       {assets?.map((asset, index) => (
         <Card
           key={index}
