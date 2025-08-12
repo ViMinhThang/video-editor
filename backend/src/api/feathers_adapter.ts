@@ -1,4 +1,4 @@
-import { WebService } from "./web_service";
+import { WebService } from "./rest/web_service";
 import { Id, NullableId, Params } from "@feathersjs/feathers";
 
 export class FeathersWrapper<T> {

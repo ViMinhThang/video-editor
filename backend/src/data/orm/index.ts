@@ -13,6 +13,8 @@ import {
   AddTrackDeletion,
 } from "./track_repo/mutation";
 import { AddQueriesTrack } from "./track_repo/queries";
+import { AddStorageVideoFrame } from "./video_frame_repo/mutation";
+import { AddQueriesVideoFrame } from "./video_frame_repo/queries";
 
 const projectRepo = AddProjectUpdate(
   AddProjectDeletion(AddProjectStorage(AddProjectQueries(BaseRepo)))
@@ -26,4 +28,6 @@ const trackRepo = AddStorageTrack(
   AddTrackDeletion(AddQueriesTrack(AddStorageTrackItem(assetRepo)))
 );
 
-export const videoRepoImpl = trackRepo;
+const videoRepo = AddStorageVideoFrame(AddQueriesVideoFrame(trackRepo));
+
+export const videoRepoImpl = videoRepo;

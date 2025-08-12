@@ -1,6 +1,6 @@
 import { track_repo } from "../../data";
 import { Track } from "../../data/models/track_models";
-import { WebService } from "../web_service";
+import { WebService } from "./web_service";
 import * as jsonpatch from "fast-json-patch";
 export class TrackWebService implements WebService<Track> {
   getOne(id: any): Promise<Track | undefined> {
@@ -31,8 +31,5 @@ export class TrackWebService implements WebService<Track> {
         jsonpatch.applyPatch(dbData, data).newDocument
       );
     }
-  }
-  async getTracksPreview(project_id: number) {
-    return track_repo.getTracksWithOneItem(project_id);
   }
 }

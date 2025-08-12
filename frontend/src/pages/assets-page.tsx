@@ -13,13 +13,16 @@ interface Props {
   fileInputRef: React.RefObject<HTMLInputElement>;
   handleUploadFile: () => void;
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAddToTrack: (asset: Asset) => void;
 }
+
 
 const AssetsPage = ({
   assets,
   fileInputRef,
   handleUploadFile,
   handleFileChange,
+  handleAddToTrack,
 }: Props) => {
   return (
     <div className="border-none bg-black text-white px-5 w-full h-full">
@@ -43,6 +46,7 @@ const AssetsPage = ({
           <div
             key={index}
             className="w-[120px] h-[90px] flex-shrink-0 flex flex-col hover:bg-gray-200 p-2 rounded-sm hover:text-black cursor-pointer"
+            onClick={() => handleAddToTrack(asset)}
           >
             <AssetThumbnail asset={asset} />
             <h1

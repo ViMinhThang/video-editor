@@ -1,7 +1,7 @@
 import { asset_repo } from "../../data";
 import { Project } from "../../data/models/project_models";
 import { Asset } from "../../data/models/track_items_models";
-import { WebService } from "../web_service";
+import { WebService } from "./web_service";
 import * as jsonpatch from "fast-json-patch";
 
 export class AssetsWebService implements WebService<Asset> {

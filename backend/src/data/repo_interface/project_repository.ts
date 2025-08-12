@@ -1,4 +1,4 @@
-import { Project } from "./models/project_models";
+import { Project } from "../models/project_models";
 
 export interface ProjectRepository {
   updateProject(id: number, data: Partial<Project>): Promise<boolean>;

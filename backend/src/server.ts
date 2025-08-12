@@ -4,9 +4,10 @@ import { getConfig } from "./config";
 import helmet from "helmet";
 import { createErrorHandlers } from "./errors";
 import { createFeathersServices } from "./api";
-import { createUploadRoutes } from "./api/upload_routes";
+import { createUploadRoutes } from "./api/custom/upload_routes";
 import path from "path";
 import { cors } from "@feathersjs/express";
+import { createStateRoutes } from "./api/custom/get_state_project";
 
 const port = getConfig("http:port", 3000);
 
@@ -32,6 +33,7 @@ expressApp.use(
 );
 createFeathersServices(expressApp);
 createUploadRoutes(expressApp);
+createStateRoutes(expressApp)
 createErrorHandlers(expressApp);
 
 const server = createServer(expressApp);

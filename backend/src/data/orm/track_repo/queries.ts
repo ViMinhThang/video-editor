@@ -1,3 +1,4 @@
+import { TrackItem } from "../../models/track_items_models";
 import { Track } from "../../models/track_models";
 import { BaseRepo, Constructor } from "../core";
 import { TrackItemModel, TrackModel } from "../models";
@@ -19,27 +20,23 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
       });
       return result;
     }
-    async getTracksWithOneItem(id: number) {
-      const tracks = await TrackModel.findAll({
-        where: { id },
-        include: [
-          {
-            model: TrackItemModel,
-            as: "items",
-            separate: true,
-            limit: 1,
-            order: [["id", "ASC"]],
-            include: [
-              {
-                model: AssetModel,
-              },
-            ],
-          },
-        ],
-        order: [["id", "ASC"]],
+    async getTrackItemsByProjectId(query: any): Promise<TrackItem[]> {
+      const result = await TrackItemModel.findAll({
+        where: { project_id: query.projectId },raw:true
       });
-
-      return tracks;
+      return result;
+    }
+    async getTrackItems(queries: any): Promise<TrackItem[]> {
+      const result = await TrackItemModel.findAll({
+        where: { id: queries.id },
+      });
+      return result;
+    }
+    async getTrackItemById(id: string): Promise<TrackItem | undefined> {
+      const result = await TrackItemModel.findOne({
+        where: { id: id },
+      });
+      return result ?? undefined;
     }
   };
 }

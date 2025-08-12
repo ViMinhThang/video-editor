@@ -5,6 +5,7 @@ import {
   Model,
 } from "sequelize";
 import { Asset, TrackItem } from "../../models/track_items_models";
+import { videoFrame } from "../../models/video_frame_models";
 
 export class TrackItemModel
   extends Model<
@@ -18,6 +19,7 @@ export class TrackItemModel
   declare start_time?: number | undefined;
   declare end_time: number | undefined;
   declare asset_id?: number | undefined;
+  declare project_id: number;
   declare width?: number | undefined;
   declare height?: number | undefined;
   declare x?: number | undefined;
@@ -40,9 +42,26 @@ export class AssetModel
   declare file_name: string;
   declare original_name: string;
   declare project_id: number;
+  declare type: string;
   declare mime_type: string;
+  declare server_path: string;
   declare size: number;
   declare thumbnail?: string | undefined;
+  declare url: string;
+  declare created_at?: CreationOptional<Date>;
+  declare updated_at?: CreationOptional<Date>;
+}
+export class VideoFrameModel
+  extends Model<
+    InferAttributes<VideoFrameModel>,
+    InferCreationAttributes<VideoFrameModel>
+  >
+  implements videoFrame
+{
+  declare id: CreationOptional<number>;
+  declare track_item_id: number;
+  declare frame_index: number;
+  declare group_index: number;
   declare url: string;
   declare created_at?: CreationOptional<Date>;
   declare updated_at?: CreationOptional<Date>;

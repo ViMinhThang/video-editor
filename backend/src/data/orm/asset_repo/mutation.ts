@@ -9,7 +9,7 @@ export function AddDeletionAsset<TBase extends Constructor<BaseRepo>>(
       const count = await AssetModel.destroy({
         where: { id },
       });
-      return count > 0 ;
+      return count > 0;
     }
   };
 }
@@ -25,7 +25,9 @@ export function AddStoreAsset<TBase extends Constructor<BaseRepo>>(
             project_id: a.project_id,
             file_name: a.file_name,
             mime_type: a.mime_type,
+            server_path: a.server_path,
             size: a.size,
+            type: a.type,
             url: a.url,
             thumbnail: a?.thumbnail,
           },

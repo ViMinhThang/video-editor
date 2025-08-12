@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
-
+import path from "path";
+import os from "os";
 const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
   return new Promise<void>((resolve, reject) => {
     console.log("=== FFmpeg makeThumbnail Debug ===");
@@ -21,7 +22,6 @@ const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
       "1",
       thumbnailPath,
     ]);
-
 
     ffmpeg.on("close", (code) => {
       if (code === 0) {
@@ -101,4 +101,53 @@ const getDuration = (fullPath: string): Promise<number> => {
     });
   });
 };
-export default { getDimension, getDuration, makeThumbnail };
+const extractFramesIntoThreeGroups = async (
+  fullPath: string,
+  totalFrames = 9
+): Promise<string[][]> => {
+  const duration = await getDuration(fullPath);
+  const interval = duration / totalFrames;
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "frames-"));
+  console.log("[extractFrames] Temp dir:", tempDir);
+
+  await new Promise<void>((resolve, reject) => {
+    const ffmpeg = spawn("ffmpeg", [
+      "-i",
+      fullPath,
+      "-vf",
+      `fps=1/${interval}`,
+      path.join(tempDir, "frame-%03d.jpg"),
+    ]);
+    ffmpeg.on("close", (code) => {
+      if (code == 0) resolve();
+      else reject(new Error(`ffmpeg exited with code ${code}`));
+    });
+    ffmpeg.on("error", reject);
+  });
+
+  const allFrames = fs
+    .readdirSync(tempDir)
+    .sort()
+    .map((file) => path.join(tempDir, file));
+
+  console.log("[extractFrames] Total frames:", allFrames.length);
+  console.log("[extractFrames] All frame paths:", allFrames);
+
+  const groupSize = Math.ceil(allFrames.length / 3);
+  const framesGroups: string[][] = [];
+  for (let i = 0; i < allFrames.length; i += groupSize) {
+    const group = allFrames.slice(i, i + groupSize);
+    framesGroups.push(group);
+    console.log(`[extractFrames] Group ${framesGroups.length}:`, group);
+  }
+
+  return framesGroups;
+};
+
+export default {
+  getDimension,
+  getDuration,
+  makeThumbnail,
+  extractFramesIntoThreeGroups,
+};

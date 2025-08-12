@@ -6,11 +6,12 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
   Base: Tbase
 ) {
   return class extends Base {
-    async storeTrackItem(ti: TrackItem): Promise<boolean> {
+    async storeTrackItem(ti: TrackItem): Promise<TrackItem> {
       return this.sequelize.transaction(async (transaction) => {
         const [_track_item, created] = await TrackItemModel.upsert(
           {
             track_id: ti.track_id,
+            project_id: ti.project_id,
             start_time: ti?.start_time,
             asset_id: ti.asset_id,
             end_time: ti?.end_time,
@@ -22,7 +23,7 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
           },
           { transaction }
         );
-        return created ?? false;
+        return _track_item;
       });
     }
   };
@@ -53,6 +54,12 @@ export function AddTrackDeletion<TBase extends Constructor<BaseRepo>>(
   return class extends Base {
     async deleteTrack(id: number) {
       const count = await TrackModel.destroy({
+        where: { id },
+      });
+      return count > 0;
+    }
+    async deleteTrackItem(id: number) {
+      const count = await TrackItemModel.destroy({
         where: { id },
       });
       return count > 0;

@@ -1,6 +1,10 @@
 import { DataTypes, Sequelize } from "sequelize";
 import { TrackModel } from "../track_models";
-import { AssetModel, TrackItemModel } from "../track_items_models";
+import {
+  AssetModel,
+  TrackItemModel,
+  VideoFrameModel,
+} from "../track_items_models";
 import { ProjectModel } from "../project_models";
 
 const primaryKey = {
@@ -24,6 +28,7 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
   TrackItemModel.init(
     {
       ...primaryKey,
+      project_id: { type: DataTypes.INTEGER },
       track_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -72,14 +77,36 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
         onDelete: "CASCADE",
       },
       file_name: { type: DataTypes.STRING },
+      type: { type: DataTypes.STRING },
       url: { type: DataTypes.STRING },
       mime_type: { type: DataTypes.STRING },
       thumbnail: { type: DataTypes.STRING },
       size: { type: DataTypes.STRING },
+      server_path: { type: DataTypes.STRING },
     },
     {
       sequelize,
       tableName: "assets",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }
+  );
+  VideoFrameModel.init(
+    {
+      ...primaryKey,
+      track_item_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: "track_items", key: "id" },
+        onDelete: "CASCADE",
+      },
+      frame_index: { type: DataTypes.INTEGER },
+      group_index: { type: DataTypes.INTEGER },
+      url: { type: DataTypes.STRING },
+    },
+    {
+      sequelize,
+      tableName: "video_frames",
       createdAt: "created_at",
       updatedAt: "updated_at",
     }
@@ -96,4 +123,12 @@ export const associateTrackModels = () => {
   TrackItemModel.belongsTo(TrackModel, { foreignKey: "track_id" });
   ProjectModel.hasMany(AssetModel, { foreignKey: "project_id" });
   AssetModel.belongsTo(ProjectModel, { foreignKey: "project_id" });
+  TrackItemModel.hasMany(VideoFrameModel, {
+    foreignKey: "track_item_id",
+    as: "frames",
+  });
+  VideoFrameModel.belongsTo(TrackItemModel, {
+    foreignKey: "track_item_id",
+    as: "trackItem",
+  });
 };

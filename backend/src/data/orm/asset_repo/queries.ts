@@ -12,7 +12,7 @@ export function AddQueriesAsset<TBase extends Constructor<BaseRepo>>(
     }
     async getAssets(query: any): Promise<Asset[]> {
       const result = await AssetModel.findAll({
-        where: { project_id: query.project_id },
+        where: { project_id: query.projectId },
       });
       return result;
     }
