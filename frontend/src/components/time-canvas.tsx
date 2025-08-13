@@ -1,63 +1,84 @@
-import React, { useEffect, useRef } from "react";
+import { drawRoundedImage } from "@/lib/utils";
 import { VideoFrame } from "@/types";
+import { useEffect, useRef } from "react";
 
-interface TimelineCanvasProps {
+// ---- Timeline Canvas ----
+export const TimelineCanvas: React.FC<{
   frames: VideoFrame[];
-  width: number;
-  height: number;
+  scale: number; // pixels per second
   thumbnailWidth?: number;
   thumbnailHeight?: number;
-  groupGap?: number;
-}
-
-const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
+  groupGap: number;
+}> = ({
   frames,
-  width,
-  height,
+  scale,
   thumbnailWidth = 80,
-  thumbnailHeight = 48,
-  groupGap = 10, // khoảng cách giữa các nhóm frame
+  thumbnailHeight = 60,
+  groupGap = 10,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext("2d");
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Xóa canvas cũ
-    ctx.clearRect(0, 0, width, height);
-
-    // Group frames theo group_index
+    const dpr = window.devicePixelRatio || 1;
+    // Group theo track_item_id
     const groups: Record<number, VideoFrame[]> = {};
     frames.forEach((frame) => {
-      if (!groups[frame.group_index]) groups[frame.group_index] = [];
-      groups[frame.group_index].push(frame);
+      if (!groups[frame.track_item_id]) groups[frame.track_item_id] = [];
+      groups[frame.track_item_id].push(frame);
     });
 
-    // Vẽ từng nhóm với khoảng cách groupGap
-    let x = 0;
+    // Tính width canvas dựa trên số frame và thumbnailWidth
+    const width = frames.length * thumbnailWidth;
+    const height = thumbnailHeight + 20; // padding top
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, width, height);
+    let xOffset = 0;
     Object.keys(groups)
       .sort((a, b) => Number(a) - Number(b))
-      .forEach((groupKey) => {
-        const groupFrames = groups[Number(groupKey)];
+      .forEach((trackItemId) => {
+        const groupFrames = groups[Number(trackItemId)];
 
-        groupFrames.forEach((frame) => {
-          const currentX = x; // giữ vị trí x riêng cho từng ảnh
+        groupFrames.forEach((frame, idx) => {
           const img = new Image();
           img.src = import.meta.env.VITE_API_BASE_URL + frame.url;
+
+          // Vị trí x rounded để tránh khoảng trắng do số thập phân
+          const posX = Math.round(xOffset + idx * thumbnailWidth);
+
+          // Chiều rộng ảnh vẽ
+          // Có thể cộng thêm 1px khi zoom để phủ khoảng trống
+          const drawWidth = Math.round(thumbnailWidth) + 1;
+
           img.onload = () => {
-            if (!ctx) return;
-            ctx.drawImage(img, currentX, 0, thumbnailWidth, thumbnailHeight);
+            drawRoundedImage(
+              ctx,
+              img,
+              posX,
+              20,
+              drawWidth,
+              thumbnailHeight,
+              8,
+              idx == 0,
+              idx == groupFrames.length - 1
+            );
           };
-          x += thumbnailWidth;
         });
 
-        x += groupGap; // khoảng cách giữa các nhóm
+        // Tăng xOffset bằng tổng width nhóm + khoảng cách giữa nhóm
+        xOffset += groupFrames.length * thumbnailWidth + groupGap;
       });
-  }, [frames, width, height, thumbnailWidth, thumbnailHeight, groupGap]);
+  }, [frames, scale, thumbnailWidth, thumbnailHeight]);
 
-  return <canvas ref={canvasRef} width={width} height={height} />;
+  return <canvas ref={canvasRef} />;
 };
-
-export default TimelineCanvas;

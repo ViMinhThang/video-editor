@@ -6,124 +6,88 @@ import EditorMenu from "@/components/editor-menu";
 import AssetsPage from "@/pages/assets-page";
 import SubtitlePage from "@/pages/subtitle-page";
 import TextPage from "@/pages/text-page";
-import {
-  Asset,
-  AssetWithFrames,
-  FullProjectState,
-  Project,
-  TrackItem,
-  VideoFrame,
-} from "@/types";
-import { CassetteTape, LoaderCircle } from "lucide-react";
+import { Asset, TrackItem, VideoFrame } from "@/types";
+import { CassetteTape } from "lucide-react";
 import { useEditor } from "@/hooks/use-editor";
 import { EditorProvider } from "@/context/editor-context";
-import TimelineCanvas from "@/components/time-canvas";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { ScrollTimeline } from "@/components/scroll-time";
+
 interface ItemProps {
   title: string;
-  icon: React.ElementType; // LucideIcon type or React.FC<SVGProps>
+  icon: React.ElementType;
   type: string;
 }
 
-export const EditorWrapper: React.FC = () => (
+export const EditorWrapper = () => (
   <EditorProvider>
     <EditorLayout />
   </EditorProvider>
 );
 
-const EditorLayout: React.FC = () => {
+const EditorLayout = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const [state, setState] = useState<FullProjectState | null>(null);
+  const [scale, setScale] = useState(25);
+  const [duration, setDuration] = useState(0);
+  const [allFrames, setAllFrames] = useState<VideoFrame[]>([]);
   const [item, setItem] = useState<ItemProps>({
     title: "Phương tiện",
     icon: CassetteTape,
     type: "asset",
   });
+  const { assets, handleUploadFile, handleFileChange, fileInputRef } =
+    useEditor();
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  // Initialize tracks with proper types
-  const [tracks, setTracks] = useState<Record<string, AssetWithFrames[]>>({
+  const [tracks, setTracks] = useState<Record<string, TrackItem[]>>({
     video: [],
     audio: [],
     text: [],
   });
 
-  useEffect(() => {
-    if (timelineRef.current) {
-      timelineRef.current.scrollLeft = 0;
-    }
-  }, [tracks.video]);
+  const handleLoadProjectState = (assets: Asset[]) => {
+    const video_tracks: TrackItem[] = [];
+    const audio_tracks: TrackItem[] = [];
+    const text_tracks: TrackItem[] = [];
 
-  const handleAddToTrack = async (asset: Asset) => {
-    const type = asset.type;
-    if (type === "video") {
-      setTracks((prev) => ({
-        ...prev,
-        [type]: [{ ...asset, frames: [], loading: true }, ...prev[type]],
-      }));
-      try {
-        const response = await axios.post("/api/trackItems/", {
-          asset_id: asset.id,
-          url: asset.url,
-          project_id: projectId,
-          track_id: 1,
-        });
-        setTracks((prev) => ({
-          ...prev,
-          [type]: prev[type].map((v) =>
-            v.id === asset.id || v.id === asset.id
-              ? { ...v, frames: response.data.frames, loading: false }
-              : v
-          ),
-        }));
-      } catch (error) {
-        console.error(error);
-        setTracks((prev) => ({
-          ...prev,
-          [type]: prev[type].filter((t) => t.id !== asset.id),
-        }));
-      }
-    }
-  };
+    assets.forEach((asset) => {
+      if (!asset.track_items) return;
 
-  const handleLoadProjectState = (data: {
-    project: Project;
-    assets: Asset[];
-    track_items: (TrackItem & { video_frames: VideoFrame[] })[];
-  }) => {
-    const framesMap = new Map<number, VideoFrame[]>();
-    data.track_items.forEach((trackItem) => {
-      if (trackItem.video_frames) {
-        framesMap.set(trackItem.asset_id, trackItem.video_frames);
-      }
-    });
-
-    const groupedTracks: Record<string, AssetWithFrames[]> = {
-      video: [],
-      audio: [],
-      text: [],
-    };
-
-    data.assets.forEach((asset) => {
-      const frames = framesMap.get(asset.id) || [];
-      if (!groupedTracks[asset.type]) {
-        groupedTracks[asset.type] = [];
-      }
-      groupedTracks[asset.type].push({
-        ...asset,
-        frames,
+      asset.track_items.forEach((trackItem) => {
+        trackItem.loading = false;
+        if (asset.type === "video") {
+          video_tracks.push(trackItem);
+        } else if (asset.type === "audio") {
+          audio_tracks.push(trackItem);
+        } else if (asset.type === "text") {
+          text_tracks.push(trackItem);
+        }
       });
     });
 
-    setTracks(groupedTracks);
-    setState(data); // giữ toàn bộ project state nếu cần
+    setTracks({
+      video: video_tracks,
+      audio: audio_tracks,
+      text: text_tracks,
+    });
+
+    // Tính duration dựa trên video tracks
+    const total_duration = video_tracks.reduce(
+      (sum, video) => sum + (video.end_time || 0),
+      0
+    );
+    setDuration(total_duration);
+    console.log(total_duration);
+    // Lấy tất cả frames từ video_tracks
+    const frames = video_tracks.flatMap((item) => item.video_frames || []);
+    setAllFrames(frames);
   };
 
   const loadFullProject = async () => {
     if (!projectId) return;
     try {
       const response = await axios.get(`/api/projects/${projectId}/full`);
-      handleLoadProjectState(response.data);
+      handleLoadProjectState(response.data.assets);
+      if (timelineRef.current) timelineRef.current.scrollLeft = 0;
     } catch (error) {
       console.error("Load project failed", error);
     }
@@ -133,14 +97,29 @@ const EditorLayout: React.FC = () => {
     loadFullProject();
   }, [projectId]);
 
-  const { assets, handleUploadFile, handleFileChange, project, fileInputRef } =
-    useEditor();
+  const handleAddTrackItemToStart = async (asset: Asset) => {
+    if (asset.type !== "video" || !projectId) return;
+
+    try {
+      await axios.post("/api/trackItems/", {
+        asset_id: asset.id,
+        url: asset.url,
+        project_id: projectId,
+        track_id: 1, // track video đầu tiên
+      });
+      // Reload toàn bộ project sau khi append
+      await loadFullProject();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       <div className="border-r-0 h-full">
         <EditorMenu item={item} setItem={setItem} />
       </div>
+
       <div className="w-[285px]">
         {item.type === "asset" && (
           <AssetsPage
@@ -148,44 +127,70 @@ const EditorLayout: React.FC = () => {
             handleUploadFile={handleUploadFile}
             handleFileChange={handleFileChange}
             fileInputRef={fileInputRef}
-            handleAddToTrack={handleAddToTrack}
+            handleAddToTrack={handleAddTrackItemToStart}
           />
         )}
         {item.type === "text" && <TextPage />}
         {item.type === "subtitle" && <SubtitlePage />}
       </div>
+
       <div className="flex flex-col w-full">
-        <div className="bg-white p-3">
+        <div className="bg-white p-3 flex gap-2">
           <Button className="bg-blue-500 rounded-sm">Export</Button>
+          <Button onClick={() => setScale((s) => Math.min(s + 20, 200))}>
+            Zoom +
+          </Button>
+          <Button onClick={() => setScale((s) => Math.max(s - 20, 20))}>
+            Zoom -
+          </Button>
         </div>
+
         <div className="bg-gray-300 flex-1/2">asdasd</div>
+
         <div
           ref={timelineRef}
-          className="flex-1/5 p-2 bg-gray-100 overflow-x-auto whitespace-nowrap"
+          className="flex-1/5 p-2 bg-gray-100 overflow-x-auto whitespace-nowrap flex flex-col overflow-auto"
         >
-          {tracks.video.map((item) => (
-            <div key={item.id} className="inline-flex mr-2 items-start">
-              {"loading" in item && item.loading ? (
-                <div className="flex mr-1 border rounded overflow-hidden">
-                  <div className="relative w-64 h-12 bg-gray-900">
-                    <div className="absolute inset-0 flex items-center justify-center text-white text-[10px]">
-                      <LoaderCircle className="animate-spin mr-1" size={12} />
-                      Loading
-                    </div>
-                  </div>
-                </div>
-              ) : item.frames.length > 0 && item.frames[0] instanceof Object ? (
-                <TimelineCanvas
-                    frames={item.frames}
-                    width={1920} // chiều rộng canvas, chỉnh tùy ý
-                    height={60} // chiều cao canvas
-                    thumbnailWidth={80}
-                    thumbnailHeight={48} groupGap={10}      />
-              ) : (
-                <div>Không có frame</div>
-              )}
-            </div>
-          ))}
+          {/* <div className="flex justify-start items-center p-0 m-0">
+            <TimelineRuler
+              width={duration * scale}
+              height={30}
+              duration={duration}
+              scale={scale}
+            />
+          </div>
+
+          <div className="flex justify-start items-center">
+            {allFrames.length > 0 ? (
+              <TimelineCanvas
+                frames={allFrames}
+                width={duration * scale}
+                height={144}
+                thumbnailHeight={60}
+                groupGap={10}
+                scale={scale}
+              />
+            ) : (
+              <div>Không có frame</div>
+            )}
+          </div>
+        </div>
+        <div
+          className="scrollbar-container overflow-x-auto"
+          style={{ width: "100%" }}
+          onScroll={(e) => {
+            const target = e.target as HTMLDivElement;
+            if (timelineRef.current) {
+              timelineRef.current.scrollLeft = target.scrollLeft;
+            }
+          }}
+        >
+          <div style={{ width: duration * scale, height: 1 }}></div> */}
+          <ScrollTimeline
+            frames={allFrames}
+            duration={duration}
+            scale={scale}
+          />
         </div>
       </div>
     </div>

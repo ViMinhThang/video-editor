@@ -100,8 +100,6 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
         references: { model: "track_items", key: "id" },
         onDelete: "CASCADE",
       },
-      frame_index: { type: DataTypes.INTEGER },
-      group_index: { type: DataTypes.INTEGER },
       url: { type: DataTypes.STRING },
     },
     {

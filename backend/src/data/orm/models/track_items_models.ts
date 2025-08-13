@@ -60,8 +60,6 @@ export class VideoFrameModel
 {
   declare id: CreationOptional<number>;
   declare track_item_id: number;
-  declare frame_index: number;
-  declare group_index: number;
   declare url: string;
   declare created_at?: CreationOptional<Date>;
   declare updated_at?: CreationOptional<Date>;

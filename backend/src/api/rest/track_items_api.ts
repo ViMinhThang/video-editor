@@ -5,7 +5,7 @@ import { uploadDir } from "../custom/upload_routes";
 import { WebService } from "./web_service";
 import FF from "../../lib/FF";
 import fs from "fs/promises";
-import { getProjectAssetDir } from "../../lib/util";
+import { getNextRunIndex, getProjectAssetDir } from "../../lib/util";
 import { videoFrame } from "../../data/models/video_frame_models";
 
 export class TrackItemWebService implements WebService<TrackItem> {
@@ -36,51 +36,32 @@ export class TrackItemWebService implements WebService<TrackItem> {
     }
     try {
       const videoBaseName = path.parse(asset.original_name).name;
+      const baseFramesDir = path.join(
+        getProjectAssetDir(project_id, videoBaseName)
+      );
+      const runIndex = await getNextRunIndex(baseFramesDir);
       const framesDir = path.join(
-        getProjectAssetDir(project_id, videoBaseName),
+        baseFramesDir,
+        "track_item" + "_" + created.id + "",
         "frames"
       );
-
       await fs.mkdir(framesDir, { recursive: true });
 
-      const tmpPath: string[][] = await FF.extractFramesIntoThreeGroups(
-        asset.server_path
-      );
+      const tmpPath: string[] = await FF.extractAllFrames(asset.server_path,11);
 
-      const finalPaths: string[][] = [];
+      const finalPaths: string[] = [];
 
-      for (let groupIndex = 0; groupIndex < tmpPath.length; groupIndex++) {
-        const groupPaths: string[] = [];
-
-        for (
-          let frameIndex = 0;
-          frameIndex < tmpPath[groupIndex].length;
-          frameIndex++
-        ) {
-          const srcPath = tmpPath[groupIndex][frameIndex];
-
-          const destPath = path.join(
-            framesDir,
-            `g${groupIndex}_f${frameIndex}${path.extname(srcPath)}`
-          );
-
-          await fs.copyFile(srcPath, destPath); // async non-blocking
-          const url_static = `/uploads/projects/${project_id}/assets/${videoBaseName}/frames/g${groupIndex}_f${frameIndex}${path.extname(
-            srcPath
-          )}`;
-
-          groupPaths.push(destPath);
-          const video_frames: videoFrame = {
-            track_item_id: created.id!,
-            frame_index: frameIndex,
-            group_index: groupIndex,
-            url: url_static,
-          };
-          await video_repo.storeVideoFrame(video_frames);
-          await fs.unlink(srcPath).catch(() => {});
-        }
-
-        finalPaths.push(groupPaths);
+      for (let i = 0; i < tmpPath.length; i++) {
+        const frame_index = path.join(framesDir, `frame_${i}.jpg`);
+        await fs.copyFile(tmpPath[i], frame_index);
+        await fs.unlink(tmpPath[i]);
+        finalPaths.push(frame_index);
+        const url_static = `/uploads/projects/${project_id}/assets/${videoBaseName}/track_item_${created.id}/frames/frame_${[i]}.jpg`;
+        const video_frames: videoFrame = {
+          track_item_id: created.id!,
+          url: url_static,
+        };
+        await video_repo.storeVideoFrame(video_frames);
       }
 
       console.log("Frames copied:", finalPaths);

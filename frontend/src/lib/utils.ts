@@ -21,48 +21,45 @@ export function getAssetType(mime: string) {
   if (mime.startsWith("image")) return "image";
   return "text";
 }
-export const extractFrames = async (videoUrl: string, frameCount = 9) => {
-  return new Promise<string[]>((resolve) => {
-    const video = document.createElement("video");
-    video.src = videoUrl;
-    video.crossOrigin = "anonymous";
-    video.muted = true;
+export function drawRoundedImage(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+  roundLeft: boolean,
+  roundRight: boolean
+) {
+  ctx.save();
+  ctx.beginPath();
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const frames: string[] = [];
+  // Vẽ path bo góc bên trái nếu cần
+  if (roundLeft) {
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+  }
+  // Vẽ path bo góc bên phải nếu cần
+  else if (roundRight) {
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+  } else {
+    // Không bo góc
+    ctx.rect(x, y, width, height);
+  }
 
-    video.addEventListener("loadeddata", async () => {
-      const duration = video.duration;
-      const interval = duration / frameCount;
-
-      canvas.width = video.videoWidth / 4;
-      canvas.height = video.videoHeight / 4;
-
-      let currentFrame = 0;
-
-      const capture = () => {
-        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        frames.push(canvas.toDataURL("image/jpeg"));
-
-        currentFrame++;
-        if (currentFrame < frameCount) {
-          video.currentTime = interval * currentFrame;
-        } else {
-          resolve(frames);
-        }
-      };
-
-      video.addEventListener("seeked", capture);
-      capture();
-    });
-  });
-};
-export const splitIntoThree = (frames: string[]) => {
-  const partSize = Math.ceil(frames.length / 3);
-  return [
-    frames.slice(0, partSize),
-    frames.slice(partSize, partSize * 2),
-    frames.slice(partSize * 2)
-  ];
-};
+  ctx.clip();
+  ctx.drawImage(img, x, y, width, height);
+  ctx.restore();
+}

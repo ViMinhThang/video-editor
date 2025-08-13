@@ -1,6 +1,10 @@
 import { Express, Request, Response } from "express";
 import { asset_repo, project_repo, track_repo, video_repo } from "../../data";
 import { Asset, TrackItem } from "../../data/models/track_items_models";
+import {
+  assetsWithTrackItems,
+  videoFrame,
+} from "../../data/models/video_frame_models";
 
 export const createStateRoutes = (app: Express) => {
   app.get(
@@ -26,9 +30,9 @@ export const createStateRoutes = (app: Express) => {
           await track_repo.getTrackItemsByProjectId({ projectId });
 
         // Lấy video frames cho mỗi track item
-        const track_items_with_frames = [];
+        const track_items_with_frames: assetsWithTrackItems[] = [];
         for (const trackItem of track_items) {
-          if (!trackItem.id) continue; // tránh undefined
+          if (!trackItem.id) continue;
           const video_frames = await video_repo.getVideoFramesByTrackItemId(
             trackItem.id
           );
@@ -37,15 +41,14 @@ export const createStateRoutes = (app: Express) => {
             video_frames,
           });
         }
+        const assetsWithTrackItems = assets.map((asset) => ({
+          ...asset,
+          track_items: track_items_with_frames.filter(
+            (ti) => ti.asset_id === asset.id
+          ),
+        }));
 
-        // Gộp state
-        const state = {
-          project,
-          assets,
-          track_items: track_items_with_frames,
-        };
-
-        return res.status(200).json(state);
+        return res.status(200).json({ assets: assetsWithTrackItems });
       } catch (err) {
         console.error("Error fetching project state:", err);
         return res.status(500).json({ error: "Internal server error" });

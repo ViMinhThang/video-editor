@@ -101,10 +101,7 @@ const getDuration = (fullPath: string): Promise<number> => {
     });
   });
 };
-const extractFramesIntoThreeGroups = async (
-  fullPath: string,
-  totalFrames = 9
-): Promise<string[][]> => {
+const extractAllFrames = async (fullPath: string, totalFrames = 9): Promise<string[]> => {
   const duration = await getDuration(fullPath);
   const interval = duration / totalFrames;
 
@@ -120,7 +117,7 @@ const extractFramesIntoThreeGroups = async (
       path.join(tempDir, "frame-%03d.jpg"),
     ]);
     ffmpeg.on("close", (code) => {
-      if (code == 0) resolve();
+      if (code === 0) resolve();
       else reject(new Error(`ffmpeg exited with code ${code}`));
     });
     ffmpeg.on("error", reject);
@@ -134,20 +131,12 @@ const extractFramesIntoThreeGroups = async (
   console.log("[extractFrames] Total frames:", allFrames.length);
   console.log("[extractFrames] All frame paths:", allFrames);
 
-  const groupSize = Math.ceil(allFrames.length / 3);
-  const framesGroups: string[][] = [];
-  for (let i = 0; i < allFrames.length; i += groupSize) {
-    const group = allFrames.slice(i, i + groupSize);
-    framesGroups.push(group);
-    console.log(`[extractFrames] Group ${framesGroups.length}:`, group);
-  }
-
-  return framesGroups;
+  return allFrames;
 };
 
 export default {
   getDimension,
   getDuration,
   makeThumbnail,
-  extractFramesIntoThreeGroups,
+  extractAllFrames,
 };
