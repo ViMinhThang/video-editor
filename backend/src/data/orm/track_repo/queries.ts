@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { TrackItem } from "../../models/track_items_models";
 import { Track } from "../../models/track_models";
 import { BaseRepo, Constructor } from "../core";
@@ -22,7 +23,8 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
     }
     async getTrackItemsByProjectId(query: any): Promise<TrackItem[]> {
       const result = await TrackItemModel.findAll({
-        where: { project_id: query.projectId },raw:true
+        where: { project_id: query.projectId },
+        raw: true,
       });
       return result;
     }
@@ -37,6 +39,20 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
         where: { id: id },
       });
       return result ?? undefined;
+    }
+    async getTrackByTime(time: number): Promise<TrackItem | undefined> {
+      try {
+        const result = await TrackItemModel.findOne({
+          where: {
+            start_time: { [Op.lte]: time },
+            end_time: { [Op.gt]: time },
+          },
+        });
+        return result ?? undefined;
+      } catch (err) {
+        console.error("[getTrackByTime] error:", err);
+        throw err;
+      }
     }
   };
 }

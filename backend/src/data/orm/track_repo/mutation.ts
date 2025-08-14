@@ -10,6 +10,7 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
       return this.sequelize.transaction(async (transaction) => {
         const [_track_item, created] = await TrackItemModel.upsert(
           {
+            id: ti.id,
             track_id: ti.track_id,
             project_id: ti.project_id,
             start_time: ti?.start_time,
@@ -23,7 +24,7 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
           },
           { transaction }
         );
-        return _track_item;
+        return _track_item.get({ plain: true });
       });
     }
   };

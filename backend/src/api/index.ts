@@ -37,7 +37,7 @@ export const createFeathersServices = (app: Express) => {
         (ctx) => {
           if (ctx.error) {
             // In ra thông tin lỗi đầy đủ
-            console.error("❌ Feathers error hook:", {
+            console.error("Feathers error hook:", {
               message: ctx.error.message,
               name: ctx.error.name,
               code: ctx.error.code,

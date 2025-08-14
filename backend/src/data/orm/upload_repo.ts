@@ -10,10 +10,12 @@ export function AddUploadMedia<TBase extends Constructor<BaseRepo>>(
       return this.sequelize.transaction(async (transaction) => {
         const [_asset, created] = await AssetModel.upsert(
           {
-            original_name: a.original_name,
+          original_name: a.original_name,
             project_id: a.project_id,
+            server_path:a.server_path,
             file_name: a.file_name,
             mime_type: a.mime_type,
+            type:a.type,
             size: a.size,
             url: a.url,
             thumbnail: a?.thumbnail,

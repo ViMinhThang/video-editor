@@ -17,5 +17,19 @@ export function AddStorageVideoFrame<Tbase extends Constructor<BaseRepo>>(
         return _track_item ?? undefined;
       });
     }
+    async updateFramesTrackItemId(
+      frameIds: number[],
+      newTrackItemId: number
+    ): Promise<boolean> {
+      const [count] = await VideoFrameModel.update(
+        { track_item_id: newTrackItemId },
+        {
+          where: {
+            id: frameIds,
+          },
+        }
+      );
+      return count > 0;
+    }
   };
 }

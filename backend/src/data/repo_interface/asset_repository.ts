@@ -7,4 +7,5 @@ export interface assetRepository {
   getAssets(query: any): Promise<Asset[]>;
   deleteAsset(id: number): Promise<boolean>;
   storeAsset(params: Asset): Promise<Asset | undefined>;
+  getAssetPath(asset_id: number): Promise<string | undefined>;
 }

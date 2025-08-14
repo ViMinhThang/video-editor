@@ -101,7 +101,10 @@ const getDuration = (fullPath: string): Promise<number> => {
     });
   });
 };
-const extractAllFrames = async (fullPath: string, totalFrames = 9): Promise<string[]> => {
+const extractAllFrames = async (
+  fullPath: string,
+  totalFrames = 9
+): Promise<string[]> => {
   const duration = await getDuration(fullPath);
   const interval = duration / totalFrames;
 
@@ -133,10 +136,57 @@ const extractAllFrames = async (fullPath: string, totalFrames = 9): Promise<stri
 
   return allFrames;
 };
+const cutVideoAccurate = async (
+  fullPath: string,
+  start: number,
+  end: number,
+  outputName?: string
+): Promise<string> => {
+  const duration = end - start;
+  if (duration <= 0) {
+    throw new Error("Invalid time range: end must be greater than start");
+  }
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cut-"));
+  console.log("[cutVideoAccurate] Temp dir:", tempDir);
+
+  const outputFile = path.join(tempDir, outputName || "cut.mp4");
+
+  // Chạy ffmpeg với re-encode
+  await new Promise<void>((resolve, reject) => {
+    const ffmpeg = spawn("ffmpeg", [
+      "-ss", start.toString(),        // thời điểm bắt đầu
+      "-i", fullPath,                 // input video
+      "-t", duration.toString(),      // độ dài đoạn cắt
+      "-c:v", "libx264",              // re-encode video để cắt chính xác
+      "-preset", "fast",              // tốc độ encode
+      "-crf", "18",                   // chất lượng (thấp hơn = đẹp hơn, 18 ~ visually lossless)
+      "-c:a", "aac",                  // re-encode audio
+      "-b:a", "192k",                 // bitrate audio
+      "-movflags", "+faststart",      // tối ưu phát trực tuyến
+      outputFile,
+    ]);
+
+    ffmpeg.stderr.on("data", (data) => {
+      console.error(`[cutVideoAccurate] ${data}`);
+    });
+
+    ffmpeg.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg exited with code ${code}`));
+    });
+
+    ffmpeg.on("error", reject);
+  });
+
+  console.log("[cutVideoAccurate] Output file:", outputFile);
+  return outputFile;
+};
 
 export default {
   getDimension,
   getDuration,
   makeThumbnail,
   extractAllFrames,
+  cutVideoAccurate,
 };

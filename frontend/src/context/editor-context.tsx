@@ -3,7 +3,7 @@ import { Asset, Project } from "@/types";
 import { createContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
-interface EditorContextType {
+interface ProjectContextType {
   project: Project | null;
   assets: Asset[];
   reloadProject: (id: string) => Promise<void>;
@@ -16,9 +16,9 @@ interface EditorContextType {
   loading: boolean;
 }
 
-export const EditorContext = createContext<EditorContextType | null>(null);
+export const ProjectContext = createContext<ProjectContextType | null>(null);
 
-export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
+export const ProjectProvider = ({ children }: { children: React.ReactNode }) => {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -63,7 +63,7 @@ export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
   }, [projectId]);
 
   return (
-    <EditorContext.Provider
+    <ProjectContext.Provider
       value={{
         project,
         assets,
@@ -76,6 +76,6 @@ export const EditorProvider = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       {children}
-    </EditorContext.Provider>
+    </ProjectContext.Provider>
   );
 };

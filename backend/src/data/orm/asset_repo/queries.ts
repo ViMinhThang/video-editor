@@ -17,5 +17,14 @@ export function AddQueriesAsset<TBase extends Constructor<BaseRepo>>(
       });
       return result;
     }
+    async getAssetPath(asset_id: number): Promise<string | undefined> {
+      const result = await AssetModel.findOne({
+        where: { id: asset_id },
+        attributes: ["server_path"],
+        raw: true,
+      });
+
+      return result ? result.server_path : undefined;
+    }
   };
 }

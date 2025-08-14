@@ -27,8 +27,8 @@ export class TrackItemWebService implements WebService<TrackItem> {
       project_id,
       asset_id: asset.id,
       track_id: 1,
-      start_time: 0,
-      end_time: duration,
+      start_time: data.start_time,
+      end_time: data.start_time + duration,
     };
     const created = await track_repo.storeTrackItem(track_item);
     if (!created) {
@@ -39,7 +39,6 @@ export class TrackItemWebService implements WebService<TrackItem> {
       const baseFramesDir = path.join(
         getProjectAssetDir(project_id, videoBaseName)
       );
-      const runIndex = await getNextRunIndex(baseFramesDir);
       const framesDir = path.join(
         baseFramesDir,
         "track_item" + "_" + created.id + "",
@@ -47,7 +46,10 @@ export class TrackItemWebService implements WebService<TrackItem> {
       );
       await fs.mkdir(framesDir, { recursive: true });
 
-      const tmpPath: string[] = await FF.extractAllFrames(asset.server_path,11);
+      const tmpPath: string[] = await FF.extractAllFrames(
+        asset.server_path,
+        Math.ceil(duration / 2)
+      );
 
       const finalPaths: string[] = [];
 
@@ -56,7 +58,9 @@ export class TrackItemWebService implements WebService<TrackItem> {
         await fs.copyFile(tmpPath[i], frame_index);
         await fs.unlink(tmpPath[i]);
         finalPaths.push(frame_index);
-        const url_static = `/uploads/projects/${project_id}/assets/${videoBaseName}/track_item_${created.id}/frames/frame_${[i]}.jpg`;
+        const url_static = `/uploads/projects/${project_id}/assets/${videoBaseName}/track_item_${
+          created.id
+        }/frames/frame_${[i]}.jpg`;
         const video_frames: videoFrame = {
           track_item_id: created.id!,
           url: url_static,

@@ -12,4 +12,5 @@ export interface trackRepository {
   storeTrack(id: any, arg1: { order: any }): unknown;
   getTracks(params: any): Promise<Track[]>;
   storeTrack(params: { project_id: number; type: string }): Promise<Track>;
+  getTrackByTime(time: number): Promise<TrackItem | undefined>;
 }

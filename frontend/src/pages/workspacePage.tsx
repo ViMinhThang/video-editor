@@ -1,7 +1,7 @@
 import Cardmodi from "@/components/card-custom";
 import { CreateCardButton } from "@/components/CreateButtons";
 import { Button } from "@/components/ui/button";
-import { useEditor } from "@/hooks/use-editor";
+import { useProject } from "@/hooks/use-project";
 import { deleteAsset } from "@/services/assetsServices";
 import { FileUp, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ export default function WorkspacePage() {
     handleFileChange,
     fileInputRef,
     loading,
-  } = useEditor();
+  } = useProject();
 
   const navigate = useNavigate();
 

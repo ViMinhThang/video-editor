@@ -19,6 +19,8 @@ export interface FullProjectState {
   assets: Asset[];
 }
 export interface VideoFrame {
+  start_time: number;
+  end_time: number;
   id: number;
   track_item_id: number;
   url: string;

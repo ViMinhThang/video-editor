@@ -2,17 +2,16 @@ import { drawRoundedImage } from "@/lib/utils";
 import { VideoFrame } from "@/types";
 import { useEffect, useRef } from "react";
 
-// ---- Timeline Canvas ----
 export const TimelineCanvas: React.FC<{
   frames: VideoFrame[];
-  scale: number; // pixels per second
+  scale: number;
   thumbnailWidth?: number;
   thumbnailHeight?: number;
   groupGap: number;
 }> = ({
   frames,
   scale,
-  thumbnailWidth = 80,
+  thumbnailWidth = 60,
   thumbnailHeight = 60,
   groupGap = 10,
 }) => {
@@ -25,60 +24,70 @@ export const TimelineCanvas: React.FC<{
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    // Group theo track_item_id
-    const groups: Record<number, VideoFrame[]> = {};
-    frames.forEach((frame) => {
-      if (!groups[frame.track_item_id]) groups[frame.track_item_id] = [];
-      groups[frame.track_item_id].push(frame);
-    });
 
-    // Tính width canvas dựa trên số frame và thumbnailWidth
-    const width = frames.length * thumbnailWidth;
-    const height = thumbnailHeight + 20; // padding top
+    // Gom frame theo track_item_id
+    const groups: Record<number, VideoFrame[]> = {};
+    for (const f of frames) {
+      (groups[f.track_item_id] ??= []).push(f);
+    }
+
+    const groupEntries = Object.entries(groups).sort(
+      ([a], [b]) => Number(a) - Number(b)
+    );
+
+    const groupCount = groupEntries.length;
+    const width = frames.length * thumbnailWidth + (groupCount - 1) * groupGap;
+    const height = thumbnailHeight + 20;
 
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    ctx.scale(dpr, dpr);
-
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
-    let xOffset = 0;
-    Object.keys(groups)
-      .sort((a, b) => Number(a) - Number(b))
-      .forEach((trackItemId) => {
-        const groupFrames = groups[Number(trackItemId)];
 
-        groupFrames.forEach((frame, idx) => {
-          const img = new Image();
-          img.src = import.meta.env.VITE_API_BASE_URL + frame.url;
+    // Preload tất cả ảnh
+    Promise.all(
+      frames.map(
+        (f) =>
+          new Promise<HTMLImageElement>((resolve) => {
+            const img = new Image();
+            img.src = import.meta.env.VITE_API_BASE_URL + f.url;
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(new Image());
+          })
+      )
+    ).then((images) => {
+      const imageMap: Record<number, HTMLImageElement> = {};
+      frames.forEach((f, i) => {
+        imageMap[f.id] = images[i];
+      });
 
-          // Vị trí x rounded để tránh khoảng trắng do số thập phân
-          const posX = Math.round(xOffset + idx * thumbnailWidth);
+      let xOffset = 0;
 
-          // Chiều rộng ảnh vẽ
-          // Có thể cộng thêm 1px khi zoom để phủ khoảng trống
-          const drawWidth = Math.round(thumbnailWidth) + 1;
+      groupEntries.forEach(([, group]) => {
+        group.forEach((frame, idx) => {
+          const img = imageMap[frame.id];
+          const startX = xOffset + idx * thumbnailWidth;
 
-          img.onload = () => {
-            drawRoundedImage(
-              ctx,
-              img,
-              posX,
-              20,
-              drawWidth,
-              thumbnailHeight,
-              8,
-              idx == 0,
-              idx == groupFrames.length - 1
-            );
-          };
+          // VẼ tất cả frame bình thường
+          drawRoundedImage(
+            ctx,
+            img,
+            startX,
+            20,
+            thumbnailWidth,
+            thumbnailHeight,
+            8,
+            idx === 0,
+            idx === group.length - 1
+          );
         });
 
-        // Tăng xOffset bằng tổng width nhóm + khoảng cách giữa nhóm
-        xOffset += groupFrames.length * thumbnailWidth + groupGap;
+        xOffset += group.length * thumbnailWidth + groupGap;
       });
-  }, [frames, scale, thumbnailWidth, thumbnailHeight]);
+    });
+  }, [frames, scale, thumbnailWidth, thumbnailHeight, groupGap]);
 
   return <canvas ref={canvasRef} />;
 };
