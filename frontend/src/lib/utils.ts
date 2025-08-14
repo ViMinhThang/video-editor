@@ -23,20 +23,33 @@ export function getAssetType(mime: string) {
 }
 export function drawRoundedImage(
   ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
+  img: HTMLImageElement | null,
   x: number,
   y: number,
   width: number,
   height: number,
   radius: number,
   roundLeft: boolean,
-  roundRight: boolean
+  roundRight: boolean,
+  strokeOnly = false,
+  strokeStyle = "red",
+  lineWidth = 3,
+  roundAllCorners = false  // thêm
 ) {
   ctx.save();
   ctx.beginPath();
 
-  // Vẽ path bo góc bên trái nếu cần
-  if (roundLeft) {
+  if (roundAllCorners) {
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+  } else if (roundLeft) {
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width, y);
     ctx.lineTo(x + width, y + height);
@@ -44,9 +57,7 @@ export function drawRoundedImage(
     ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
     ctx.lineTo(x, y + radius);
     ctx.quadraticCurveTo(x, y, x + radius, y);
-  }
-  // Vẽ path bo góc bên phải nếu cần
-  else if (roundRight) {
+  } else if (roundRight) {
     ctx.moveTo(x, y);
     ctx.lineTo(x + width - radius, y);
     ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
@@ -55,11 +66,17 @@ export function drawRoundedImage(
     ctx.lineTo(x, y + height);
     ctx.closePath();
   } else {
-    // Không bo góc
     ctx.rect(x, y, width, height);
   }
 
-  ctx.clip();
-  ctx.drawImage(img, x, y, width, height);
+  if (strokeOnly) {
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+  } else if (img) {
+    ctx.clip();
+    ctx.drawImage(img, x, y, width, height);
+  }
+
   ctx.restore();
 }
