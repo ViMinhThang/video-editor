@@ -8,13 +8,12 @@ import SubtitlePage from "@/pages/subtitle-page";
 import TextPage from "@/pages/text-page";
 import { Asset, VideoFrame } from "@/types";
 import { CassetteTape, Scissors } from "lucide-react";
-import { ScrollTimeline } from "@/components/scroll-time";
+import { ScrollTimeline } from "@/components/timeline/time-scroll";
 import { ProjectProvider } from "@/context/editor-context";
 import { useProject } from "@/hooks/use-project";
 import { useEditor } from "@/hooks/use-editor";
-import { response } from "express";
 
-interface ItemProps {
+export interface ItemProps {
   title: string;
   icon: React.ElementType;
   type: string;
@@ -60,7 +59,7 @@ const TimelineSection = ({
 
   return (
     <div className="flex-1/5 p-2 bg-gray-100 overflow-x-auto whitespace-nowrap flex flex-col overflow-auto">
-      <div className="mb-5 border-b-2 p-2">
+      <div className="mb-1 border-b-2 p-2">
         <Button className="cursor-pointer" onClick={handleCutVideo}>
           <Scissors />
         </Button>

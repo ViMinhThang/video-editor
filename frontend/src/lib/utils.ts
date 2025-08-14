@@ -1,3 +1,4 @@
+import { TimelineMetricsParams } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -80,3 +81,21 @@ export function drawRoundedImage(
 
   ctx.restore();
 }
+export const getTimelineMetrics = ({
+  framesLength,
+  duration,
+  zoom,
+  currentTime,
+  extraTime = 60,
+  baseScale = 40,
+}: TimelineMetricsParams) => {
+  const totalDuration = duration + extraTime;
+  const scale = baseScale * (zoom / 100);
+  const frameDuration = duration / framesLength;
+  const thumbnailWidth = frameDuration * scale;
+  const width = totalDuration * scale;
+  const cursorX = currentTime * scale;
+
+  return { totalDuration, scale, frameDuration, thumbnailWidth, width, cursorX };
+};
+

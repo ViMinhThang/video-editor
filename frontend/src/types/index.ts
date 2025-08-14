@@ -38,3 +38,23 @@ export interface TrackItem {
   video_frames: VideoFrame[];
   loading:boolean
 }
+export interface TimelineMetricsParams {
+  framesLength: number;
+  duration: number;
+  zoom: number;
+  currentTime: number;
+  extraTime?: number;
+  baseScale?: number;
+}
+
+export interface DrawTimelineParams {
+  canvas: HTMLCanvasElement;
+  frames: VideoFrame[];
+  scale: number;
+  thumbnailWidth: number;
+  thumbnailHeight: number;
+  groupGap: number;
+  highlightTrackItemId?: number | null;
+  animLineWidth?: number;
+  borderColor?: string;
+}
