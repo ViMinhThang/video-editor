@@ -4,6 +4,7 @@ import { TimelineRuler } from "./time-ruler";
 import { ArrowBigDown } from "lucide-react";
 import { VideoFrame } from "@/types";
 import { getTimelineMetrics } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
 interface ScrollTimelineProps {
   frames: VideoFrame[];
@@ -22,15 +23,14 @@ export const ScrollTimeline = ({
   onTimeChange,
   cutTime,
 }: ScrollTimelineProps) => {
-  
-const { totalDuration, scale, thumbnailWidth, width, cursorX } = getTimelineMetrics({
-  framesLength: frames.length,
-  duration,
-  zoom,
-  currentTime,
-});
-
-
+  const { totalDuration, scale, thumbnailWidth, width, cursorX } =
+    getTimelineMetrics({
+      framesLength: frames.length,
+      duration,
+      zoom,
+      currentTime,
+    });
+  const scrollRef = useRef<HTMLDivElement>(null);
   const {
     contextMenu,
     highlightTrackItemIdRef,
@@ -40,9 +40,24 @@ const { totalDuration, scale, thumbnailWidth, width, cursorX } = getTimelineMetr
     handleDownload,
     setContextMenu,
   } = useTimeline(frames, duration, scale, onTimeChange);
+  useEffect(() => {
+    if (!scrollRef.current) return;
 
+    const container = scrollRef.current;
+    const cursorPadding = container.clientWidth / 2; // keep cursor giữa màn hình
+    const scrollLeft = cursorX - cursorPadding;
+
+    container.scrollTo({
+      left: scrollLeft > 0 ? scrollLeft : 0,
+      behavior: "smooth",
+    });
+  }, [cursorX]);
+  
   return (
-    <div className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative">
+    <div
+      className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative"
+      ref={scrollRef}
+    >
       <div
         style={{ width: `${width}px`, position: "relative" }}
         onMouseDown={handleMouseDown}

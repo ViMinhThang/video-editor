@@ -88,7 +88,14 @@ export const handleUploadVideo = async (
     console.error("FFmpeg metadata failed:", err);
   }
 
-  const asset = buildAsset(file, project_id, "video", thumbUrl, destPath);
+  const asset = buildAsset(
+    file,
+    project_id,
+    "video",
+    thumbUrl,
+    destPath,
+    videoBaseName
+  );
 
   const created = await asset_repo.storeAsset(asset);
 
@@ -113,13 +120,21 @@ export const handleUploadImage = async (
   const imageBaseName = path.parse(file.originalname).name;
   const assetDir = getProjectAssetDir(project_id, imageBaseName);
   await fs.mkdir(assetDir, { recursive: true });
+  const imageName = path.parse(file.originalname).name;
 
   const destPath = path.join(assetDir, file.filename);
   await fs.rename(file.path, destPath);
 
   const thumbUrl = `/uploads/projects/${project_id}/assets/${imageBaseName}/${file.filename}`;
 
-  const asset = buildAsset(file, project_id, "image", thumbUrl, destPath);
+  const asset = buildAsset(
+    file,
+    project_id,
+    "image",
+    thumbUrl,
+    destPath,
+    imageName
+  );
   const created = await asset_repo.storeAsset(asset);
 
   // // Lưu track item nếu cần

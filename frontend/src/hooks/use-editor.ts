@@ -1,3 +1,4 @@
+import { loadProject } from "@/api/track-api";
 import { splitTrackItems } from "@/lib/utils";
 import { Asset, TrackItem, VideoFrame } from "@/types";
 import axios from "axios";
@@ -11,14 +12,17 @@ export const useEditor = (projectId?: string) => {
     audio: [],
     text: [],
   });
-  const loadProject = async () => {
-    if (!projectId) {
-      console.log("There is no projectId");
-    } else {
-      const res = await axios.get(`/api/projects/${projectId}/full`);
+  const fetchProject = async () => {
+    if (!projectId) return;
+
+    try {
+      const res = await loadProject(projectId);
       handleAssets(res.data.assets);
+    } catch (err) {
+      console.error("Failed to load project", err);
     }
   };
+
   const handleAssets = (assests: Asset[]) => {
     const videoTracks: TrackItem[] = [];
     const audioTracks: TrackItem[] = [];
@@ -68,7 +72,8 @@ export const useEditor = (projectId?: string) => {
     setFrames(videoTracks.flatMap((t) => t.video_frames || []));
   };
   useEffect(() => {
-    loadProject();
+    fetchProject();
   }, [projectId]);
-  return { duration, frames, tracks, loadProject };
+
+  return { duration, frames, tracks, fetchProject };
 };

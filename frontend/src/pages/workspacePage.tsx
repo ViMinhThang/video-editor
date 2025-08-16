@@ -2,7 +2,7 @@ import Cardmodi from "@/components/card-custom";
 import { CreateCardButton } from "@/components/CreateButtons";
 import { Button } from "@/components/ui/button";
 import { useProject } from "@/hooks/use-project";
-import { deleteAsset } from "@/services/assetsServices";
+import { deleteAsset } from "@/api/asset-api";
 import { FileUp, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

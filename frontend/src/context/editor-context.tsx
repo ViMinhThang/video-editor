@@ -1,4 +1,4 @@
-import { fetchAssets, fetchProject, uploadAsset } from "@/services/assetsServices";
+import { fetchAssets, fetchProject, uploadAsset } from "@/api/asset-api";
 import { Asset, Project } from "@/types";
 import { createContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";

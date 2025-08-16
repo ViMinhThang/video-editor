@@ -31,7 +31,8 @@ export const buildAsset = (
   project_id: string,
   type: "video" | "image",
   thumbnail: string,
-  server_path: string
+  server_path: string,
+  videoBaseName: string
 ) => ({
   original_name: file.originalname,
   project_id: Number(project_id),
@@ -41,5 +42,5 @@ export const buildAsset = (
   size: file.size,
   thumbnail,
   server_path,
-  url: `/uploads/projects/${project_id}/assets/${file.filename}`,
+  url: `/uploads/projects/${project_id}/assets/${videoBaseName}/${file.filename}`,
 });

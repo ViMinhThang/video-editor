@@ -154,3 +154,12 @@ export function splitTrackItems(trackItems: TrackItem[]): TrackItem[] {
 
   return result;
 }
+export const formatTime = (time: number) => {
+  const hrs = Math.floor(time / 3600);
+  const mins = Math.floor((time % 3600) / 60);
+  const secs = Math.floor(time % 60);
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+};
