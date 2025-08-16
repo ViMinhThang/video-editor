@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { VideoFrame } from "@/types";
+import { downloadTrackItem } from "@/api/track-api";
 
 export const useTimeline = (frames: VideoFrame[], duration: number, scale: number, onTimeChange: (newTime: number) => void) => {
   const highlightTrackItemIdRef = useRef<number | null>(null);
@@ -58,17 +59,12 @@ export const useTimeline = (frames: VideoFrame[], duration: number, scale: numbe
     animate();
   };
 
-  const handleDownload = () => {
+  const handleDownload =async () => {
     if (!contextMenu.trackItemId) return;
     const trackItem = frames.find(f => f.track_item_id === contextMenu.trackItemId);
     if (!trackItem) return;
+    await downloadTrackItem(contextMenu.trackItemId)
 
-    const link = document.createElement("a");
-    link.href = import.meta.env.VITE_API_BASE_URL + trackItem.url;
-    link.download = trackItem.url.split("/").pop() || "file.mp4";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 
     setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
     highlightTrackItemIdRef.current = null;

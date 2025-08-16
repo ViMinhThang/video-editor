@@ -8,7 +8,7 @@ import { createUploadRoutes } from "./api/custom/upload_routes";
 import path from "path";
 import { cors } from "@feathersjs/express";
 import { createStateRoutes } from "./api/custom/get_state_project";
-import { createCutRoute } from "./api/custom/track_item_routes";
+import { createCutRoute, createDownloadRoute } from "./api/custom/track_item_routes";
 
 const port = getConfig("http:port", 3000);
 
@@ -34,6 +34,7 @@ console.log("Serving uploads from:", path.join(__dirname, "../uploads"));
 expressApp.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 createFeathersServices(expressApp);
 createUploadRoutes(expressApp);
+createDownloadRoute(expressApp)
 createStateRoutes(expressApp);
 createCutRoute(expressApp);
 createErrorHandlers(expressApp);

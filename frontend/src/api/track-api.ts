@@ -20,3 +20,9 @@ export const loadProject = async (projectId: string) => {
   }
   return await axios.get(`/api/projects/${projectId}/full`);
 };
+export const downloadTrackItem = async (id: number) => {
+  if (!id) {
+    console.log("There is no track id");
+  }
+  return await axios.get(`/api/track-item/download?track_item_id=${id}`);
+};

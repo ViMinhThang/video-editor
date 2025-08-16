@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { ScrollTimeline } from "./time-scroll";
 import { VideoFrame } from "@/types";
 import { formatTime } from "@/lib/utils";
+import { TimeDisplay } from "./time-display";
 
 interface Props {
   frames: VideoFrame[];
@@ -62,7 +63,7 @@ export const TimelineSection = ({
             )}
           </Button>
           <div className="ml-2 text-sm font-light">
-            {formatTime(currentTime)} | {formatTime(duration)}
+            <TimeDisplay currentTime={currentTime} duration={duration} />
           </div>
         </div>
 

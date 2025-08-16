@@ -79,8 +79,9 @@ const EditorLayout = () => {
       {/* Main content */}
       <div className="flex flex-col w-[80%]">
         {/* Top bar */}
-        <div className="bg-white p-3 flex gap-4 items-center">
-          <Button className="bg-blue-500 rounded-sm">Export</Button>
+        <div className="bg-white p-3 flex gap-4 items-center justify-between">
+          <div>asdasdsd</div>
+          <Button className="rounded-sm">Export</Button>
         </div>
 
         {/* Video preview */}

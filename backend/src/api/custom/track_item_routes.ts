@@ -4,7 +4,7 @@ import FF from "../../lib/FF";
 import { TrackItem } from "../../data/models/track_items_models";
 import { videoFrame } from "../../data/models/video_frame_models";
 import { calculateNumbFrames } from "../../lib/util";
-
+import fs from "fs/promises";
 export const createCutRoute = (app: Express) => {
   app.post(
     "/api/track-item/cut-track-item",
@@ -84,4 +84,47 @@ export const createCutRoute = (app: Express) => {
       // }
     }
   );
+};
+export const createDownloadRoute = (app: Express) => {
+  app.get("/api/track-item/download", async (req: Request, res: Response) => {
+    try {
+      const { track_item_id } = req.query;
+      if (!track_item_id) return res.status(400).send("Missing track_item_id");
+
+      const track_item = await track_repo.getTrackItemById(track_item_id);
+      if (
+        !track_item ||
+        track_item.start_time == null ||
+        track_item.end_time == null ||
+        !track_item.asset_id
+      )
+        return res.status(404).send("Track item not found");
+
+      const asset = await asset_repo.getAssetById(track_item.asset_id);
+      if (!asset || !asset.server_path)
+        return res.status(404).send("Asset not found");
+
+      const outputPath = await FF.cutVideoAccurate(
+        asset.server_path,
+        track_item.start_time,
+        track_item.end_time
+      );
+
+      res.download(outputPath, asset.original_name, async (err) => {
+        if (err) {
+          console.error("Download error:", err);
+          res.status(500).send("Failed to download file");
+        } else {
+          try {
+            await fs.unlink(outputPath);
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Error in download route:", err);
+      res.status(500).send("Internal server error");
+    }
+  });
 };
