@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import EditorMenu from "@/components/editor-menu";
+import EditorMenu from "@/components/bars/editor-menu";
 import AssetsPage from "@/pages/assets-page";
 import SubtitlePage from "@/pages/subtitle-page";
 import TextPage from "@/pages/text-page";

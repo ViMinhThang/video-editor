@@ -5,7 +5,11 @@ import { uploadDir } from "../custom/upload_routes";
 import { WebService } from "./web_service";
 import FF from "../../lib/FF";
 import fs from "fs/promises";
-import { getNextRunIndex, getProjectAssetDir } from "../../lib/util";
+import {
+  calculateNumbFrames,
+  getNextRunIndex,
+  getProjectAssetDir,
+} from "../../lib/util";
 import { videoFrame } from "../../data/models/video_frame_models";
 
 export class TrackItemWebService implements WebService<TrackItem> {
@@ -48,7 +52,7 @@ export class TrackItemWebService implements WebService<TrackItem> {
 
       const tmpPath: string[] = await FF.extractAllFrames(
         asset.server_path,
-        Math.ceil(duration / 2)
+        calculateNumbFrames(duration)
       );
 
       const finalPaths: string[] = [];

@@ -9,8 +9,12 @@ export const getProjectAssetDir = (project_id: string, basename: string) => {
 export async function getNextRunIndex(baseDir: string): Promise<number> {
   try {
     const entries = await fs.readdir(baseDir, { withFileTypes: true });
-    const runDirs = entries.filter(e => e.isDirectory() && e.name.startsWith("run_"));
-    const indices = runDirs.map(d => parseInt(d.name.split("_")[1], 10)).filter(n => !isNaN(n));
+    const runDirs = entries.filter(
+      (e) => e.isDirectory() && e.name.startsWith("run_")
+    );
+    const indices = runDirs
+      .map((d) => parseInt(d.name.split("_")[1], 10))
+      .filter((n) => !isNaN(n));
     if (indices.length === 0) return 1;
     return Math.max(...indices) + 1;
   } catch {
@@ -18,10 +22,9 @@ export async function getNextRunIndex(baseDir: string): Promise<number> {
   }
 }
 
-// Xử lý video upload
-
-
-// Xử lý image upload
+export const calculateNumbFrames = (duration: number, frameSpacing = 2) => {
+  return Math.ceil(duration / frameSpacing);
+};
 
 export const buildAsset = (
   file: Express.Multer.File,

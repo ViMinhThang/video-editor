@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import CreateProjectDialog from "./create-project";
+import CreateProjectDialog from "../create-project";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Project } from "@/types";

@@ -1,10 +1,10 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/bars/app-sidebar";
 import { Outlet } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
-import Topbar from "../components/topbar";
+import Topbar from "../bars/topbar";
 
 export default function Layout() {
   const [projects, setProjects] = useState([]);

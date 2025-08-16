@@ -36,7 +36,7 @@ export interface TrackItem {
   start_time: number;
   end_time: number;
   video_frames: VideoFrame[];
-  loading:boolean
+  loading: boolean;
 }
 export interface TimelineMetricsParams {
   framesLength: number;

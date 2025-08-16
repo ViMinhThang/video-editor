@@ -3,6 +3,7 @@ import { asset_repo, track_repo, video_repo } from "../../data";
 import FF from "../../lib/FF";
 import { TrackItem } from "../../data/models/track_items_models";
 import { videoFrame } from "../../data/models/video_frame_models";
+import { calculateNumbFrames } from "../../lib/util";
 
 export const createCutRoute = (app: Express) => {
   app.post(
@@ -11,8 +12,8 @@ export const createCutRoute = (app: Express) => {
       // try {
       const { currentTime } = req.body;
       const track_item = await track_repo.getTrackByTime(currentTime);
-      console.log(track_item)
-      console.log(currentTime)
+      console.log(track_item);
+      console.log(currentTime);
       if (!track_item) {
         return res
           .status(404)
@@ -57,9 +58,8 @@ export const createCutRoute = (app: Express) => {
       const created = await track_repo.storeTrackItem(new_track_item);
       await track_repo.storeTrackItem(track_item);
 
-      const frameSpacing = 2;
-      const startIndex = Math.ceil(
-        (currentTime - track_item.start_time) / frameSpacing
+      const startIndex = calculateNumbFrames(
+        currentTime - track_item.start_time
       );
 
       const allFrames = await video_repo.getVideoFramesByTrackItemId(

@@ -1,11 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import Layout from "./layout/main-layout";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import EmptyPage from "./pages/emty-page";
 import ProjectPage from "./pages/project-page";
-import { EditorWrapper } from "./layout/editor-layout";
+import { EditorWrapper } from "./components/layout/editor-layout";
+import Layout from "./components/layout/main-layout";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

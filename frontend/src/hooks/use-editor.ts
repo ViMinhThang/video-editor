@@ -1,3 +1,4 @@
+import { splitTrackItems } from "@/lib/utils";
 import { Asset, TrackItem, VideoFrame } from "@/types";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -36,10 +37,6 @@ export const useEditor = (projectId?: string) => {
       }
     });
 
-
-
-    
-
     const durationByAsset: Record<number, number> = {};
     videoTracks.forEach((t) => {
       if (t.asset_id != null) {
@@ -53,8 +50,21 @@ export const useEditor = (projectId?: string) => {
       (sum, dur) => sum + dur,
       0
     );
-    setTracks({ video: videoTracks, audio: audioTracks, text: textTracks });
+
+    setTracks({
+      video: splitTrackItems(splitTrackItems(videoTracks)),
+      audio: splitTrackItems(splitTrackItems(audioTracks)),
+      text: splitTrackItems(splitTrackItems(textTracks)),
+    });
+    console.log(videoTracks);
     setDuration(totalDuration);
+
+    videoTracks.forEach((vi) => {
+      vi.video_frames.forEach((frame) => {
+        frame.start_time = vi.start_time;
+      });
+    });
+
     setFrames(videoTracks.flatMap((t) => t.video_frames || []));
   };
   useEffect(() => {
