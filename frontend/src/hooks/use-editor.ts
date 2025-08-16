@@ -56,20 +56,21 @@ export const useEditor = (projectId?: string) => {
     );
 
     setTracks({
-      video: splitTrackItems(splitTrackItems(videoTracks)),
-      audio: splitTrackItems(splitTrackItems(audioTracks)),
-      text: splitTrackItems(splitTrackItems(textTracks)),
+      video: videoTracks,
+      audio: audioTracks,
+      text: textTracks,
     });
     console.log(videoTracks);
     setDuration(totalDuration);
 
-    videoTracks.forEach((vi) => {
+    const res = splitTrackItems(videoTracks);
+    res.forEach((vi) => {
       vi.video_frames.forEach((frame) => {
         frame.start_time = vi.start_time;
       });
     });
 
-    setFrames(videoTracks.flatMap((t) => t.video_frames || []));
+    setFrames(res.flatMap((t) => t.video_frames || []));
   };
   useEffect(() => {
     fetchProject();

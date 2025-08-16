@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { Asset, TrackItem } from "../data/models/track_items_models";
 const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
   return new Promise<void>((resolve, reject) => {
     console.log("=== FFmpeg makeThumbnail Debug ===");
@@ -155,15 +156,24 @@ const cutVideoAccurate = async (
   // Chạy ffmpeg với re-encode
   await new Promise<void>((resolve, reject) => {
     const ffmpeg = spawn("ffmpeg", [
-      "-ss", start.toString(),        // thời điểm bắt đầu
-      "-i", fullPath,                 // input video
-      "-t", duration.toString(),      // độ dài đoạn cắt
-      "-c:v", "libx264",              // re-encode video để cắt chính xác
-      "-preset", "fast",              // tốc độ encode
-      "-crf", "18",                   // chất lượng (thấp hơn = đẹp hơn, 18 ~ visually lossless)
-      "-c:a", "aac",                  // re-encode audio
-      "-b:a", "192k",                 // bitrate audio
-      "-movflags", "+faststart",      // tối ưu phát trực tuyến
+      "-ss",
+      start.toString(), // thời điểm bắt đầu
+      "-i",
+      fullPath, // input video
+      "-t",
+      duration.toString(), // độ dài đoạn cắt
+      "-c:v",
+      "libx264", // re-encode video để cắt chính xác
+      "-preset",
+      "fast", // tốc độ encode
+      "-crf",
+      "18", // chất lượng (thấp hơn = đẹp hơn, 18 ~ visually lossless)
+      "-c:a",
+      "aac", // re-encode audio
+      "-b:a",
+      "192k", // bitrate audio
+      "-movflags",
+      "+faststart", // tối ưu phát trực tuyến
       outputFile,
     ]);
 
@@ -182,11 +192,46 @@ const cutVideoAccurate = async (
   console.log("[cutVideoAccurate] Output file:", outputFile);
   return outputFile;
 };
+const concatVideos = async (cutVideos: string[], outputPath: string) => {
+  if (!cutVideos.length) {
+    throw new Error("No videos to concat");
+  }
 
+  // Tạo temp file list cho ffmpeg
+  const tempListPath = path.join(process.cwd(), `temp_list_${Date.now()}.txt`);
+  const fileContent = cutVideos.map((v) => `file '${v}'`).join("\n");
+  fs.writeFileSync(tempListPath, fileContent);
+
+  // Chạy ffmpeg concat
+  await new Promise<void>((resolve, reject) => {
+    const ffmpeg = spawn("ffmpeg", [
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      tempListPath,
+      "-c",
+      "copy",
+      outputPath,
+    ]);
+
+    ffmpeg.stderr.on("data", (data) => console.log(data.toString()));
+
+    ffmpeg.on("close", (code) => {
+      fs.unlinkSync(tempListPath); // xóa temp list
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg exited with code ${code}`));
+    });
+  });
+
+  return outputPath;
+};
 export default {
   getDimension,
   getDuration,
   makeThumbnail,
   extractAllFrames,
   cutVideoAccurate,
+  concatVideos,
 };

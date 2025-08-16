@@ -63,8 +63,14 @@ export const useTimeline = (frames: VideoFrame[], duration: number, scale: numbe
     if (!contextMenu.trackItemId) return;
     const trackItem = frames.find(f => f.track_item_id === contextMenu.trackItemId);
     if (!trackItem) return;
-    await downloadTrackItem(contextMenu.trackItemId)
-
+    const response = await downloadTrackItem(contextMenu.trackItemId)
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `cutted.mp4`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
     setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
     highlightTrackItemIdRef.current = null;

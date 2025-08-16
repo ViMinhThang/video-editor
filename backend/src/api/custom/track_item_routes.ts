@@ -1,10 +1,11 @@
 import { Express, Request, Response } from "express";
 import { asset_repo, track_repo, video_repo } from "../../data";
 import FF from "../../lib/FF";
-import { TrackItem } from "../../data/models/track_items_models";
+import { Asset, TrackItem } from "../../data/models/track_items_models";
 import { videoFrame } from "../../data/models/video_frame_models";
 import { calculateNumbFrames } from "../../lib/util";
 import fs from "fs/promises";
+import path from "path";
 export const createCutRoute = (app: Express) => {
   app.post(
     "/api/track-item/cut-track-item",
@@ -126,5 +127,55 @@ export const createDownloadRoute = (app: Express) => {
       console.error("Error in download route:", err);
       res.status(500).send("Internal server error");
     }
+  });
+};
+export const createTrackExportRoute = (app: Express) => {
+  app.get("/api/track-item/export", async (req: Request, res: Response) => {
+    const { projectId } = req.query;
+    const trackItems: TrackItem[] = await track_repo.getTrackItemsByProjectId({
+      projectId: Number.parseInt(projectId as string),
+    });
+    if (!trackItems) {
+      return res.status(404).send("Track item not found");
+    }
+
+    trackItems.sort((a, b) => a.start_time! - b.start_time!);
+    const assetsId: number[] = trackItems.map((ti) => ti.asset_id!);
+    const assets: Asset[] = [];
+    for (let i = 0; i < assetsId.length; i++) {
+      const asset = await asset_repo.getAssetById(assetsId[i]);
+      if (asset) {
+        assets.push(asset);
+      }
+    }
+    const cutVideos: string[] = [];
+
+    for (let i = 0; i < assets.length; i++) {
+      for (let j = 0; j < trackItems.length; j++) {
+        if (trackItems[j].asset_id === assets[i].id) {
+          console.log(assets[i].server_path);
+          console.log(trackItems[j].start_time!);
+          console.log(trackItems[j].end_time!);
+          const outputPath = await FF.cutVideoAccurate(
+            assets[i].server_path,
+            trackItems[j].start_time!,
+            trackItems[j].end_time!
+          );
+
+          cutVideos.push(outputPath);
+        }
+      }
+    }
+    const outputFile = path.join(process.cwd(), `export_${projectId}.mp4`);
+    await FF.concatVideos(cutVideos, outputFile);
+
+    res.download(outputFile, `project_${projectId}.mp4`, (err) => {
+      if (err) console.error(err);
+      try {
+        fs.unlink(outputFile);
+      } catch (error) {
+        console.log(error);
+      }
+    });
   });
 };

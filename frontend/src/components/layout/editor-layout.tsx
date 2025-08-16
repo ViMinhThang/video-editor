@@ -11,8 +11,9 @@ import { TimelineSection } from "../timeline/time-section";
 import { ProjectProvider } from "@/context/editor-context";
 import { useProject } from "@/hooks/use-project";
 import { useEditor } from "@/hooks/use-editor";
-import { postTrack } from "@/api/track-api";
+import { exportProject, postTrack } from "@/api/track-api";
 import { useVideo } from "@/hooks/use-video";
+import VideoCanvas from "../timeline/video-canvas";
 
 const VITE_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -51,10 +52,27 @@ const EditorLayout = () => {
     if (tracks[asset.type].some((t) => t.asset_id === asset.id)) return;
 
     const trackItems = tracks[asset.type];
+    console.log(trackItems);
     const lastItem = trackItems[trackItems.length - 1];
     const start_time = lastItem ? lastItem.start_time + lastItem.end_time : 0;
+    console.log(start_time);
     await postTrack(asset, projectId, start_time);
     await fetchProject();
+  };
+
+  const handleExportProject = async (projectId: string) => {
+    try {
+      const response = await exportProject(projectId);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `project_${projectId}.mp4`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -81,16 +99,22 @@ const EditorLayout = () => {
         {/* Top bar */}
         <div className="bg-white p-3 flex gap-4 items-center justify-between">
           <div>asdasdsd</div>
-          <Button className="rounded-sm">Export</Button>
+          <Button
+            className="rounded-sm"
+            onClick={() => handleExportProject(projectId)}
+          >
+            Export
+          </Button>
         </div>
 
         {/* Video preview */}
         <div className="bg-gray-200 flex p-5 justify-center items-center min-h-[400px]">
           {asset?.url ? (
-            <video
-              ref={videoRef}
-              className="w-[80%] rounded-md shadow-md"
+            <VideoCanvas
+              videoRef={videoRef}
               src={VITE_BASE_URL + asset.url}
+              overlayText="Hello world!" // hoặc lấy từ subtitle track
+              currentTime={currentTime}
             />
           ) : (
             <div className="w-[80%] h-[667px] flex flex-col justify-center items-center rounded-md"></div>
