@@ -3,9 +3,10 @@ import path from "path";
 import fs from "fs/promises";
 import { Express, Request, Response } from "express";
 import multer from "multer";
-import { buildAsset, getProjectAssetDir } from "../../lib/util";
+import { buildAsset, getProjectAssetDir, parseSrt } from "../../lib/util";
 import FF from "../../lib/FF";
-import { asset_repo } from "../../data";
+import { asset_repo, track_repo } from "../../data";
+import { TrackItem } from "../../data/models/track_items_models";
 
 export const uploadDir = path.join(__dirname, "../../../uploads");
 
@@ -29,28 +30,36 @@ export const createUploadRoutes = (app: Express) => {
     upload.single("file"),
     async (req: Request, res: Response) => {
       try {
-        if (!req.file) {
+        if (!req.file)
           return res.status(400).json({ message: "No file uploaded" });
-        }
 
         const { project_id } = req.body;
-        if (!project_id) {
+        if (!project_id)
           return res.status(400).json({ message: "Missing project_id" });
-        }
 
-        let created;
+        const ext = path.extname(req.file.originalname).toLowerCase();
         if (req.file.mimetype.startsWith("video/")) {
-          created = await handleUploadVideo(req.file, project_id);
+          const created = await handleUploadVideo(req.file, project_id);
+          return res
+            .status(201)
+            .json({ message: "Upload successful", asset: created });
         } else if (req.file.mimetype.startsWith("image/")) {
-          created = await handleUploadVideo(req.file, project_id);
+          const created = await handleUploadImage(req.file, project_id);
+          return res
+            .status(201)
+            .json({ message: "Upload successful", asset: created });
+        } else if (ext === ".srt") {
+          const created = await handleUploadSrt(
+            req.file,
+            project_id,
+            req.body.asset_id
+          ); // tự tạo handler
+          return res
+            .status(201)
+            .json({ message: "SRT upload successful", asset: created });
         } else {
           return res.status(400).json({ message: "Unsupported file type" });
         }
-
-        return res.status(201).json({
-          message: "Upload successful",
-          asset: created,
-        });
       } catch (error) {
         console.error("Upload error:", error);
         return res.status(500).json({ message: "Internal server error" });
@@ -150,4 +159,33 @@ export const handleUploadImage = async (
   // }
 
   return created;
+};
+export const handleUploadSrt = async (
+  file: Express.Multer.File,
+  project_id: string,
+  asset_id: string
+) => {
+  try {
+    const content = await fs.readFile(file.path, "utf-8");
+    const srtItems = parseSrt(content);
+    const created: TrackItem[] = [];
+
+    for (const item of srtItems) {
+      const trackItem = {
+        asset_id: asset_id,
+        project_id,
+        track_id: 2,
+        start_time: item.start,
+        end_time: item.end,
+        text_content: item.text,
+      };
+      created.push(await track_repo.storeTrackItem(trackItem));
+    }
+
+    await fs.unlink(file.path);
+    return created;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };

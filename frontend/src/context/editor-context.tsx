@@ -1,81 +1,102 @@
-import { fetchAssets, fetchProject, uploadAsset } from "@/api/asset-api";
-import { Asset, Project } from "@/types";
-import { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Asset, TrackItem, VideoFrame } from "@/types";
+import { loadProject } from "@/api/track-api";
 
-interface ProjectContextType {
-  project: Project | null;
-  assets: Asset[];
-  reloadProject: (id: string) => Promise<void>;
-  reloadAssets: (id: string) => Promise<void>;
-  handleUploadFile: () => void;
-  handleFileChange: (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => Promise<void>;
-  fileInputRef: React.RefObject<HTMLInputElement>;
-  loading: boolean;
+interface EditorContextType {
+  duration: number;
+  frames: VideoFrame[];
+  tracks: Record<string, TrackItem[]>;
+  fetchProject: () => Promise<void>;
+  setDuration: React.Dispatch<React.SetStateAction<number>>;
+  setTracks: React.Dispatch<React.SetStateAction<Record<string, TrackItem[]>>>;
 }
 
-export const ProjectContext = createContext<ProjectContextType | null>(null);
+export const EditorContext = createContext<EditorContextType | undefined>(undefined);
 
-export const ProjectProvider = ({ children }: { children: React.ReactNode }) => {
+export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { projectId } = useParams<{ projectId: string }>();
-  const [project, setProject] = useState<Project | null>(null);
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [loading, setLoading] = useState(true);
-  const reloadProject = async (id: string) => {
-    const data = await fetchProject(id);
-    setProject(data);
+
+  const [duration, setDuration] = useState(0);
+  const [frames, setFrames] = useState<VideoFrame[]>([]);
+  const [tracks, setTracks] = useState<Record<string, TrackItem[]>>({
+    video: [],
+    audio: [],
+    text: [],
+    subtitle: [],
+  });
+
+  const handleAssets = (assets: Asset[]) => {
+    const videoTracks: TrackItem[] = [];
+    const audioTracks: TrackItem[] = [];
+    const textTracks: TrackItem[] = [];
+    const subtitle: TrackItem[] = [];
+
+    assets.forEach((asset) => {
+      if (!asset.track_items) return;
+      asset.track_items.forEach((ti) => {
+        ti.loading = false;
+        switch (ti.track_id) {
+          case 1:
+            videoTracks.push(ti);
+            break;
+          case 3:
+            audioTracks.push(ti);
+            break;
+          case 2:
+            textTracks.push(ti);
+            break;
+          case 4:
+            subtitle.push(ti);
+            break;
+        }
+      });
+    });
+
+    const durationByAsset: Record<number, number> = {};
+    videoTracks.forEach((t) => {
+      if (t.asset_id != null) {
+        durationByAsset[t.asset_id] = Math.max(
+          durationByAsset[t.asset_id] || 0,
+          t.end_time || 0
+        );
+      }
+    });
+    const totalDuration = Object.values(durationByAsset).reduce(
+      (sum, dur) => sum + dur,
+      0
+    );
+
+    setTracks({
+      video: videoTracks,
+      audio: audioTracks,
+      text: textTracks,
+      subtitle,
+    });
+    setDuration(totalDuration);
+    setFrames(videoTracks.flatMap((t) => t.video_frames || []));
   };
 
-  const reloadAssets = async (id: string) => {
-    const data = await fetchAssets(id);
-    setAssets(data);
-  };
-  const handleUploadFile = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const fetchProject = async () => {
+    if (!projectId) return;
     try {
-      console.log(project);
-      await uploadAsset(file, projectId);
-      const updatedAssets = await fetchAssets(projectId);
-      setAssets(updatedAssets);
-    } catch (error) {
-      console.log(error);
+      const res = await loadProject(projectId);
+      handleAssets(res.data.assets);
+    } catch (err) {
+      console.error("Failed to load project", err);
     }
   };
+
   useEffect(() => {
-    if (!projectId) return;
-
-    setLoading(true);
-
-    Promise.all([reloadProject(projectId), reloadAssets(projectId)]).finally(
-      () => setLoading(false)
-    );
+    fetchProject();
   }, [projectId]);
 
   return (
-    <ProjectContext.Provider
-      value={{
-        project,
-        assets,
-        reloadProject,
-        reloadAssets,
-        handleUploadFile,
-        handleFileChange,
-        fileInputRef,
-        loading,
-      }}
+    <EditorContext.Provider
+      value={{ duration, frames, tracks, fetchProject, setDuration, setTracks }}
     >
       {children}
-    </ProjectContext.Provider>
+    </EditorContext.Provider>
   );
 };
+

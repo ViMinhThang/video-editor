@@ -1,28 +1,29 @@
 import { useTimeline } from "@/hooks/use-timeline";
-import { TimelineCanvas } from "./time-canvas";
+import { TimelineCanvas } from "./time-canvas-video";
 import { TimelineRuler } from "./time-ruler";
 import { ArrowBigDown } from "lucide-react";
-import { VideoFrame } from "@/types";
+import { TrackItem, VideoFrame } from "@/types";
 import { getTimelineMetrics } from "@/lib/utils";
 import { useEffect, useRef } from "react";
+import { useEditorContext } from "@/hooks/use-editor";
+import { useParams } from "react-router-dom";
+import { useVideo } from "@/hooks/use-video";
+import TimeCanvasSubtitle from "./time-canvas-subtitle";
 
 interface ScrollTimelineProps {
-  frames: VideoFrame[];
-  duration: number;
   zoom?: number;
-  currentTime: number;
-  onTimeChange: (newTime: number) => void;
+  duration: number;
   cutTime?: number;
 }
 
 export const ScrollTimeline = ({
-  frames,
-  duration,
   zoom = 100,
-  currentTime,
-  onTimeChange,
-  cutTime,
+  duration,
 }: ScrollTimelineProps) => {
+  const { tracks } = useEditorContext();
+  const frames = tracks.video.flatMap((t) => t.video_frames || []);
+  const { currentTime, setCurrentTime } = useVideo();
+
   const { totalDuration, scale, thumbnailWidth, width, cursorX } =
     getTimelineMetrics({
       framesLength: frames.length,
@@ -39,7 +40,7 @@ export const ScrollTimeline = ({
     handleContextMenu,
     handleDownload,
     setContextMenu,
-  } = useTimeline(frames, duration, scale, onTimeChange);
+  } = useTimeline(frames, duration, scale, setCurrentTime);
   useEffect(() => {
     if (!scrollRef.current) return;
 
@@ -52,7 +53,7 @@ export const ScrollTimeline = ({
       behavior: "smooth",
     });
   }, [cursorX]);
-  
+
   return (
     <div
       className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative"
@@ -68,9 +69,8 @@ export const ScrollTimeline = ({
           duration={totalDuration}
           scale={scale}
         />
-
+        <TimeCanvasSubtitle tracks={[]} highlightTrackItemIdRef={undefined} animLineWidthRef={undefined} />
         <TimelineCanvas
-          frames={frames}
           thumbnailWidth={thumbnailWidth}
           groupGap={5}
           highlightTrackItemIdRef={highlightTrackItemIdRef}

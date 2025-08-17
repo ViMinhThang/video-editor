@@ -1,4 +1,4 @@
-import { ProjectContext } from "@/context/editor-context";
+import { ProjectContext } from "@/context/project-context";
 import { useContext } from "react";
 
 

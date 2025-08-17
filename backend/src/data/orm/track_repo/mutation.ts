@@ -14,7 +14,7 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
             track_id: ti.track_id,
             project_id: ti.project_id,
             start_time: ti?.start_time,
-            asset_id: ti.asset_id,
+            asset_id: ti?.asset_id,
             end_time: ti?.end_time,
             x: ti?.x,
             y: ti?.y,

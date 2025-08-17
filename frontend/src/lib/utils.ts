@@ -99,61 +99,6 @@ export const getTimelineMetrics = ({
   return { totalDuration, scale, frameDuration, thumbnailWidth, width, cursorX };
 };
 
-
-export function splitTrackItems(trackItems: TrackItem[]): TrackItem[] {
-  const result: TrackItem[] = [];
-
-  for (const t of trackItems) {
-    if (!t.video_frames) continue;
-
-    // sort frames theo start_time để an toàn
-    const sortedFrames = [...t.video_frames].sort(
-      (a, b) => a.start_time - b.start_time
-    );
-
-    let currentStart = t.start_time;
-
-    for (const f of sortedFrames) {
-      if (currentStart < f.start_time) {
-        // có gap → tạo segment trước frame này
-        result.push({
-          ...t,
-          id: result.length + 1, // id tạm, để không clash
-          start_time: currentStart,
-          end_time: f.start_time,
-          video_frames: [],
-        });
-        currentStart = f.start_time;
-      }
-
-      result.push({
-        ...t,
-        id: result.length + 1,
-        start_time: f.start_time,
-        end_time: f.end_time,
-        video_frames: [f],
-      });
-
-      currentStart = f.end_time;
-    }
-
-    // nếu còn dư tới end_time → push nốt
-    if (currentStart < t.end_time) {
-      result.push({
-        ...t,
-        id: result.length + 1,
-        start_time: currentStart,
-        end_time: t.end_time,
-        video_frames: [],
-      });
-    }
-  }
-
-  // sort theo start_time
-  result.sort((a, b) => a.start_time - b.start_time);
-
-  return result;
-}
 export const formatTime = (time: number) => {
   const hrs = Math.floor(time / 3600);
   const mins = Math.floor((time % 3600) / 60);

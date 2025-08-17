@@ -42,11 +42,22 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
       handleId = video.requestVideoFrameCallback(() => render());
     };
 
+    const drawFrame = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      if (overlayText) {
+        ctx.fillStyle = "white";
+        ctx.font = "24px sans-serif";
+        ctx.fillText(overlayText, 50, canvas.height - 50);
+      }
+    };
     // Khi video play thì bắt đầu render
     const handlePlay = () => render();
 
     video.addEventListener("play", handlePlay);
     video.addEventListener("seeked", handlePlay); // seek xong cũng render frame
+    video.addEventListener("loadeddata", drawFrame); // 👈 load xong thì vẽ frame đầu
 
     return () => {
       video.removeEventListener("play", handlePlay);

@@ -35,7 +35,7 @@
   ],
   "tracks": [
     {
-      "id": 0,
+      "id": 2,
       "type": "text",
       "order": "0"
     },
@@ -45,8 +45,13 @@
       "order": "1"
     },
     {
-      "id": 2,
+      "id": 3,
       "type": "sound",
+      "order": "2"
+    },
+    {
+      "id": 4,
+      "type": "subtitle",
       "order": "2"
     }
   ]

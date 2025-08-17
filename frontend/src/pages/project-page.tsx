@@ -1,4 +1,4 @@
-import { ProjectProvider } from "@/context/editor-context";
+import { ProjectProvider } from "@/context/project-context";
 import WorkspacePage from "@/pages/workspacePage";
 
 export default function ProjectPage() {

@@ -2,42 +2,25 @@ import axios from "axios";
 import { Pause, Play, Scissors } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { ScrollTimeline } from "./time-scroll";
-import { VideoFrame } from "@/types";
-import { formatTime } from "@/lib/utils";
+import { ScrollTimeline } from "./scroll-timeline";
 import { TimeDisplay } from "./time-display";
+import { useVideo } from "@/hooks/use-video";
+import { useEditorContext } from "@/hooks/use-editor";
 
-interface Props {
-  frames: VideoFrame[];
-  duration: number;
-  zoom: number;
-  currentTime: number;
-  setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
-  loadProject: () => void;
-  togglePlay: () => void;
-  isPlaying: boolean;
-  setZoom: React.Dispatch<React.SetStateAction<number>>;
-}
+export const TimelineSection = () => {
+  const { duration, fetchProject } = useEditorContext();
+  const { isPlaying, currentTime, togglePlay } =
+    useVideo();
 
-export const TimelineSection = ({
-  frames,
-  duration,
-  zoom,
-  currentTime,
-  setCurrentTime,
-  loadProject,
-  isPlaying,
-  togglePlay,
-  setZoom,
-}: Props) => {
   const [cutTime, setCutTime] = useState<number | null>(null);
+  const [zoom, setZoom] = useState(100);
 
   const handleCutVideo = async () => {
     try {
       await axios.post("/api/track-item/cut-track-item", {
         currentTime: Math.ceil(currentTime),
       });
-      loadProject();
+      fetchProject();
       setCutTime(Math.ceil(currentTime));
     } catch (error) {
       console.error("Error cutting video:", currentTime, error);
@@ -45,7 +28,7 @@ export const TimelineSection = ({
   };
 
   return (
-    <div className="flex-1/6 p-2 bg-gray-100 flex flex-col overflow-auto">
+    <div className="p-2 bg-gray-100 flex flex-col overflow-auto">
       {/* Controls */}
       <div className="flex justify-between mb-1 border-b-2 p-2 items-center">
         <Button onClick={handleCutVideo} className="cursor-pointer">
@@ -86,12 +69,9 @@ export const TimelineSection = ({
 
       {/* Timeline scroll */}
       <ScrollTimeline
-        frames={frames}
-        cutTime={cutTime}
         duration={duration}
+        cutTime={cutTime}
         zoom={zoom}
-        currentTime={currentTime}
-        onTimeChange={setCurrentTime}
       />
     </div>
   );

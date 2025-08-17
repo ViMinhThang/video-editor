@@ -1,9 +1,10 @@
-import { VideoFrame } from "@/types";
+import { TrackItem } from "@/types";
 import { useEffect, useRef, useCallback } from "react";
 import { drawTimeline } from "@/lib/timeline-draw";
+import { useParams } from "react-router-dom";
+import { useEditorContext } from "@/hooks/use-editor";
 
 interface TimelineCanvasProps {
-  frames: VideoFrame[];
   thumbnailWidth?: number;
   thumbnailHeight?: number;
   groupGap: number;
@@ -17,29 +18,25 @@ interface TimelineCanvasProps {
   ) => void;
 }
 
-export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
-  frames,
+export const TimelineCanvas = ({
   thumbnailWidth = 60,
   thumbnailHeight = 60,
   groupGap = 10,
   highlightTrackItemIdRef,
   animLineWidthRef,
   onRightClick,
-}) => {
+}: TimelineCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  /** Hàm render lại timeline */
+  const { tracks } = useEditorContext();
+  const videos = tracks.video;
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawTimeline({
       canvas,
-      frames,
+      videos,
       thumbnailWidth,
       thumbnailHeight,
       groupGap,
@@ -47,7 +44,7 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
       animLineWidth: animLineWidthRef.current,
     });
   }, [
-    frames,
+    videos,
     thumbnailWidth,
     thumbnailHeight,
     groupGap,
@@ -55,7 +52,6 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
     animLineWidthRef,
   ]);
 
-  /** Resize handler → chỉ set lại width/height khi mount hoặc khi window resize */
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
@@ -64,7 +60,6 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
 
-      // gán size theo container thay vì reset mỗi lần render
       canvas.width = rect.width * dpr;
       canvas.height = (thumbnailHeight + 20) * dpr;
 
@@ -74,12 +69,11 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
       render();
     };
 
-    handleResize(); // init
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [thumbnailHeight, render]);
 
-  /** Animate border highlight */
   useEffect(() => {
     const step = () => {
       if (highlightTrackItemIdRef.current == null) return;
@@ -90,9 +84,8 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
 
     render();
     requestAnimationFrame(step);
-  }, [frames, render, highlightTrackItemIdRef, animLineWidthRef]);
+  }, [tracks, render, highlightTrackItemIdRef, animLineWidthRef]);
 
-  /** Context menu → chọn group bằng clickX */
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!canvasRef.current) return;
@@ -100,22 +93,20 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
     const rect = canvasRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
 
-    const groups: Record<number, VideoFrame[]> = {};
-    for (const f of frames) (groups[f.track_item_id] ??= []).push(f);
-    const groupEntries = Object.entries(groups).sort(
-      ([a], [b]) => Number(a) - Number(b)
-    );
-
     let xOffset = 0;
     let foundTrackItemId: number | null = null;
 
-    for (const [trackIdStr, group] of groupEntries) {
-      const groupWidth = group.length * thumbnailWidth;
-      if (clickX >= xOffset && clickX <= xOffset + groupWidth) {
-        foundTrackItemId = Number(trackIdStr);
+    // loop từng track theo thứ tự start_time
+    const sortedTracks = [...videos].sort(
+      (a, b) => a.start_time - b.start_time
+    );
+    for (const track of sortedTracks) {
+      const trackWidth = (track.video_frames?.length ?? 0) * thumbnailWidth;
+      if (clickX >= xOffset && clickX <= xOffset + trackWidth) {
+        foundTrackItemId = track.id;
         break;
       }
-      xOffset += groupWidth + groupGap;
+      xOffset += trackWidth + groupGap;
     }
 
     if (foundTrackItemId != null) {
@@ -132,7 +123,7 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
       onContextMenu={handleContextMenu}
       style={{
         display: "block",
-        width: "100%", // auto theo container
+        width: "100%",
         height: `${thumbnailHeight + 20}px`,
       }}
     />

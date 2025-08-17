@@ -2,7 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { VideoFrame } from "@/types";
 import { downloadTrackItem } from "@/api/track-api";
 
-export const useTimeline = (frames: VideoFrame[], duration: number, scale: number, onTimeChange: (newTime: number) => void) => {
+export const useTimeline = (
+  frames: VideoFrame[],
+  duration: number,
+  scale: number,
+  setCurrentTime: (time: number) => void
+) => {
   const highlightTrackItemIdRef = useRef<number | null>(null);
   const animLineWidthRef = useRef(0);
   const animationFrameRef = useRef<number | null>(null);
@@ -27,7 +32,7 @@ export const useTimeline = (frames: VideoFrame[], duration: number, scale: numbe
   const handleTravel = (clientX: number, containerLeft: number) => {
     const clickX = clientX - containerLeft;
     const newTime = Math.max(0, Math.min(duration, clickX / scale));
-    onTimeChange(newTime);
+    setCurrentTime(newTime);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -35,7 +40,8 @@ export const useTimeline = (frames: VideoFrame[], duration: number, scale: numbe
     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
     handleTravel(e.clientX, rect.left);
 
-    const onMove = (moveEvent: MouseEvent) => handleTravel(moveEvent.clientX, rect.left);
+    const onMove = (moveEvent: MouseEvent) =>
+      handleTravel(moveEvent.clientX, rect.left);
     const onUp = () => {
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
@@ -45,7 +51,12 @@ export const useTimeline = (frames: VideoFrame[], duration: number, scale: numbe
     document.addEventListener("mouseup", onUp);
   };
 
-  const handleContextMenu = (clickX: number, clientX: number, clientY: number, trackItemId: number) => {
+  const handleContextMenu = (
+    clickX: number,
+    clientX: number,
+    clientY: number,
+    trackItemId: number
+  ) => {
     setContextMenu({ visible: true, x: clientX, y: clientY, trackItemId });
     highlightTrackItemIdRef.current = trackItemId;
     animLineWidthRef.current = 0;
@@ -59,18 +70,20 @@ export const useTimeline = (frames: VideoFrame[], duration: number, scale: numbe
     animate();
   };
 
-  const handleDownload =async () => {
+  const handleDownload = async () => {
     if (!contextMenu.trackItemId) return;
-    const trackItem = frames.find(f => f.track_item_id === contextMenu.trackItemId);
+    const trackItem = frames.find(
+      (f) => f.track_item_id === contextMenu.trackItemId
+    );
     if (!trackItem) return;
-    const response = await downloadTrackItem(contextMenu.trackItemId)
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `cutted.mp4`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    const response = await downloadTrackItem(contextMenu.trackItemId);
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `cutted.mp4`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
 
     setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
     highlightTrackItemIdRef.current = null;

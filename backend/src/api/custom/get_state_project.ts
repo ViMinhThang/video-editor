@@ -47,7 +47,7 @@ export const createStateRoutes = (app: Express) => {
             (ti) => ti.asset_id === asset.id
           ),
         }));
-
+          
         return res.status(200).json({ assets: assetsWithTrackItems });
       } catch (err) {
         console.error("Error fetching project state:", err);

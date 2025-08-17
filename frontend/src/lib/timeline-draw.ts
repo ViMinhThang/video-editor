@@ -1,9 +1,9 @@
-import { VideoFrame } from "@/types";
+import { TrackItem, VideoFrame } from "@/types";
 import { drawRoundedImage } from "@/lib/utils";
 
 interface DrawTimelineOptions {
   canvas: HTMLCanvasElement;
-  frames: VideoFrame[];
+  videos: TrackItem[];
   thumbnailWidth: number;
   thumbnailHeight: number;
   groupGap: number;
@@ -30,7 +30,7 @@ const loadImage = (src: string): Promise<HTMLImageElement> =>
 
 export async function drawTimeline({
   canvas,
-  frames,
+  videos,
   thumbnailWidth,
   thumbnailHeight,
   groupGap,
@@ -43,15 +43,11 @@ export async function drawTimeline({
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // nhóm frame theo track_item_id
-  const groups: Record<number, VideoFrame[]> = {};
-  for (const f of frames) (groups[f.track_item_id] ??= []).push(f);
+  // sort track theo start_time
+  const sortedTracks = [...videos].sort((a, b) => a.start_time - b.start_time);
 
-  const groupEntries = Object.entries(groups).sort(
-    ([a], [b]) => Number(a) - Number(b)
-  );
-
-  // preload tất cả ảnh 1 lượt
+  // preload tất cả ảnh trong tracks
+  const frames = sortedTracks.flatMap((t) => t.video_frames ?? []);
   const images = await Promise.all(
     frames.map((f) => loadImage(import.meta.env.VITE_API_BASE_URL + f.url))
   );
@@ -60,11 +56,11 @@ export async function drawTimeline({
 
   let xOffset = 0;
 
-  for (const [trackIdStr, group] of groupEntries) {
-    group.sort((a, b) => a.start_time - b.start_time);
-    const trackItemId = Number(trackIdStr);
+  for (const track of sortedTracks) {
+    const framesInTrack = track.video_frames ?? [];
+    framesInTrack.sort((a, b) => a.start_time - b.start_time);
 
-    group.forEach((frame, idx) => {
+    framesInTrack.forEach((frame, idx) => {
       const img = imageMap[frame.id];
       drawRoundedImage(
         ctx,
@@ -75,18 +71,18 @@ export async function drawTimeline({
         thumbnailHeight,
         8,
         idx === 0,
-        idx === group.length - 1
+        idx === framesInTrack.length - 1
       );
     });
 
-    // highlight group
-    if (highlightTrackItemId === trackItemId) {
+    // highlight track
+    if (highlightTrackItemId === track.id) {
       drawRoundedImage(
         ctx,
         null,
         xOffset,
         20,
-        group.length * thumbnailWidth,
+        framesInTrack.length * thumbnailWidth,
         thumbnailHeight,
         8,
         true,
@@ -98,6 +94,6 @@ export async function drawTimeline({
       );
     }
 
-    xOffset += group.length * thumbnailWidth + groupGap;
+    xOffset += framesInTrack.length * thumbnailWidth + groupGap;
   }
 }
