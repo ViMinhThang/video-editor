@@ -12,9 +12,13 @@ interface EditorContextType {
   setTracks: React.Dispatch<React.SetStateAction<Record<string, TrackItem[]>>>;
 }
 
-export const EditorContext = createContext<EditorContextType | undefined>(undefined);
+export const EditorContext = createContext<EditorContextType | undefined>(
+  undefined
+);
 
-export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { projectId } = useParams<{ projectId: string }>();
 
   const [duration, setDuration] = useState(0);
@@ -23,14 +27,12 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     video: [],
     audio: [],
     text: [],
-    subtitle: [],
   });
 
   const handleAssets = (assets: Asset[]) => {
     const videoTracks: TrackItem[] = [];
     const audioTracks: TrackItem[] = [];
     const textTracks: TrackItem[] = [];
-    const subtitle: TrackItem[] = [];
 
     assets.forEach((asset) => {
       if (!asset.track_items) return;
@@ -45,9 +47,6 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             break;
           case 2:
             textTracks.push(ti);
-            break;
-          case 4:
-            subtitle.push(ti);
             break;
         }
       });
@@ -71,7 +70,6 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       video: videoTracks,
       audio: audioTracks,
       text: textTracks,
-      subtitle,
     });
     setDuration(totalDuration);
     setFrames(videoTracks.flatMap((t) => t.video_frames || []));
@@ -99,4 +97,3 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     </EditorContext.Provider>
   );
 };
-

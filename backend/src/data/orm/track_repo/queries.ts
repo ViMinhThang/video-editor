@@ -46,6 +46,7 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
           where: {
             start_time: { [Op.lte]: time },
             end_time: { [Op.gt]: time },
+            track_id: 1,
           },
         });
         return result ?? undefined;

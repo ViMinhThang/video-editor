@@ -35,7 +35,10 @@ export function drawRoundedImage(
   strokeOnly = false,
   strokeStyle = "red",
   lineWidth = 3,
-  roundAllCorners = false  // thêm
+  roundAllCorners = false,
+  text?: string, // thêm text
+  textColor = "black", // màu chữ
+  font = "12px Arial" // font chữ
 ) {
   ctx.save();
   ctx.beginPath();
@@ -77,10 +80,23 @@ export function drawRoundedImage(
   } else if (img) {
     ctx.clip();
     ctx.drawImage(img, x, y, width, height);
+  } else {
+    // background fill (nếu không có img thì dùng màu nhạt)
+    ctx.fillStyle = "#f2dede";
+    ctx.fill();
+
+    // vẽ text nếu có
+    if (text) {
+      ctx.fillStyle = textColor;
+      ctx.font = font;
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x + 6, y + height / 2);
+    }
   }
 
   ctx.restore();
 }
+
 export const getTimelineMetrics = ({
   framesLength,
   duration,
@@ -96,7 +112,14 @@ export const getTimelineMetrics = ({
   const width = totalDuration * scale;
   const cursorX = currentTime * scale;
 
-  return { totalDuration, scale, frameDuration, thumbnailWidth, width, cursorX };
+  return {
+    totalDuration,
+    scale,
+    frameDuration,
+    thumbnailWidth,
+    width,
+    cursorX,
+  };
 };
 
 export const formatTime = (time: number) => {
@@ -108,3 +131,45 @@ export const formatTime = (time: number) => {
 
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
 };
+export function findTrackAtX<
+  T extends {
+    id: number;
+    start_time: number;
+    end_time?: number;
+    video_frames?: any[];
+  }
+>(
+  items: T[],
+  clickX: number,
+  groupGap: number,
+  thumbnailWidth: number = 0,
+  pxPerSecond: number = 40
+): number | null {
+  let xOffset = 0;
+
+  const sorted = [...items].sort((a, b) => a.start_time - b.start_time);
+
+  for (const track of sorted) {
+    let width = 0;
+
+    // Nếu là video (có video_frames)
+    if (track.video_frames) {
+      width = (track.video_frames?.length ?? 0) * thumbnailWidth;
+      if (clickX >= xOffset && clickX <= xOffset + width) {
+        return track.id;
+      }
+      xOffset += width + groupGap;
+    }
+    // Nếu là subtitle (dựa vào start_time, end_time)
+    else if (track.end_time !== undefined) {
+      width = (track.end_time - track.start_time) * pxPerSecond;
+      const x = xOffset + track.start_time * pxPerSecond;
+      if (clickX >= x && clickX <= x + width) {
+        return track.id;
+      }
+      xOffset += width + groupGap;
+    }
+  }
+
+  return null;
+}

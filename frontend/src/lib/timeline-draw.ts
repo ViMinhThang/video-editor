@@ -11,7 +11,14 @@ interface DrawTimelineOptions {
   animLineWidth: number;
   borderColor?: string;
 }
-
+interface DrawSubtitleTimelineOptions {
+  canvas: HTMLCanvasElement;
+  texts: TrackItem[]; // track_item dạng text
+  groupGap: number;
+  highlightTrackItemId: number | null;
+  animLineWidth: number;
+  borderColor?: string;
+}
 // cache ảnh global để ko load lại nhiều lần
 const imageCache: Record<string, HTMLImageElement> = {};
 
@@ -95,5 +102,70 @@ export async function drawTimeline({
     }
 
     xOffset += framesInTrack.length * thumbnailWidth + groupGap;
+  }
+}
+export function drawSubtitleTimeline({
+  canvas,
+  texts,
+  groupGap,
+  highlightTrackItemId,
+  animLineWidth,
+  borderColor = "red",
+}: DrawSubtitleTimelineOptions) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const pxPerSecond = 40;
+  const trackHeight = 40;
+  const radius = 6;
+
+  let xOffset = 0;
+
+  for (const item of texts) {
+    const x = xOffset + item.start_time * pxPerSecond;
+    const width = (item.end_time - item.start_time) * pxPerSecond;
+
+    // vẽ subtitle block
+    drawRoundedImage(
+      ctx,
+      null,               // không có image
+      x,
+      0,
+      width,
+      trackHeight,
+      radius,
+      true,
+      true,
+      false,
+      "red",              // strokeStyle
+      2,                  // lineWidth
+      false,
+      item.text_content,  // text
+      "black",            // textColor
+      "10px Arial"        // font
+    );
+
+    // highlight border nếu match
+    if (highlightTrackItemId === item.id) {
+      drawRoundedImage(
+        ctx,
+        null,
+        x,
+        0,
+        width,
+        trackHeight,
+        radius,
+        true,
+        true,
+        true,
+        borderColor,
+        animLineWidth,
+        true
+      );
+    }
+
+    xOffset += width + groupGap;
   }
 }

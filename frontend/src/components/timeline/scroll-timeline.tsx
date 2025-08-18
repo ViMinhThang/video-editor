@@ -1,51 +1,42 @@
-import { useTimeline } from "@/hooks/use-timeline";
+import { useTimelineContext } from "@/hooks/use-timeline";
+import { useVideo } from "@/hooks/use-video";
+import { getTimelineMetrics } from "@/lib/utils";
+import { ArrowBigDown } from "lucide-react";
+import { useRef, useEffect } from "react";
+import { TimeCanvasSubtitle } from "./time-canvas-subtitle";
 import { TimelineCanvas } from "./time-canvas-video";
 import { TimelineRuler } from "./time-ruler";
-import { ArrowBigDown } from "lucide-react";
-import { TrackItem, VideoFrame } from "@/types";
-import { getTimelineMetrics } from "@/lib/utils";
-import { useEffect, useRef } from "react";
-import { useEditorContext } from "@/hooks/use-editor";
-import { useParams } from "react-router-dom";
-import { useVideo } from "@/hooks/use-video";
-import TimeCanvasSubtitle from "./time-canvas-subtitle";
 
-interface ScrollTimelineProps {
-  zoom?: number;
-  duration: number;
-  cutTime?: number;
-}
-
-export const ScrollTimeline = ({
-  zoom = 100,
-  duration,
-}: ScrollTimelineProps) => {
-  const { tracks } = useEditorContext();
-  const frames = tracks.video.flatMap((t) => t.video_frames || []);
-  const { currentTime, setCurrentTime } = useVideo();
-
-  const { totalDuration, scale, thumbnailWidth, width, cursorX } =
-    getTimelineMetrics({
-      framesLength: frames.length,
-      duration,
-      zoom,
-      currentTime,
-    });
-  const scrollRef = useRef<HTMLDivElement>(null);
+export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
   const {
+    frames,
+    duration,
+    scale,
+    setCurrentTime,
     contextMenu,
-    highlightTrackItemIdRef,
-    animLineWidthRef,
     handleMouseDown,
     handleContextMenu,
     handleDownload,
     setContextMenu,
-  } = useTimeline(frames, duration, scale, setCurrentTime);
+    highlightTrackItemIdRef,
+    animLineWidthRef,
+  } = useTimelineContext();
+
+  const { currentTime } = useVideo();
+
+  const { totalDuration, thumbnailWidth, width, cursorX } = getTimelineMetrics({
+    framesLength: frames.length,
+    duration,
+    zoom,
+    currentTime,
+  });
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!scrollRef.current) return;
-
     const container = scrollRef.current;
-    const cursorPadding = container.clientWidth / 2; // keep cursor giữa màn hình
+    const cursorPadding = container.clientWidth / 2;
     const scrollLeft = cursorX - cursorPadding;
 
     container.scrollTo({
@@ -56,8 +47,8 @@ export const ScrollTimeline = ({
 
   return (
     <div
-      className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative"
       ref={scrollRef}
+      className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative"
     >
       <div
         style={{ width: `${width}px`, position: "relative" }}
@@ -69,7 +60,12 @@ export const ScrollTimeline = ({
           duration={totalDuration}
           scale={scale}
         />
-        <TimeCanvasSubtitle tracks={[]} highlightTrackItemIdRef={undefined} animLineWidthRef={undefined} />
+        <TimeCanvasSubtitle
+          groupGap={10}
+          highlightTrackItemIdRef={highlightTrackItemIdRef}
+          animLineWidthRef={animLineWidthRef}
+          onRightClick={handleContextMenu}
+        />
         <TimelineCanvas
           thumbnailWidth={thumbnailWidth}
           groupGap={5}

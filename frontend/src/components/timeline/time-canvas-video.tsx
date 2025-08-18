@@ -1,35 +1,29 @@
-import { TrackItem } from "@/types";
-import { useEffect, useRef, useCallback } from "react";
-import { drawTimeline } from "@/lib/timeline-draw";
-import { useParams } from "react-router-dom";
 import { useEditorContext } from "@/hooks/use-editor";
+import { drawTimeline } from "@/lib/timeline-draw";
+import { findTrackAtX } from "@/lib/utils";
+import { useRef, useCallback, useEffect } from "react";
 
 interface TimelineCanvasProps {
   thumbnailWidth?: number;
   thumbnailHeight?: number;
   groupGap: number;
-  highlightTrackItemIdRef: React.MutableRefObject<number | null>;
+  highlightTrackItemIdRef: React.RefObject<number | null>;
   animLineWidthRef: React.MutableRefObject<number>;
-  onRightClick?: (
-    clickX: number,
-    clientX: number,
-    clientY: number,
-    trackItemId: number
-  ) => void;
+  onRightClick: (e: React.MouseEvent, trackItemId: number) => void; // 👈 đổi string -> number
 }
-
-export const TimelineCanvas = ({
+export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
   thumbnailWidth = 60,
   thumbnailHeight = 60,
   groupGap = 10,
   highlightTrackItemIdRef,
   animLineWidthRef,
   onRightClick,
-}: TimelineCanvasProps) => {
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { tracks } = useEditorContext();
   const videos = tracks.video;
+
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -93,30 +87,23 @@ export const TimelineCanvas = ({
     const rect = canvasRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
 
-    let xOffset = 0;
-    let foundTrackItemId: number | null = null;
-
-    // loop từng track theo thứ tự start_time
-    const sortedTracks = [...videos].sort(
-      (a, b) => a.start_time - b.start_time
+    const foundTrackItemId = findTrackAtX(
+      videos,
+      clickX,
+      groupGap,
+      thumbnailWidth
     );
-    for (const track of sortedTracks) {
-      const trackWidth = (track.video_frames?.length ?? 0) * thumbnailWidth;
-      if (clickX >= xOffset && clickX <= xOffset + trackWidth) {
-        foundTrackItemId = track.id;
-        break;
-      }
-      xOffset += trackWidth + groupGap;
-    }
+
+    highlightTrackItemIdRef.current = foundTrackItemId;
+    animLineWidthRef.current = 0;
+    render();
 
     if (foundTrackItemId != null) {
-      highlightTrackItemIdRef.current = foundTrackItemId;
-      animLineWidthRef.current = 0;
-      render();
-      onRightClick?.(clickX, e.clientX, e.clientY, foundTrackItemId);
+      onRightClick?.(e, foundTrackItemId);
     }
   };
 
+  // ✅ return JSX ở đây, không return trong handleContextMenu
   return (
     <canvas
       ref={canvasRef}

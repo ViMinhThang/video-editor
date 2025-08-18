@@ -6,14 +6,16 @@ import { ScrollTimeline } from "./scroll-timeline";
 import { TimeDisplay } from "./time-display";
 import { useVideo } from "@/hooks/use-video";
 import { useEditorContext } from "@/hooks/use-editor";
+import { TimelineProvider } from "@/context/timeline-context";
 
 export const TimelineSection = () => {
-  const { duration, fetchProject } = useEditorContext();
-  const { isPlaying, currentTime, togglePlay } =
-    useVideo();
+  const { duration, fetchProject, tracks } = useEditorContext();
+  const { isPlaying, currentTime, togglePlay, setCurrentTime } = useVideo();
 
   const [cutTime, setCutTime] = useState<number | null>(null);
   const [zoom, setZoom] = useState(100);
+
+  const frames = tracks.video.flatMap((t) => t.video_frames || []);
 
   const handleCutVideo = async () => {
     try {
@@ -67,12 +69,15 @@ export const TimelineSection = () => {
         </label>
       </div>
 
-      {/* Timeline scroll */}
-      <ScrollTimeline
+      {/* Timeline */}
+      <TimelineProvider
+        frames={frames}
         duration={duration}
-        cutTime={cutTime}
-        zoom={zoom}
-      />
+        scale={40}
+        setCurrentTime={setCurrentTime}
+      >
+        <ScrollTimeline zoom={zoom} />
+      </TimelineProvider>
     </div>
   );
 };
