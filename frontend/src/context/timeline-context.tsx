@@ -11,8 +11,6 @@ import {
 
 export interface TimelineContextType {
   frames: any[];
-  duration: number;
-  scale: number;
   setCurrentTime: (time: number) => void;
 
   contextMenu: {
@@ -42,16 +40,12 @@ export const TimelineContext = createContext<TimelineContextType | null>(null);
 interface ProviderProps {
   children: ReactNode;
   frames: any[];
-  duration: number;
-  scale: number;
   setCurrentTime: (time: number) => void;
 }
 
 export const TimelineProvider = ({
   children,
   frames,
-  duration,
-  scale,
   setCurrentTime,
 }: ProviderProps) => {
   const [contextMenu, setContextMenu] = useState({
@@ -68,7 +62,8 @@ export const TimelineProvider = ({
     // TODO: implement cursor drag logic
   };
 
-  const handleContextMenu = (e: MouseEvent, trackItemId: number) => { // 👈 đổi
+  const handleContextMenu = (e: MouseEvent, trackItemId: number) => {
+    // 👈 đổi
     e.preventDefault();
     setContextMenu({
       visible: true,
@@ -86,8 +81,6 @@ export const TimelineProvider = ({
     <TimelineContext.Provider
       value={{
         frames,
-        duration,
-        scale,
         setCurrentTime,
         contextMenu,
         highlightTrackItemIdRef,

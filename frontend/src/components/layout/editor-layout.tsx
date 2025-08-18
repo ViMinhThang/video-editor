@@ -15,6 +15,7 @@ import { useVideo } from "@/hooks/use-video";
 import { VideoProvider } from "@/context/video-context";
 import { useEditorContext } from "@/hooks/use-editor";
 import { EditorProvider } from "@/context/editor-context";
+import VideoCanvas from "../timeline/video-canvas";
 
 const VITE_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -46,7 +47,6 @@ const EditorLayout = () => {
     icon: CassetteTape,
     type: "asset",
   });
-  const { videoRef } = useVideo();
   const handleAddTrackItem = async (asset: Asset) => {
     if (asset.type !== "video" || !projectId) return;
     setAsset(asset);
@@ -92,17 +92,13 @@ const EditorLayout = () => {
         {/* Video preview */}
         <div className="bg-gray-200 flex p-5 justify-center items-center min-h-[400px]">
           {asset?.url ? (
-            <video
-              ref={videoRef}
-              className="w-[80%] rounded-md shadow-md"
-              src={VITE_BASE_URL + asset.url}
-            />
+            <VideoCanvas src={VITE_BASE_URL + asset.url} />
           ) : (
             <div className="w-[80%] h-[667px] flex flex-col justify-center items-center rounded-md"></div>
           )}
         </div>
 
-          <TimelineSection />
+        <TimelineSection />
       </div>
     </div>
   );

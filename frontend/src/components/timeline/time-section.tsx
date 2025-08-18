@@ -71,9 +71,7 @@ export const TimelineSection = () => {
 
       {/* Timeline */}
       <TimelineProvider
-        frames={frames}
-        duration={duration}
-        scale={40}
+        frames={frames}        
         setCurrentTime={setCurrentTime}
       >
         <ScrollTimeline zoom={zoom} />

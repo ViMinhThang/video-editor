@@ -6,13 +6,11 @@ import { useRef, useEffect } from "react";
 import { TimeCanvasSubtitle } from "./time-canvas-subtitle";
 import { TimelineCanvas } from "./time-canvas-video";
 import { TimelineRuler } from "./time-ruler";
+import { useEditorContext } from "@/hooks/use-editor";
 
 export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
   const {
     frames,
-    duration,
-    scale,
-    setCurrentTime,
     contextMenu,
     handleMouseDown,
     handleContextMenu,
@@ -21,16 +19,17 @@ export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
     highlightTrackItemIdRef,
     animLineWidthRef,
   } = useTimelineContext();
-
+  const { duration } = useEditorContext();
   const { currentTime } = useVideo();
 
-  const { totalDuration, thumbnailWidth, width, cursorX } = getTimelineMetrics({
-    framesLength: frames.length,
-    duration,
-    zoom,
-    currentTime,
-  });
-
+  const { totalDuration, scale, thumbnailWidth, width, cursorX } =
+    getTimelineMetrics({
+      framesLength: frames.length,
+      duration,
+      zoom,
+      currentTime,
+    });
+  console.log("duration:" + totalDuration);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

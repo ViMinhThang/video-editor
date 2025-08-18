@@ -103,7 +103,6 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
     }
   };
 
-  // ✅ return JSX ở đây, không return trong handleContextMenu
   return (
     <canvas
       ref={canvasRef}

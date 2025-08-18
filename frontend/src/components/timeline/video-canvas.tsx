@@ -1,3 +1,4 @@
+import { useVideo } from "@/hooks/use-video";
 import React, { useEffect, useRef } from "react";
 
 interface VideoCanvasProps {
@@ -5,19 +6,17 @@ interface VideoCanvasProps {
   width?: number;
   height?: number;
   overlayText?: string;
-  videoRef: React.RefObject<HTMLVideoElement>;
   currentTime?: number;
 }
 
 const VideoCanvas: React.FC<VideoCanvasProps> = ({
   src,
-  width = 1280,
-  height = 720,
+  width = 1128.88,
+  height = 635,
   overlayText = "",
-  videoRef,
-  currentTime,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { videoRef } = useVideo();
 
   useEffect(() => {
     const video = videoRef.current;
@@ -38,7 +37,7 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
         ctx.fillText(overlayText, 50, canvas.height - 50);
       }
 
-      // Gọi tiếp khi video render xong frame
+      // tiếp tục render frame khi video chạy
       handleId = video.requestVideoFrameCallback(() => render());
     };
 
@@ -52,28 +51,29 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
         ctx.fillText(overlayText, 50, canvas.height - 50);
       }
     };
-    // Khi video play thì bắt đầu render
+
     const handlePlay = () => render();
 
     video.addEventListener("play", handlePlay);
-    video.addEventListener("seeked", handlePlay); // seek xong cũng render frame
-    video.addEventListener("loadeddata", drawFrame); // 👈 load xong thì vẽ frame đầu
+    video.addEventListener("seeked", drawFrame); // khi tua thì vẽ frame mới
+    video.addEventListener("loadeddata", drawFrame);
 
     return () => {
       video.removeEventListener("play", handlePlay);
-      video.removeEventListener("seeked", handlePlay);
+      video.removeEventListener("seeked", drawFrame);
+      video.removeEventListener("loadeddata", drawFrame);
       if (handleId) video.cancelVideoFrameCallback(handleId);
     };
   }, [videoRef, overlayText]);
 
   return (
     <div className="relative flex justify-center items-center">
+      {/* video bị ẩn hoàn toàn, chỉ để lấy frame */}
       <video ref={videoRef} src={src} style={{ display: "none" }} />
       <canvas
         ref={canvasRef}
         width={width}
         height={height}
-        className="rounded-md shadow-md"
       />
     </div>
   );
