@@ -7,6 +7,7 @@ import { TimeDisplay } from "./time-display";
 import { useVideo } from "@/hooks/use-video";
 import { useEditorContext } from "@/hooks/use-editor";
 import { TimelineProvider } from "@/context/timeline-context";
+import { cutVideo } from "@/api/track-api";
 
 export const TimelineSection = () => {
   const { duration, fetchProject, tracks } = useEditorContext();
@@ -19,11 +20,10 @@ export const TimelineSection = () => {
 
   const handleCutVideo = async () => {
     try {
-      await axios.post("/api/track-item/cut-track-item", {
-        currentTime: Math.ceil(currentTime),
-      });
+      const formatedTime = Math.ceil(currentTime);
+      await cutVideo(formatedTime);
       fetchProject();
-      setCutTime(Math.ceil(currentTime));
+      setCutTime(formatedTime);
     } catch (error) {
       console.error("Error cutting video:", currentTime, error);
     }
@@ -70,10 +70,7 @@ export const TimelineSection = () => {
       </div>
 
       {/* Timeline */}
-      <TimelineProvider
-        frames={frames}        
-        setCurrentTime={setCurrentTime}
-      >
+      <TimelineProvider frames={frames} setCurrentTime={setCurrentTime}>
         <ScrollTimeline zoom={zoom} />
       </TimelineProvider>
     </div>

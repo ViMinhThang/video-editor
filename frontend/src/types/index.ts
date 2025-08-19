@@ -35,7 +35,7 @@ export interface TrackItem {
   y: number;
   x: number;
   text_content: string;
-  id: string;
+  id: number;
   project_id: number;
   track_id: number;
   asset_id: number;

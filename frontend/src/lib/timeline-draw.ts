@@ -1,4 +1,4 @@
-import { TrackItem, VideoFrame } from "@/types";
+import { TrackItem } from "@/types";
 import { drawRoundedImage } from "@/lib/utils";
 
 interface DrawTimelineOptions {
@@ -84,7 +84,7 @@ export async function drawTimeline({
     });
 
     // highlight track
-    if (highlightTrackItemId === Number.parseInt(track.id)) {
+    if (highlightTrackItemId === track.id) {
       drawRoundedImage(
         ctx,
         null,
@@ -147,7 +147,7 @@ export function drawSubtitleTimeline({
     );
 
     // highlight border nếu match
-    if (highlightTrackItemId === Number.parseInt(item.id)) {
+    if (highlightTrackItemId === item.id) {
       drawRoundedImage(
         ctx,
         null,

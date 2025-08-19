@@ -54,3 +54,14 @@ export const importSrt = async (
     },
   });
 };
+
+export const cutVideo = async (currentTime: number) => {
+  const res = await axios.post("/api/track-item/cut-track-item", {
+    currentTime: currentTime,
+  });
+  return res;
+};
+export const updateText = async (track: TrackItem) => {
+  const res = await axios.put(`/api/track-item/${track.id}`, track);
+  return res;
+};
