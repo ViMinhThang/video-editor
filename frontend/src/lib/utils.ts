@@ -189,3 +189,7 @@ export const takeDuration = (tracks: TrackItem[]) => {
   );
   return totalDuration;
 };
+export const getClickX = (canvas: HTMLCanvasElement, e: React.MouseEvent) => {
+  const rect = canvas.getBoundingClientRect();
+  return e.clientX - rect.left;
+};

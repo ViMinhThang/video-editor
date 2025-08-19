@@ -11,7 +11,7 @@ export const EditorContext = createContext<EditorContextType | undefined>(
 
 export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const { projectId } = useParams<{ projectId: string }>();
-
+  const [asset, setAsset] = useState<Asset | null>(null);
   const [duration, setDuration] = useState(0);
   const [frames, setFrames] = useState<VideoFrame[]>([]);
   const [tracks, setTracks] = useState<Record<string, TrackItem[]>>({
@@ -44,7 +44,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <EditorContext.Provider
-      value={{ duration, frames, tracks, fetchProject, setDuration, setTracks }}
+      value={{ duration, frames,asset, tracks, fetchProject, setDuration, setTracks,setAsset }}
     >
       {children}
     </EditorContext.Provider>

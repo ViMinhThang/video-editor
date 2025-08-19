@@ -13,11 +13,8 @@ export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
     frames,
     contextMenu,
     handleMouseDown,
-    handleContextMenu,
     handleDownload,
     setContextMenu,
-    highlightTrackItemIdRef,
-    animLineWidthRef,
   } = useTimelineContext();
   const { duration } = useEditorContext();
   const { currentTime } = useVideo();
@@ -60,18 +57,9 @@ export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
           scale={scale}
         />
         <TimeCanvasSubtitle
-          groupGap={10}
-          highlightTrackItemIdRef={highlightTrackItemIdRef}
-          animLineWidthRef={animLineWidthRef}
-          onRightClick={handleContextMenu}
-        />
-        <TimelineCanvas
-          thumbnailWidth={thumbnailWidth}
           groupGap={5}
-          highlightTrackItemIdRef={highlightTrackItemIdRef}
-          animLineWidthRef={animLineWidthRef}
-          onRightClick={handleContextMenu}
         />
+        <TimelineCanvas thumbnailWidth={thumbnailWidth} groupGap={5} />
 
         {/* Cursor */}
         <div

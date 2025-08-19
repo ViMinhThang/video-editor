@@ -29,6 +29,10 @@ export interface VideoFrame {
 }
 
 export interface TrackItem {
+  color: string;
+  fontSize: number;
+  y: number;
+  x: number;
   text_content: string;
   id: number;
   project_id: number;

@@ -18,6 +18,7 @@ interface DrawSubtitleTimelineOptions {
   highlightTrackItemId: number | null;
   animLineWidth: number;
   borderColor?: string;
+  thumbnailHeight: number;
 }
 // cache ảnh global để ko load lại nhiều lần
 const imageCache: Record<string, HTMLImageElement> = {};
@@ -109,6 +110,7 @@ export function drawSubtitleTimeline({
   texts,
   groupGap,
   highlightTrackItemId,
+  thumbnailHeight,
   animLineWidth,
   borderColor = "red",
 }: DrawSubtitleTimelineOptions) {
@@ -117,34 +119,31 @@ export function drawSubtitleTimeline({
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const pxPerSecond = 40;
-  const trackHeight = 40;
   const radius = 6;
 
   let xOffset = 0;
 
   for (const item of texts) {
-    const x = xOffset + item.start_time * pxPerSecond;
-    const width = (item.end_time - item.start_time) * pxPerSecond;
-
+    const x = xOffset + item.start_time * 40;
+    const width = (item.end_time - item.start_time - 0.1)*40;
     // vẽ subtitle block
     drawRoundedImage(
       ctx,
-      null,               // không có image
+      null, // không có image
       x,
       0,
       width,
-      trackHeight,
+      thumbnailHeight,
       radius,
       true,
       true,
       false,
-      "red",              // strokeStyle
-      2,                  // lineWidth
+      "red", // strokeStyle
+      2, // lineWidth
       false,
-      item.text_content,  // text
-      "black",            // textColor
-      "10px Arial"        // font
+      item.text_content, // text
+      "black", // textColor
+      "10px Arial" // font
     );
 
     // highlight border nếu match
@@ -155,7 +154,7 @@ export function drawSubtitleTimeline({
         x,
         0,
         width,
-        trackHeight,
+        thumbnailHeight,
         radius,
         true,
         true,
@@ -166,6 +165,33 @@ export function drawSubtitleTimeline({
       );
     }
 
-    xOffset += width + groupGap;
+    xOffset += groupGap;
   }
 }
+export const resizeCanvas = (
+  canvas: HTMLCanvasElement,
+  thumbnailHeight: number,
+  render: () => void
+) => {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * dpr;
+  canvas.height = (thumbnailHeight + 20) * dpr;
+
+  const ctx = canvas.getContext("2d");
+  if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  render();
+};
+export const animateHighlight = (
+  animLineWidthRef: React.MutableRefObject<number>,
+  render: () => void
+) => {
+  const step = () => {
+    animLineWidthRef.current = Math.min(animLineWidthRef.current + 0.5, 6);
+    render();
+    if (animLineWidthRef.current < 6) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+};

@@ -38,9 +38,8 @@ const EditorLayout = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { assets, handleUploadFile, handleFileChange, fileInputRef } =
     useProject();
-  const { tracks, fetchProject } = useEditorContext();
+  const { tracks, fetchProject,asset,setAsset } = useEditorContext();
 
-  const [asset, setAsset] = useState<Asset | null>(null);
   const [item, setItem] = useState<ItemProps>({
     title: "Phương tiện",
     icon: CassetteTape,

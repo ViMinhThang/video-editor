@@ -1,36 +1,34 @@
 import { useEditorContext } from "@/hooks/use-editor";
-import { drawTimeline } from "@/lib/timeline-draw";
-import { findTrackAtX } from "@/lib/utils";
+import { useProject } from "@/hooks/use-project";
+import { useTimelineContext } from "@/hooks/use-timeline";
+import {
+  animateHighlight,
+  drawTimeline,
+  resizeCanvas,
+} from "@/lib/timeline-draw";
+import {
+  handleContextMenuClick,
+  handleVideoClick,
+} from "@/lib/timeline-video-interaction";
+import { TimelineCanvasProps } from "@/types/editor";
 import { useRef, useCallback, useEffect } from "react";
 
-interface TimelineCanvasProps {
-  thumbnailWidth?: number;
-  thumbnailHeight?: number;
-  groupGap: number;
-  highlightTrackItemIdRef: React.RefObject<number | null>;
-  animLineWidthRef: React.MutableRefObject<number>;
-  onRightClick: (e: React.MouseEvent, trackItemId: number) => void;
-  onClick?: (trackItemId: number) => void;
-}
-
-export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
+export const TimelineCanvas = ({
   thumbnailWidth = 60,
   thumbnailHeight = 60,
   groupGap = 10,
-  highlightTrackItemIdRef,
-  animLineWidthRef,
-  onRightClick,
-  onClick,
-}) => {
+}: TimelineCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } =
+    useTimelineContext();
+  const { tracks, setAsset } = useEditorContext();
 
-  const { tracks } = useEditorContext();
   const videos = tracks.video;
+  const { assets } = useProject();
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     drawTimeline({
       canvas,
       videos,
@@ -51,19 +49,9 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
 
   useEffect(() => {
     const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-
-      canvas.width = rect.width * dpr;
-      canvas.height = (thumbnailHeight + 20) * dpr;
-
-      const ctx = canvas.getContext("2d");
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      render();
+      if (canvasRef.current) {
+        resizeCanvas(canvasRef.current, thumbnailHeight, render);
+      }
     };
 
     handleResize();
@@ -72,61 +60,42 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
   }, [thumbnailHeight, render]);
 
   useEffect(() => {
-    const step = () => {
-      if (highlightTrackItemIdRef.current == null) return;
-      animLineWidthRef.current = Math.min(animLineWidthRef.current + 0.5, 6);
-      render();
-      if (animLineWidthRef.current < 6) requestAnimationFrame(step);
-    };
-
     render();
-    requestAnimationFrame(step);
+    if (highlightTrackItemIdRef.current != null) {
+      animLineWidthRef.current = 0;
+      animateHighlight(animLineWidthRef, render);
+    }
   }, [tracks, render, highlightTrackItemIdRef, animLineWidthRef]);
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!canvasRef.current) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-
-    const foundTrackItemId = findTrackAtX(
+  const onContextMenu = (e: React.MouseEvent) => {
+    handleContextMenuClick({
+      e,
+      canvasRef,
       videos,
-      clickX,
       groupGap,
-      thumbnailWidth
-    );
-
-    highlightTrackItemIdRef.current = foundTrackItemId;
-    animLineWidthRef.current = 0;
-    render();
-
-    if (foundTrackItemId != null) {
-      onRightClick?.(e, foundTrackItemId);
-    }
+      thumbnailWidth,
+      highlightTrackItemIdRef,
+      animLineWidthRef,
+      render,
+      handleContextMenu,
+    });
   };
-  const handleClick = (e: React.MouseEvent) => {
-    if (!canvasRef.current) return;
 
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-
-    const foundTrackItemId = findTrackAtX(
-      videos,
-      clickX,
+  const onVideoClick = (e: React.MouseEvent) => {
+    handleVideoClick({
+      e,
+      canvasRef,
+      tracks,
+      assets,
+      setAsset,
       groupGap,
-      thumbnailWidth
-    );
-
-    if (foundTrackItemId != null) {
-      onClick?.(foundTrackItemId);
-    }
+      thumbnailWidth,
+    });
   };
   return (
     <canvas
       ref={canvasRef}
-      onContextMenu={handleContextMenu}
-      onClick={handleClick}
+      onContextMenu={onContextMenu}
+      onClick={onVideoClick}
       style={{
         display: "block",
         width: "100%",
