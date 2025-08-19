@@ -3,11 +3,8 @@ import { useTimelineContext } from "@/hooks/use-timeline";
 import { drawSubtitleTimeline, resizeCanvas } from "@/lib/timeline-draw";
 import { useRef, useCallback, useEffect } from "react";
 import { handleSubtitleContextMenuClick } from "@/lib/timeline-subtitle-interaction";
+import { TimeCanvasSubtitleProps } from "@/types/timeline";
 
-interface TimeCanvasSubtitleProps {
-  groupGap: number;
-  thumbnailHeight?: number;
-}
 
 export const TimeCanvasSubtitle = ({
   groupGap,

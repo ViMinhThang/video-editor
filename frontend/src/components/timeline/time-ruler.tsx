@@ -1,19 +1,14 @@
 import React, { useRef, useEffect } from "react";
 import { drawTimelineRuler } from "@/lib/timeline-ruler-draw";
+import { TimelineRulerProps } from "@/types/timeline";
 
-interface TimelineRulerProps {
-  width: number;
-  height: number;
-  duration: number;
-  scale: number;
-}
 
-export const TimelineRuler: React.FC<TimelineRulerProps> = ({
+export const TimelineRuler = ({
   width,
   height,
   duration,
   scale,
-}) => {
+}:TimelineRulerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

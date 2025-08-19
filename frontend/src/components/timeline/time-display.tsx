@@ -1,10 +1,8 @@
 import { formatTime } from "@/lib/utils";
+import { TimeDisplayProps } from "@/types/timeline";
 import { useEffect, useState } from "react";
 
-interface TimeDisplayProps {
-  currentTime: number;
-  duration: number;
-}
+
 
 export const TimeDisplay = ({ currentTime, duration }: TimeDisplayProps) => {
   const [displayTime, setDisplayTime] = useState({

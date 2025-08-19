@@ -10,7 +10,7 @@ import {
   handleContextMenuClick,
   handleVideoClick,
 } from "@/lib/timeline-video-interaction";
-import { TimelineCanvasProps } from "@/types/editor";
+import { TimelineCanvasProps } from "@/types/timeline";
 import { useRef, useCallback, useEffect } from "react";
 
 export const TimelineCanvas = ({
