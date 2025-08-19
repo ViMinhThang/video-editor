@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import EditorMenu from "@/components/bars/editor-menu";
 import AssetsPage from "@/pages/assets-page";
 import SubtitlePage from "@/pages/subtitle-page";
 import TextPage from "@/pages/text-page";
-import { Asset, VideoFrame } from "@/types";
+import { Asset } from "@/types";
 import { CassetteTape } from "lucide-react";
 import { TimelineSection } from "../timeline/time-section";
 import { ProjectProvider } from "@/context/project-context";
 import { useProject } from "@/hooks/use-project";
 import { postTrack } from "@/api/track-api";
-import { useVideo } from "@/hooks/use-video";
 import { VideoProvider } from "@/context/video-context";
 import { useEditorContext } from "@/hooks/use-editor";
 import { EditorProvider } from "@/context/editor-context";
@@ -51,7 +50,6 @@ const EditorLayout = () => {
     if (asset.type !== "video" || !projectId) return;
     setAsset(asset);
 
-    // Không add nếu cùng asset id đã có trong tracks
     if (tracks[asset.type].some((t) => t.asset_id === asset.id)) return;
 
     const trackItems = tracks[asset.type];
@@ -59,7 +57,6 @@ const EditorLayout = () => {
     const start_time = lastItem ? lastItem.start_time + lastItem.end_time : 0;
     await postTrack(asset, projectId, start_time);
     await fetchProject();
-    console.log("fetchted");
   };
 
   return (

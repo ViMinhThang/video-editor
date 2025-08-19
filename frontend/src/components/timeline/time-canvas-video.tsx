@@ -9,8 +9,10 @@ interface TimelineCanvasProps {
   groupGap: number;
   highlightTrackItemIdRef: React.RefObject<number | null>;
   animLineWidthRef: React.MutableRefObject<number>;
-  onRightClick: (e: React.MouseEvent, trackItemId: number) => void; // 👈 đổi string -> number
+  onRightClick: (e: React.MouseEvent, trackItemId: number) => void;
+  onClick?: (trackItemId: number) => void;
 }
+
 export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
   thumbnailWidth = 60,
   thumbnailHeight = 60,
@@ -18,6 +20,7 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
   highlightTrackItemIdRef,
   animLineWidthRef,
   onRightClick,
+  onClick,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -102,11 +105,28 @@ export const TimelineCanvas: React.FC<TimelineCanvasProps> = ({
       onRightClick?.(e, foundTrackItemId);
     }
   };
+  const handleClick = (e: React.MouseEvent) => {
+    if (!canvasRef.current) return;
 
+    const rect = canvasRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+
+    const foundTrackItemId = findTrackAtX(
+      videos,
+      clickX,
+      groupGap,
+      thumbnailWidth
+    );
+
+    if (foundTrackItemId != null) {
+      onClick?.(foundTrackItemId);
+    }
+  };
   return (
     <canvas
       ref={canvasRef}
       onContextMenu={handleContextMenu}
+      onClick={handleClick}
       style={{
         display: "block",
         width: "100%",

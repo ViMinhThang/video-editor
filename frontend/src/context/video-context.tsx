@@ -1,63 +1,59 @@
 import React, {
   createContext,
-  useContext,
   useRef,
   useState,
   useEffect,
   useCallback,
 } from "react";
+import { VideoContextType } from "@/types/editor";
+import { trackTime } from "@/services/video-action";
 
-interface VideoContextType {
-  videoRef: React.RefObject<HTMLVideoElement>;
-  isPlaying: boolean;
-  currentTime: number;
-  togglePlay: () => void;
-  setCurrentTime: (time: number) => void;
-}
+export const VideoContext = createContext<VideoContextType | undefined>(
+  undefined
+);
 
-export const VideoContext = createContext<VideoContextType | undefined>(undefined);
-export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const initialVideoState = {
+  isPlaying: false,
+  currentTime: 0,
+};
+
+
+export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTimeState] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(initialVideoState.isPlaying);
+  const [currentTime, setCurrentTimeState] = useState(
+    initialVideoState.currentTime
+  );
 
-  // Play / Pause video
-  const togglePlay = useCallback(() => {
+  const play = useCallback(() => {
     if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    }
+    videoRef.current.play();
+    setIsPlaying(true);
   }, []);
 
-  // Update currentTime while playing
-  useEffect(() => {
+  const pause = useCallback(() => {
     if (!videoRef.current) return;
-    let animationFrameId: number;
+    videoRef.current.pause();
+    setIsPlaying(false);
+  }, []);
 
-    const updateTime = () => {
-      if (videoRef.current) {
-        setCurrentTimeState(videoRef.current.currentTime);
-        animationFrameId = requestAnimationFrame(updateTime);
-      }
-    };
+  const togglePlay = useCallback(() => {
+    if (!videoRef.current) return;
+    videoRef.current.paused ? play() : pause();
+  }, [play, pause]);
 
-    if (isPlaying) animationFrameId = requestAnimationFrame(updateTime);
-
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [isPlaying]);
-
-  // Seek video
   const setCurrentTime = useCallback((time: number) => {
     if (!videoRef.current) return;
     videoRef.current.currentTime = time;
     setCurrentTimeState(time);
   }, []);
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      return trackTime(videoRef, setCurrentTimeState);
+    }
+  }, [isPlaying]);
 
   return (
     <VideoContext.Provider
@@ -67,5 +63,3 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
     </VideoContext.Provider>
   );
 };
-
-// Hook tiện lợi để lấy context

@@ -173,3 +173,19 @@ export function findTrackAtX<
 
   return null;
 }
+export const takeDuration = (tracks: TrackItem[]) => {
+  const durationByAsset: Record<number, number> = {};
+  tracks.forEach((t) => {
+    if (t.asset_id != null) {
+      durationByAsset[t.asset_id] = Math.max(
+        durationByAsset[t.asset_id] || 0,
+        t.end_time || 0
+      );
+    }
+  });
+  const totalDuration = Object.values(durationByAsset).reduce(
+    (sum, dur) => sum + dur,
+    0
+  );
+  return totalDuration;
+};

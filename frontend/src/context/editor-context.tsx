@@ -1,24 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Asset, TrackItem, VideoFrame } from "@/types";
 import { loadProject } from "@/api/track-api";
-
-interface EditorContextType {
-  duration: number;
-  frames: VideoFrame[];
-  tracks: Record<string, TrackItem[]>;
-  fetchProject: () => Promise<void>;
-  setDuration: React.Dispatch<React.SetStateAction<number>>;
-  setTracks: React.Dispatch<React.SetStateAction<Record<string, TrackItem[]>>>;
-}
+import { processAssests } from "@/services/editor-actions";
+import { EditorContextType } from "@/types/editor";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
   undefined
 );
 
-export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const EditorProvider = ({ children }: { children: ReactNode }) => {
   const { projectId } = useParams<{ projectId: string }>();
 
   const [duration, setDuration] = useState(0);
@@ -30,49 +21,11 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const handleAssets = (assets: Asset[]) => {
-    const videoTracks: TrackItem[] = [];
-    const audioTracks: TrackItem[] = [];
-    const textTracks: TrackItem[] = [];
+    const { tracks, totalDuration, frames } = processAssests(assets);
 
-    assets.forEach((asset) => {
-      if (!asset.track_items) return;
-      asset.track_items.forEach((ti) => {
-        ti.loading = false;
-        switch (ti.track_id) {
-          case 1:
-            videoTracks.push(ti);
-            break;
-          case 3:
-            audioTracks.push(ti);
-            break;
-          case 2:
-            textTracks.push(ti);
-            break;
-        }
-      });
-    });
-
-    const durationByAsset: Record<number, number> = {};
-    videoTracks.forEach((t) => {
-      if (t.asset_id != null) {
-        durationByAsset[t.asset_id] = Math.max(
-          durationByAsset[t.asset_id] || 0,
-          t.end_time || 0
-        );
-      }
-    });
-    const totalDuration = Object.values(durationByAsset).reduce(
-      (sum, dur) => sum + dur,
-      0
-    );
-
-    setTracks({
-      video: videoTracks,
-      audio: audioTracks,
-      text: textTracks,
-    });
+    setTracks(tracks);
     setDuration(totalDuration);
-    setFrames(videoTracks.flatMap((t) => t.video_frames || []));
+    setFrames(frames);
   };
 
   const fetchProject = async () => {

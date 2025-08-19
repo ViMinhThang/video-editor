@@ -1,80 +1,64 @@
+import { downloadTrackItem } from "@/api/track-api";
+import { download, selectTrackItemContext } from "@/services/timeline-action";
 import {
-  createContext,
-  useContext,
-  useState,
-  useRef,
-  ReactNode,
-  MouseEvent,
-  Dispatch,
-  SetStateAction,
-} from "react";
-
-export interface TimelineContextType {
-  frames: any[];
-  setCurrentTime: (time: number) => void;
-
-  contextMenu: {
-    visible: boolean;
-    x: number;
-    y: number;
-    trackItemId: number | null; // 👈 đổi string -> number
-  };
-  highlightTrackItemIdRef: React.MutableRefObject<number | null>; // 👈 đổi string -> number
-  animLineWidthRef: React.MutableRefObject<number>;
-
-  handleMouseDown: (e: MouseEvent<HTMLDivElement>) => void;
-  handleContextMenu: (e: MouseEvent, trackItemId: number) => void; // 👈 đổi string -> number
-  handleDownload: () => void;
-  setContextMenu: Dispatch<
-    SetStateAction<{
-      visible: boolean;
-      x: number;
-      y: number;
-      trackItemId: number | null; // 👈 đổi string -> number
-    }>
-  >;
-}
+  ContextMenuState,
+  TimelineContextType,
+  TimeLineProps,
+} from "@/types/editor";
+import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
 
 export const TimelineContext = createContext<TimelineContextType | null>(null);
 
-interface ProviderProps {
-  children: ReactNode;
-  frames: any[];
-  setCurrentTime: (time: number) => void;
-}
-
+const initialContextMenu: ContextMenuState = {
+  visible: false,
+  x: 0,
+  y: 0,
+  trackItemId: null,
+};
 export const TimelineProvider = ({
   children,
   frames,
   setCurrentTime,
-}: ProviderProps) => {
-  const [contextMenu, setContextMenu] = useState({
-    visible: false,
-    x: 0,
-    y: 0,
-    trackItemId: null as number | null, // 👈 đổi
-  });
+}: TimeLineProps) => {
+  const [contextMenu, setContextMenu] = useState(initialContextMenu);
 
-  const highlightTrackItemIdRef = useRef<number | null>(null); // 👈 đổi
-  const animLineWidthRef = useRef<number>(2);
+  const highlightState = {
+    trackItemIdRef: useRef<number | null>(null),
+    animLineWidthRef: useRef<number>(2),
+    animationFrameRef: useRef<number | null>(null),
+  };
 
+  const resetHighlight = () => {
+    setContextMenu(initialContextMenu);
+    highlightState.trackItemIdRef.current = null;
+    highlightState.animLineWidthRef.current = 0;
+  };
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     // TODO: implement cursor drag logic
   };
 
   const handleContextMenu = (e: MouseEvent, trackItemId: number) => {
-    // 👈 đổi
     e.preventDefault();
-    setContextMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-      trackItemId,
-    });
+    setContextMenu({ visible: true, x: e.clientX, y: e.clientY, trackItemId });
+
+    selectTrackItemContext(
+      highlightState.trackItemIdRef,
+      highlightState.animLineWidthRef,
+      highlightState.animationFrameRef,
+      trackItemId
+    );
   };
 
-  const handleDownload = () => {
-    console.log("Download clicked", contextMenu.trackItemId);
+  const handleDownload = async () => {
+    if (!contextMenu.trackItemId) return;
+    const trackItem = frames.find(
+      (f) => f.track_item_id === contextMenu.trackItemId
+    );
+    if (!trackItem) return;
+    const response = await downloadTrackItem(contextMenu.trackItemId);
+    download(response.data, "cutted.mp4", "video/mp4");
+    setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
+    resetHighlight();
   };
 
   return (
@@ -83,8 +67,8 @@ export const TimelineProvider = ({
         frames,
         setCurrentTime,
         contextMenu,
-        highlightTrackItemIdRef,
-        animLineWidthRef,
+        highlightTrackItemIdRef: highlightState.trackItemIdRef,
+        animLineWidthRef: highlightState.animLineWidthRef,
         handleMouseDown,
         handleContextMenu,
         handleDownload,
