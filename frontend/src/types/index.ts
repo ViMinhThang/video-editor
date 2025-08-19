@@ -29,12 +29,13 @@ export interface VideoFrame {
 }
 
 export interface TrackItem {
+  rotation: number;
   color: string;
   fontSize: number;
   y: number;
   x: number;
   text_content: string;
-  id: number;
+  id: string;
   project_id: number;
   track_id: number;
   asset_id: number;

@@ -26,7 +26,6 @@ export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
       zoom,
       currentTime,
     });
-  console.log("duration:" + totalDuration);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
