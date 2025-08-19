@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useVideo } from "@/hooks/use-video";
 import { useEditorContext } from "@/hooks/use-editor";
+import axios from "axios";
 
 interface VideoCanvasProps {
   src: string;
@@ -23,6 +24,10 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [rotatingId, setRotatingId] = useState<string | null>(null);
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
+
+  // state edit text trực tiếp
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>("");
 
   // 🎥 render video + texts
   useEffect(() => {
@@ -52,7 +57,13 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
 
-          ctx.fillText(t.text_content, 0, 0);
+          // nếu đang edit text này
+          if (t.id === editingId) {
+            const cursor = Math.floor(Date.now() / 500) % 2 === 0 ? "|" : "";
+            ctx.fillText(editingText + cursor, 0, 0);
+          } else {
+            ctx.fillText(t.text_content, 0, 0);
+          }
 
           // highlight nếu chọn
           if (t.id === selectedId) {
@@ -66,8 +77,8 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
 
             ctx.strokeStyle = "lightblue";
             ctx.lineWidth = 2;
-            const paddingX = 8; // padding ngang
-            const paddingY = 6; // padding dọc
+            const paddingX = 8;
+            const paddingY = 6;
 
             ctx.strokeRect(
               -textWidth / 2 - paddingX,
@@ -76,23 +87,20 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
               textHeight + paddingY * 2
             );
 
-            // vẽ đường nối từ box lên chấm xoay
+            // đường nối tới chấm xoay
             const handleY = -textHeight / 2 - 30;
             ctx.beginPath();
             ctx.moveTo(0, -textHeight / 2);
             ctx.lineTo(0, handleY);
             ctx.stroke();
 
-            // vẽ chấm xoay
             ctx.beginPath();
             ctx.arc(0, handleY, 6, 0, Math.PI * 2);
-            ctx.fillStyle = "lightblue"; // màu dễ nhìn hơn đỏ
+            ctx.fillStyle = "lightblue";
             ctx.fill();
           }
 
           ctx.restore();
-        } else {
-          console.log("selected id " + selectedId);
         }
       });
 
@@ -104,7 +112,7 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
     return () => {
       if (handleId) video.cancelVideoFrameCallback(handleId);
     };
-  }, [videoRef, texts, selectedId]);
+  }, [videoRef, texts, selectedId, editingId, editingText]);
 
   // 📌 chọn hoặc drag/rotate
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -133,7 +141,6 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
         (metrics.actualBoundingBoxAscent || t.fontSize || 24) +
         (metrics.actualBoundingBoxDescent || 0);
 
-      // đảo ngược transform để check click
       const invX =
         (x - tx) * Math.cos(-(t.rotation ?? 0) * (Math.PI / 180)) -
         (y - ty) * Math.sin(-(t.rotation ?? 0) * (Math.PI / 180));
@@ -141,7 +148,6 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
         (x - tx) * Math.sin(-(t.rotation ?? 0) * (Math.PI / 180)) +
         (y - ty) * Math.cos(-(t.rotation ?? 0) * (Math.PI / 180));
 
-      // check click chấm rotate
       const handleX = 0;
       const handleY = -textHeight / 2 - 30;
       const dist = Math.sqrt((invX - handleX) ** 2 + (invY - handleY) ** 2);
@@ -152,17 +158,16 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
         return;
       }
 
-      // check click text box
       const left = -textWidth / 2 - 4;
       const right = textWidth / 2 + 4;
       const top = -textHeight / 2;
       const bottom = textHeight / 2;
       if (invX >= left && invX <= right && invY >= top && invY <= bottom) {
         found = t.id;
-        console.log("founded id " + found);
-
         setDraggingId(t.id);
         setOffset({ x: invX, y: invY });
+        setEditingId(t.id);
+        setEditingText(t.text_content);
         ctx.restore();
         break;
       }
@@ -182,7 +187,9 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
     if (draggingId) {
       setTracks((prev) => ({
         ...prev,
-        text: prev.text.map((t) => (t.id === draggingId ? { ...t, x, y } : t)),
+        text: prev.text.map((t) =>
+          t.id === draggingId ? { ...t, x, y } : t
+        ),
       }));
     }
 
@@ -199,11 +206,50 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = async () => {
     setDraggingId(null);
     setRotatingId(null);
     setOffset(null);
+
+    if (selectedId) {
+      const track = texts.find((t) => t.id === selectedId);
+      if (track) {
+        try {
+          await axios.put(`/api/track-item/${track.id}`, track);
+        } catch (err) {
+          console.error("Update track failed:", err);
+        }
+      }
+    }
   };
+
+  // 📌 keyboard edit trực tiếp
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editingId) return;
+      if (e.key === "Backspace") {
+        setEditingText((prev) => prev.slice(0, -1));
+      } else if (e.key === "Enter") {
+        const t = texts.find((tt) => tt.id === editingId);
+        if (!t) return;
+        setTracks((prev) => ({
+          ...prev,
+          text: prev.text.map((tt) =>
+            tt.id === editingId ? { ...tt, text_content: editingText } : tt
+          ),
+        }));
+        axios.put(`/api/track-item/${t.id}`, { ...t, text_content: editingText }).catch(console.error);
+        setEditingId(null);
+        
+      } else if (e.key === "Escape") {
+        setEditingId(null);
+      } else if (e.key.length === 1) {
+        setEditingText((prev) => prev + e.key);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [editingId, editingText, texts, setTracks]);
 
   return (
     <div className="relative flex justify-center items-center">

@@ -84,7 +84,7 @@ export async function drawTimeline({
     });
 
     // highlight track
-    if (highlightTrackItemId === track.id) {
+    if (highlightTrackItemId === Number.parseInt(track.id)) {
       drawRoundedImage(
         ctx,
         null,
@@ -116,16 +116,16 @@ export function drawSubtitleTimeline({
 }: DrawSubtitleTimelineOptions) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-
+  ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const radius = 6;
 
   let xOffset = 0;
-
-  for (const item of texts) {
+  const sortedTexts = [...texts].sort((a, b) => a.start_time - b.start_time);
+  for (const item of sortedTexts) {
     const x = xOffset + item.start_time * 40;
-    const width = (item.end_time - item.start_time - 0.1)*40;
+    const width = (item.end_time - item.start_time) * 40;
     // vẽ subtitle block
     drawRoundedImage(
       ctx,
@@ -147,7 +147,7 @@ export function drawSubtitleTimeline({
     );
 
     // highlight border nếu match
-    if (highlightTrackItemId === item.id) {
+    if (highlightTrackItemId === Number.parseInt(item.id)) {
       drawRoundedImage(
         ctx,
         null,
@@ -185,7 +185,7 @@ export const resizeCanvas = (
   render();
 };
 export const animateHighlight = (
-  animLineWidthRef: React.MutableRefObject<number>,
+  animLineWidthRef: React.RefObject<number>,
   render: () => void
 ) => {
   const step = () => {

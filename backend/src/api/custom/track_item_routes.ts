@@ -179,3 +179,15 @@ export const createTrackExportRoute = (app: Express) => {
     });
   });
 };
+export const createUpdateTextRoute = (app: Express) => {
+  app.put("/api/track-item/:id", async (req: Request, res: Response) => {
+    const track = req.body;
+    try {
+      const track_item = await track_repo.storeTrackItem(track);
+
+      res.status(200).json({ message: "updated track", track_item });
+    } catch (error) {
+      res.status(500).json({ message: error });
+    }
+  });
+};

@@ -171,6 +171,7 @@ export const handleUploadSrt = async (
     const created: TrackItem[] = [];
 
     for (const item of srtItems) {
+      console.log(item.text)
       const trackItem = {
         asset_id: asset_id,
         project_id,

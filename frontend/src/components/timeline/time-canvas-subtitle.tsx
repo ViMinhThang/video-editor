@@ -18,7 +18,7 @@ export const TimeCanvasSubtitle = ({
     useTimelineContext();
   const { tracks } = useEditorContext();
   const texts = tracks.text;
-
+  console.log("texts: " + texts);
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
