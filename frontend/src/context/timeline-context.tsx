@@ -2,9 +2,9 @@ import { downloadTrackItem } from "@/api/track-api";
 import { download, selectTrackItemContext } from "@/services/timeline-action";
 import {
   ContextMenuState,
-  TimelineContextType,
-  TimeLineProps,
+
 } from "@/types/editor";
+import { TimelineContextType, TimeLineProps } from "@/types/timeline";
 import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
 
 export const TimelineContext = createContext<TimelineContextType | null>(null);

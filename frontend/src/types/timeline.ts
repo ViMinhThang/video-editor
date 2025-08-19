@@ -1,7 +1,7 @@
 export interface TimelineCanvasProps {
   thumbnailWidth?: number;
   thumbnailHeight?: number;
-  groupGap: number;
+  groupGap?: number;
 }
 export interface TimelineRulerProps {
   width: number;

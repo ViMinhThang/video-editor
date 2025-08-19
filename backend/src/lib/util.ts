@@ -79,3 +79,18 @@ export const parseSrt = (content: string): SrtItem[] => {
 
   return items;
 };
+export const escapeText = (text: string) => {
+  return text
+    .replace(/'/g, "\\'")       // escape '
+    .replace(/:/g, '\\:')       // escape :
+    .replace(/\n/g, '\\n');     // escape newline
+};
+export function formatTime(seconds: number) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const cs = Math.floor((seconds - Math.floor(seconds)) * 100);
+  return `${h}:${m.toString().padStart(2, "0")}:${s
+    .toString()
+    .padStart(2, "0")}.${cs.toString().padStart(2, "0")}`;
+}

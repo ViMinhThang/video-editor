@@ -4,11 +4,11 @@ import { getTimelineMetrics } from "@/lib/utils";
 import { ArrowBigDown } from "lucide-react";
 import { useRef, useEffect } from "react";
 import { TimeCanvasSubtitle } from "./time-canvas-subtitle";
-import { TimelineCanvas } from "./time-canvas-video";
+import { TimeCanvasVideo } from "./time-canvas-video";
 import { TimelineRuler } from "./time-ruler";
 import { useEditorContext } from "@/hooks/use-editor";
 
-export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
+export const TimeLine = ({ zoom = 100 }: { zoom?: number }) => {
   const {
     frames,
     contextMenu,
@@ -58,7 +58,7 @@ export const ScrollTimeline = ({ zoom = 100 }: { zoom?: number }) => {
         <TimeCanvasSubtitle
           groupGap={5}
         />
-        <TimelineCanvas thumbnailWidth={thumbnailWidth} groupGap={5} />
+        <TimeCanvasVideo thumbnailWidth={thumbnailWidth} groupGap={5} />
 
         {/* Cursor */}
         <div

@@ -2,7 +2,8 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { Asset, TrackItem } from "../data/models/track_items_models";
+import { TrackItem } from "../data/models/track_items_models";
+import { formatTime } from "./util";
 const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
   return new Promise<void>((resolve, reject) => {
     console.log("=== FFmpeg makeThumbnail Debug ===");
@@ -227,10 +228,83 @@ const concatVideos = async (cutVideos: string[], outputPath: string) => {
 
   return outputPath;
 };
+export async function overlaySubtitles(
+  inputVideo: string,
+  textTracks: TrackItem[],
+  outputVideo: string
+) {
+  // 1️⃣ Tạo file subtitle tạm thời (.ass)
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "subs-"));
+  const subtitleFile = path.join(tempDir, "subs.ass");
+
+  const assHeader = `
+[Script Info]
+ScriptType: v4.00+
+Collisions: Normal
+PlayResX: 1920
+PlayResY: 1080
+Timer: 100.0000
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,36,&H00FFFFFF,&H000000FF,&H00000000,&H64000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,10,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`;
+
+  // 2️⃣ Convert trackItems thành dòng Dialogue trong ass
+  const assEvents = textTracks
+    .map((t) => {
+      const start = formatTime(t.start_time!);
+      const end = formatTime(t.end_time!);
+      const text = t.text_content!.replace(/\n/g, "\\N"); // multi-line
+      return `Dialogue: 0,${start},${end},Default,,0,0,0,,${text}`;
+    })
+    .join("\n");
+
+  fs.writeFileSync(subtitleFile, assHeader + assEvents, "utf-8");
+
+  // 3️⃣ Chạy ffmpeg overlay subtitle
+  await new Promise<void>((resolve, reject) => {
+    const ffmpeg = spawn("ffmpeg", [
+      "-i",
+      inputVideo,
+      "-vf",
+      `ass=${subtitleFile}`,
+      "-c:a",
+      "copy",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "fast",
+      "-crf",
+      "18",
+      outputVideo,
+    ]);
+
+    ffmpeg.stderr.on("data", (data) => {
+      console.log("[overlaySubtitles]", data.toString());
+    });
+
+    ffmpeg.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`ffmpeg exited with code ${code}`));
+    });
+
+    ffmpeg.on("error", reject);
+  });
+
+  // 4️⃣ Xoá tạm
+  fs.unlinkSync(subtitleFile);
+  fs.rmdirSync(tempDir);
+}
+
 export default {
   getDimension,
   getDuration,
   makeThumbnail,
+  overlaySubtitles,
   extractAllFrames,
   cutVideoAccurate,
   concatVideos,

@@ -2,12 +2,12 @@ import axios from "axios";
 import { Pause, Play, Scissors } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { ScrollTimeline } from "./scroll-timeline";
 import { TimeDisplay } from "./time-display";
 import { useVideo } from "@/hooks/use-video";
 import { useEditorContext } from "@/hooks/use-editor";
 import { TimelineProvider } from "@/context/timeline-context";
 import { cutVideo } from "@/api/track-api";
+import { TimeLine } from "./time-line";
 
 export const TimelineSection = () => {
   const { duration, fetchProject, tracks } = useEditorContext();
@@ -71,7 +71,7 @@ export const TimelineSection = () => {
 
       {/* Timeline */}
       <TimelineProvider frames={frames} setCurrentTime={setCurrentTime}>
-        <ScrollTimeline zoom={zoom} />
+        <TimeLine />
       </TimelineProvider>
     </div>
   );

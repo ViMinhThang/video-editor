@@ -1,3 +1,5 @@
+import { VideoFrameModel } from "../orm/models/track_items_models";
+
 export interface TrackItem {
   id?: number;
   track_id: number;
@@ -14,6 +16,7 @@ export interface TrackItem {
   text_content?: string;
   created_at?: Date;
   updated_at?: Date;
+  video_frames?: VideoFrameModel[];
 }
 
 export interface Asset {

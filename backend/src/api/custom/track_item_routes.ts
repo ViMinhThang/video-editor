@@ -2,7 +2,7 @@ import { Express, Request, Response } from "express";
 import { asset_repo, track_repo, video_repo } from "../../data";
 import FF from "../../lib/FF";
 import { Asset, TrackItem } from "../../data/models/track_items_models";
-import { videoFrame } from "../../data/models/video_frame_models";
+import os from "os"
 import { calculateNumbFrames } from "../../lib/util";
 import fs from "fs/promises";
 import path from "path";
@@ -132,53 +132,72 @@ export const createDownloadRoute = (app: Express) => {
 export const createTrackExportRoute = (app: Express) => {
   app.get("/api/track-item/export", async (req: Request, res: Response) => {
     const { projectId } = req.query;
-    const trackItems: TrackItem[] = await track_repo.getTrackItemsByProjectId({
-      projectId: Number.parseInt(projectId as string),
+    if (!projectId) return res.status(400).send("projectId required");
+
+    const trackItems = await track_repo.getTrackItemsByProjectId({
+      projectId: Number(projectId),
     });
-    if (!trackItems) {
+    if (!trackItems || trackItems.length === 0)
       return res.status(404).send("Track item not found");
-    }
 
-    trackItems.sort((a, b) => a.start_time! - b.start_time!);
-    const assetsId: number[] = trackItems.map((ti) => ti.asset_id!);
+    // 1️⃣ Tách video track và text track
+    const videoTracks = trackItems.filter((t) => t.video_frames && t.video_frames.length > 0);
+    const textTracks = trackItems.filter((t) => t.text_content && t.text_content.trim() !== "");
+
+    // 2️⃣ Lấy assets tương ứng
+    const assetIds = [...new Set(videoTracks.map((t) => t.asset_id))];
     const assets: Asset[] = [];
-    for (let i = 0; i < assetsId.length; i++) {
-      const asset = await asset_repo.getAssetById(assetsId[i]);
-      if (asset) {
-        assets.push(asset);
-      }
+    for (const id of assetIds) {
+      const asset = await asset_repo.getAssetById(id!);
+      if (asset) assets.push(asset);
     }
+
+    // 3️⃣ Cắt từng track_item video (re-encode để chính xác)
     const cutVideos: string[] = [];
+    for (const vt of videoTracks) {
+      const asset = assets.find((a) => a.id === vt.asset_id);
+      if (!asset) continue;
 
-    for (let i = 0; i < assets.length; i++) {
-      for (let j = 0; j < trackItems.length; j++) {
-        if (trackItems[j].asset_id === assets[i].id) {
-          console.log(assets[i].server_path);
-          console.log(trackItems[j].start_time!);
-          console.log(trackItems[j].end_time!);
-          const outputPath = await FF.cutVideoAccurate(
-            assets[i].server_path,
-            trackItems[j].start_time!,
-            trackItems[j].end_time!
-          );
-
-          cutVideos.push(outputPath);
-        }
-      }
+      const outputPath = await FF.cutVideoAccurate(
+        asset.server_path,
+        vt.start_time!,
+        vt.end_time!
+      );
+      cutVideos.push(outputPath);
     }
-    const outputFile = path.join(process.cwd(), `export_${projectId}.mp4`);
-    await FF.concatVideos(cutVideos, outputFile);
 
-    res.download(outputFile, `project_${projectId}.mp4`, (err) => {
+    if (cutVideos.length === 0) return res.status(400).send("No video to export");
+
+    // 4️⃣ Nối video lại
+    const tempDir = fs.mkdtemp(path.join(os.tmpdir(), "export-"));
+    const concatFile = path.join(await tempDir, "concat.mp4");
+    await FF.concatVideos(cutVideos, concatFile);
+
+    // 5️⃣ Overlay subtitle (nếu có)
+    let finalOutput = concatFile;
+    if (textTracks.length > 0) {
+      const withSub = path.join(await tempDir, "with_subs.mp4");
+      await FF.overlaySubtitles(concatFile, textTracks, withSub);
+      finalOutput = withSub;
+    }
+
+    // 6️⃣ Trả về file download
+    const downloadName = `project_${projectId}.mp4`;
+    res.download(finalOutput, downloadName, async (err) => {
       if (err) console.error(err);
+
+      // Cleanup tạm
       try {
-        fs.unlink(outputFile);
+        cutVideos.forEach((f) => fs.unlink(f));
+        fs.unlink(finalOutput);
+        fs.rmdir(await tempDir);
       } catch (error) {
         console.log(error);
       }
     });
   });
 };
+
 export const createUpdateTextRoute = (app: Express) => {
   app.put("/api/track-item/:id", async (req: Request, res: Response) => {
     const track = req.body;

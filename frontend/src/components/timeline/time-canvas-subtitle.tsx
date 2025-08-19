@@ -1,20 +1,17 @@
 import { useEditorContext } from "@/hooks/use-editor";
 import { useTimelineContext } from "@/hooks/use-timeline";
-import { drawSubtitleTimeline, resizeCanvas } from "@/lib/timeline-draw";
-import { useRef, useCallback, useEffect } from "react";
+import { drawSubtitleTimeline } from "@/lib/timeline-draw";
+import { useCallback } from "react";
 import { handleSubtitleContextMenuClick } from "@/lib/timeline-subtitle-interaction";
 import { TimeCanvasSubtitleProps } from "@/types/timeline";
+import { useResizableCanvas } from "@/hooks/use-canvas-hooks";
 
 
-export const TimeCanvasSubtitle = ({
-  groupGap,
-  thumbnailHeight = 40,
-}: TimeCanvasSubtitleProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } =
-    useTimelineContext();
+export const TimeCanvasSubtitle = ({ groupGap, thumbnailHeight = 40 }: TimeCanvasSubtitleProps) => {
+  const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } = useTimelineContext();
   const { tracks } = useEditorContext();
   const texts = tracks.text;
+
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -29,36 +26,11 @@ export const TimeCanvasSubtitle = ({
     });
   }, [texts, groupGap, highlightTrackItemIdRef, animLineWidthRef]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (canvasRef.current) {
-        resizeCanvas(canvasRef.current, 20, render);
-      }
-    };
+  const canvasRef = useResizableCanvas(render, 20);
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [render]);
 
-  const onContextMenu = (e: React.MouseEvent) => {
-    handleSubtitleContextMenuClick({
-      e,
-      canvasRef,
-      texts,
-      groupGap,
-      highlightTrackItemIdRef,
-      animLineWidthRef,
-      render,
-      handleContextMenu,
-    });
-  };
+  const onContextMenu = (e: React.MouseEvent) =>
+    handleSubtitleContextMenuClick({ e, canvasRef, texts, groupGap, highlightTrackItemIdRef, animLineWidthRef, render, handleContextMenu });
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{ display: "block", width: "100%" }}
-      onContextMenu={onContextMenu}
-    />
-  );
+  return <canvas ref={canvasRef} style={{ display: "block", width: "100%" }} onContextMenu={onContextMenu} />;
 };

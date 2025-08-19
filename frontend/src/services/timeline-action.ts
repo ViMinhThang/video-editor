@@ -1,5 +1,3 @@
-import { findTrackAtX, getClickX } from "@/lib/utils";
-import { Asset, TrackItem } from "@/types";
 
 export const selectTrackItemContext = (
   trackItemIdRef: React.RefObject<number | null>,
