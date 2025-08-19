@@ -27,17 +27,7 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
     let handleId: number;
 
     const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const currentTime = video.currentTime;
-      texts.forEach((t) => {
-        if (currentTime >= t.start_time && currentTime <= t.end_time) {
-          ctx.fillStyle = t.color || "white";
-          ctx.font = `${t.fontSize || 24}px sans-serif`;
-          ctx.fillText(t.text_content, t.x || 50, t.y || canvas.height - 50);
-        }
-      });
+      drawFrame()
 
       handleId = video.requestVideoFrameCallback(() => render());
     };
@@ -49,9 +39,20 @@ const VideoCanvas: React.FC<VideoCanvasProps> = ({
       const currentTime = video.currentTime;
       texts.forEach((t) => {
         if (currentTime >= t.start_time && currentTime <= t.end_time) {
+
           ctx.fillStyle = t.color || "white";
           ctx.font = `${t.fontSize || 24}px sans-serif`;
-          ctx.fillText(t.text_content, t.x || 50, t.y || canvas.height - 50);
+
+          // 👇 quan trọng
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+
+          ctx.fillText(
+            t.text_content,
+            canvas.width / 2,
+            canvas.height - 20
+          );
+
         }
       });
     };
