@@ -1,10 +1,9 @@
 import path, { basename } from "path";
-import { uploadDir } from "../api/custom/upload_routes";
 import fs from "fs/promises";
 import FF from "./FF";
-import { asset_repo } from "../data";
-export const getProjectAssetDir = (project_id: string, basename: string) => {
-  return path.join(uploadDir, "projects", project_id, "assets", basename);
+import { uploadDir } from "../infrastructure/webserver/middleware/upload";
+export const getProjectAssetDir = (project_id: number, basename: string) => {
+  return path.join(uploadDir, "projects", String(project_id), "assets", basename);
 };
 export async function getNextRunIndex(baseDir: string): Promise<number> {
   try {
@@ -28,14 +27,14 @@ export const calculateNumbFrames = (duration: number, frameSpacing = 2) => {
 
 export const buildAsset = (
   file: Express.Multer.File,
-  project_id: string,
+  project_id: number,
   type: "video" | "image",
   thumbnail: string,
   server_path: string,
   videoBaseName: string
 ) => ({
   original_name: file.originalname,
-  project_id: Number(project_id),
+  project_id: project_id,
   file_name: file.filename,
   type,
   mime_type: file.mimetype,

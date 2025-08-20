@@ -2,8 +2,8 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { TrackItem } from "../data/models/track_items_models";
 import { formatTime } from "./util";
+import { TrackItem } from "../domain/models/track_items_models";
 const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
   return new Promise<void>((resolve, reject) => {
     console.log("=== FFmpeg makeThumbnail Debug ===");

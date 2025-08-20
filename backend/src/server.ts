@@ -2,18 +2,10 @@ import { createServer } from "http";
 import express, { Express } from "express";
 import { getConfig } from "./config";
 import helmet from "helmet";
-import { createErrorHandlers } from "./errors";
-import { createFeathersServices } from "./api";
-import { createUploadRoutes } from "./api/custom/upload_routes";
+import { createErrorHandlers } from "./infrastructure/webserver/middleware/errors";
 import path from "path";
 import { cors } from "@feathersjs/express";
-import { createStateRoutes } from "./api/custom/get_state_project";
-import {
-  createCutRoute,
-  createDownloadRoute,
-  createTrackExportRoute,
-  createUpdateTextRoute,
-} from "./api/custom/track_item_routes";
+import { createRoutes } from "./infrastructure/webserver/routes";
 
 const port = getConfig("http:port", 3000);
 
@@ -37,13 +29,7 @@ expressApp.use(
 
 console.log("Serving uploads from:", path.join(__dirname, "../uploads"));
 expressApp.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-createFeathersServices(expressApp);
-createUpdateTextRoute(expressApp);
-createUploadRoutes(expressApp);
-createDownloadRoute(expressApp);
-createTrackExportRoute(expressApp);
-createStateRoutes(expressApp);
-createCutRoute(expressApp);
+createRoutes(expressApp);
 createErrorHandlers(expressApp);
 
 const server = createServer(expressApp);
