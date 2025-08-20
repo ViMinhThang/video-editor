@@ -22,7 +22,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
   const handleAssets = (assets: Asset[]) => {
     const { tracks, totalDuration, frames } = processAssests(assets);
-
+    
     setTracks(tracks);
     setDuration(totalDuration);
     setFrames(frames);

@@ -1,12 +1,12 @@
 export interface Asset {
+  name: string;
   type: string;
   url: string;
   created_at: string;
   id: number;
   mime_type: string;
   thumbnail: string;
-  original_name: string;
-  track_items: TrackItem[];
+  trackItems: TrackItem[];
 }
 export interface Project {
   title: string;
@@ -34,13 +34,13 @@ export interface TrackItem {
   fontSize: number;
   y: number;
   x: number;
-  text_content: string;
+  textContent: string;
   id: number;
   project_id: number;
-  track_id: number;
-  asset_id: number;
-  start_time: number;
-  end_time: number;
+  trackId: number;
+  assetId: number;
+  startTime: number;
+  endTime: number;
   video_frames: VideoFrame[];
   loading: boolean;
 }

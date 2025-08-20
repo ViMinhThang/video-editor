@@ -4,7 +4,7 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { Track } from "../../models/track_models";
+import { Track } from "../../../domain/models/track_models";
 
 export class TrackModel
   extends Model<

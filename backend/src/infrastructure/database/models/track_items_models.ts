@@ -4,9 +4,8 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { Asset, TrackItem } from "../../models/track_items_models";
-import { videoFrame } from "../../models/video_frame_models";
-
+import { TrackItem, Asset } from "../../../domain/models/track_items_models";
+import { videoFrame } from "../../../domain/models/video_frame_models";
 export class TrackItemModel
   extends Model<
     InferAttributes<TrackItemModel>,

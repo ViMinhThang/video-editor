@@ -16,8 +16,8 @@ interface CardmodiProps {
 }
 export function AssetThumbnail({ asset }: { asset: Asset }) {
   const mimeType = asset.mime_type;
-
-  if (mimeType === "video/mp4") {
+  console.log(asset)
+  if (mimeType.includes("video/mp4")) {
     return (
       <img
         src={API_BASE_URL + asset.thumbnail}
@@ -27,7 +27,7 @@ export function AssetThumbnail({ asset }: { asset: Asset }) {
     );
   }
 
-  if (mimeType.startsWith("image/")) {
+  if (mimeType.includes("image/")) {
     return (
       <img
         src={API_BASE_URL + asset.thumbnail}

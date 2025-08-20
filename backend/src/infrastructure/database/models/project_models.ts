@@ -4,7 +4,7 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { Project } from "../../models/project_models";
+import { Project } from "../../../domain/models/project_models";
 
 export class ProjectModel
   extends Model<

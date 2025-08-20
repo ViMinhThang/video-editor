@@ -1,9 +1,9 @@
 import { Op } from "sequelize";
-import { TrackItem } from "../../models/track_items_models";
-import { Track } from "../../models/track_models";
 import { BaseRepo, Constructor } from "../core";
-import { TrackItemModel, TrackModel } from "../../database/models";
-import { AssetModel } from "../../database/models/track_items_models";
+import {  TrackItemModel } from "../../database/models/track_items_models";
+import { TrackItem } from "../../../domain/models/track_items_models";
+import { Track } from "../../../domain/models/track_models";
+import { TrackModel } from "../../database/models/track_models";
 
 export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
   Base: Tbase

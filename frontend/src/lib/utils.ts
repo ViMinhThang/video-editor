@@ -134,8 +134,8 @@ export const formatTime = (time: number) => {
 export function findTrackAtX<
   T extends {
     id: number;
-    start_time: number;
-    end_time?: number;
+    startTime: number;
+    endTime?: number;
     video_frames?: any[];
   }
 >(
@@ -147,7 +147,7 @@ export function findTrackAtX<
 ): number | null {
   let xOffset = 0;
 
-  const sorted = [...items].sort((a, b) => a.start_time - b.start_time);
+  const sorted = [...items].sort((a, b) => a.startTime - b.startTime);
 
   for (const track of sorted) {
     let width = 0;
@@ -161,9 +161,9 @@ export function findTrackAtX<
       xOffset += width + groupGap;
     }
     // Nếu là subtitle (dựa vào start_time, end_time)
-    else if (track.end_time !== undefined) {
-      width = (track.end_time - track.start_time) * pxPerSecond;
-      const x = xOffset + track.start_time * pxPerSecond;
+    else if (track.endTime !== undefined) {
+      width = (track.endTime - track.endTime) * pxPerSecond;
+      const x = xOffset + track.startTime * pxPerSecond;
       if (clickX >= x && clickX <= x + width) {
         return track.id;
       }
@@ -176,10 +176,10 @@ export function findTrackAtX<
 export const takeDuration = (tracks: TrackItem[]) => {
   const durationByAsset: Record<number, number> = {};
   tracks.forEach((t) => {
-    if (t.asset_id != null) {
-      durationByAsset[t.asset_id] = Math.max(
-        durationByAsset[t.asset_id] || 0,
-        t.end_time || 0
+    if (t.assetId != null) {
+      durationByAsset[t.assetId] = Math.max(
+        durationByAsset[t.assetId] || 0,
+        t.endTime || 0
       );
     }
   });

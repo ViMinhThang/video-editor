@@ -1,7 +1,7 @@
 import { DataTypes, Sequelize } from "sequelize";
-import { ProjectModel } from "../../../../data/orm/models/project_models";
 import { UserModel } from "../user_models";
-import { TrackModel } from "../../../../data/orm/models/track_models";
+import { ProjectModel } from "../project_models";
+import { TrackModel } from "../track_models";
 
 export const initializeProjectModel = (sequelize: Sequelize) => {
   ProjectModel.init(

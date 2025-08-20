@@ -20,17 +20,17 @@ export const createUploadRoutes = (app: Express) => {
         if (req.file.mimetype.startsWith("video/")) {
           created = await UploadService.handleUploadVideo(
             req.file,
-            Number.parseInt(project_id)
+            project_id
           );
         } else if (req.file.mimetype.startsWith("image/")) {
           created = await UploadService.handleUploadImage(
             req.file,
-            Number.parseInt(project_id)
+            project_id
           );
         } else if (ext === "srt") {
           created = await UploadService.handleUploadSrt(
             req.file,
-            Number.parseInt(project_id),
+            project_id,
             Number.parseInt(asset_id)
           );
         } else {

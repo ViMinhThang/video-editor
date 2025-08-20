@@ -11,12 +11,12 @@ export const processAssests = (assets: Asset[]) => {
   const audioTracks: TrackItem[] = [];
   const textTracks: TrackItem[] = [];
   assets.forEach((asset) => {
-    if (!asset.track_items) return;
-    asset.track_items.forEach((ti) => {
+    if (!asset.trackItems) return;
+    asset.trackItems.forEach((ti) => {
         // avoid mutation
       const trackItem = { ...ti, loading: false };
 
-      switch (trackItem.track_id) {
+      switch (trackItem.trackId) {
         case TrackType.VIDEO:
           videoTracks.push(trackItem);
           break;
@@ -27,7 +27,7 @@ export const processAssests = (assets: Asset[]) => {
           textTracks.push(trackItem);
           break;
         default:
-          console.warn("Unknown track type:", trackItem.track_id);
+          console.warn("Unknown track type:", trackItem.trackId);
       }
     });
   });

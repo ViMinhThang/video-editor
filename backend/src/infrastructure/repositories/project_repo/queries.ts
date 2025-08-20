@@ -1,4 +1,5 @@
-import { ProjectModel, TrackModel } from "../../database/models";
+import { ProjectModel } from "../../database/models/project_models";
+import { TrackModel } from "../../database/models/track_models";
 import { BaseRepo, Constructor } from "../core";
 
 export function AddProjectQueries<TBase extends Constructor<BaseRepo>>(Base: TBase) {

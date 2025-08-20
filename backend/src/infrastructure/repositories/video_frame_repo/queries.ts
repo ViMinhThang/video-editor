@@ -1,6 +1,6 @@
-import { videoFrame } from "../../models/video_frame_models";
 import { BaseRepo, Constructor } from "../core";
 import { VideoFrameModel } from "../../database/models/track_items_models";
+import { videoFrame } from "../../../domain/models/video_frame_models";
 
 export function AddQueriesVideoFrame<Tbase extends Constructor<BaseRepo>>(
   Base: Tbase

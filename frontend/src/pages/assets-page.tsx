@@ -24,6 +24,7 @@ const AssetsPage = ({
   handleFileChange,
   handleAddToTrack,
 }: Props) => {
+  console.log(assets)
   return (
     <div className="border-none bg-black text-white px-5 w-full h-full">
       <div className="text-white font-bold border-b-1 border-gray-800 px-5 py-2">
@@ -51,9 +52,9 @@ const AssetsPage = ({
             <AssetThumbnail asset={asset} />
             <h1
               className="text-sm mt-1 font-light truncate pb-5"
-              title={asset.original_name}
+              title={asset.name}
             >
-              {asset.original_name}
+              {asset.name}
             </h1>
           </div>
         ))}

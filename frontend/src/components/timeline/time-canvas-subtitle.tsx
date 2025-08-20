@@ -11,7 +11,7 @@ export const TimeCanvasSubtitle = ({ groupGap, thumbnailHeight = 40 }: TimeCanva
   const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } = useTimelineContext();
   const { tracks } = useEditorContext();
   const texts = tracks.text;
-
+  console.log(texts)
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

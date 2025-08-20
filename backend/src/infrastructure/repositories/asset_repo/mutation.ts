@@ -21,6 +21,7 @@ export function AddStoreAsset<TBase extends Constructor<BaseRepo>>(
       return this.sequelize.transaction(async (transaction) => {
         const [_asset, created] = await AssetModel.upsert(
           {
+            id:a.id,
             original_name: a.original_name,
             project_id: a.project_id,
             file_name: a.file_name,
@@ -31,7 +32,7 @@ export function AddStoreAsset<TBase extends Constructor<BaseRepo>>(
             url: a.url,
             thumbnail: a?.thumbnail,
           },
-          { transaction }
+          { transaction, returning: true}
         );
         return _asset;
       });

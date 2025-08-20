@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import EditorMenu from "@/components/bars/editor-menu";
@@ -35,10 +35,15 @@ export const EditorWrapper = () => (
 );
 
 const EditorLayout = () => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { assets, handleUploadFile, handleFileChange, fileInputRef } =
-    useProject();
-  const { tracks, fetchProject,asset,setAsset } = useEditorContext();
+  const {
+    assets,
+    projectId,
+    fetchProject,
+    handleUploadFile,
+    handleFileChange,
+    fileInputRef,
+  } = useProject();
+  const { tracks, setTracks, asset, setAsset } = useEditorContext();
 
   const [item, setItem] = useState<ItemProps>({
     title: "Phương tiện",
@@ -49,14 +54,29 @@ const EditorLayout = () => {
     if (asset.type !== "video" || !projectId) return;
     setAsset(asset);
 
-    if (tracks[asset.type].some((t) => t.asset_id === asset.id)) return;
+    if (tracks.video.some((t) => t.assetId === asset.id)) return;
+    console.log("asset",asset)
+    const lastItem = tracks.video[tracks.video.length - 1];
+    const start_time = lastItem ? lastItem.startTime + lastItem.endTime : 0;
 
-    const trackItems = tracks[asset.type];
-    const lastItem = trackItems[trackItems.length - 1];
-    const start_time = lastItem ? lastItem.start_time + lastItem.end_time : 0;
-    await postTrack(asset, projectId, start_time);
-    await fetchProject();
+    try {
+      const res = await postTrack(asset, projectId, start_time);
+
+      setTracks((prev) => ({
+        ...prev,
+        video: [...prev.video, res.data],
+      }));
+      await fetchProject();
+    } catch (error) {
+      console.log("Error posting track item", error);
+    }
   };
+
+  useEffect(() => {
+    if (projectId) {
+      fetchProject();
+    }
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden w-full">

@@ -9,7 +9,7 @@ export interface TrackItemDTO {
   startTime: number | undefined;
   endTime: number | undefined;
   textContent?: string;
-  videoFrames?: {
+  video_frames?: {
     id: number | undefined;
     url: string;
     track_item_id: number | undefined;
@@ -17,11 +17,15 @@ export interface TrackItemDTO {
 }
 
 export interface AssetDTO {
-  id: number;
+  id: number | undefined;
   name: string;
   type: "video" | "image" | "audio";
-  thumbUrl?: string;
+  url?: string;
   trackItems: TrackItemDTO[];
+  mime_type: string;
+  thumbnail: string | undefined;
+  created_at: Date | undefined;
+  updated_at: Date | undefined;
 }
 
 export interface ProjectStateDTO {
@@ -40,7 +44,7 @@ export class ProjectStateMapper {
       startTime: trackItem.start_time,
       endTime: trackItem.end_time,
       textContent: trackItem.text_content,
-      videoFrames: trackItem.video_frames?.map((vf) => ({
+      video_frames: trackItem.video_frames?.map((vf) => ({
         id: vf.id,
         url: vf.url,
         track_item_id: trackItem.id,
@@ -53,11 +57,15 @@ export class ProjectStateMapper {
     trackItems: assetsWithTrackItems[]
   ): AssetDTO {
     return {
-      id: asset.id!,
+      id: asset.id,
       name: asset.original_name,
       type: asset.type as "video" | "image" | "audio",
-      thumbUrl: asset.url ?? undefined,
+      url: asset.url ?? undefined,
       trackItems: trackItems.map((ti) => this.toTrackItemDTO(ti)),
+      mime_type: asset.mime_type,
+      thumbnail: asset.thumbnail,
+      created_at: asset.created_at,
+      updated_at: asset.updated_at,
     };
   }
 

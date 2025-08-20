@@ -1,4 +1,4 @@
-import { VideoFrameModel } from "../orm/models/track_items_models";
+import { VideoFrameModel } from "../../infrastructure/database/models/track_items_models";
 
 export interface TrackItem {
   id?: number;

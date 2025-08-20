@@ -71,7 +71,7 @@ export const TimelineSection = () => {
 
       {/* Timeline */}
       <TimelineProvider frames={frames} setCurrentTime={setCurrentTime}>
-        <TimeLine />
+        <TimeLine zoom={zoom} />
       </TimelineProvider>
     </div>
   );

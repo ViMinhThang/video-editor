@@ -5,16 +5,18 @@ import { useProject } from "@/hooks/use-project";
 import { deleteAsset } from "@/api/asset-api";
 import { FileUp, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function WorkspacePage() {
   const {
     project,
     assets,
-    reloadAssets,
+    setAssets,
     handleUploadFile,
+    projectId,
     handleFileChange,
     fileInputRef,
-    loading,
+    fetchProject,
   } = useProject();
 
   const navigate = useNavigate();
@@ -22,18 +24,21 @@ export default function WorkspacePage() {
   const handleDeleteAsset = async (assetId: number) => {
     try {
       await deleteAsset(assetId);
-      await reloadAssets(project.id);
+      setAssets((prev) => prev.filter((asset) => asset.id !== assetId));
     } catch (error) {
       console.error("Failed to delete asset", error);
     }
   };
 
   const handleCreateVideo = () => {
-    navigate(`/projects/${project.id}/editor`);
+    navigate(`/projects/${projectId}/editor`);
   };
-  if (loading) {
-    return <div>Loading project data...</div>;
-  }
+  useEffect(()=>{
+    if(projectId){
+      fetchProject()
+    }
+  },[])
+
   return (
     <div className="w-[1600px]">
       <input

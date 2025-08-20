@@ -1,11 +1,7 @@
 import { DataTypes, Sequelize } from "sequelize";
-import { TrackModel } from "../../../../data/orm/models/track_models";
-import {
-  AssetModel,
-  TrackItemModel,
-  VideoFrameModel,
-} from "../../../../data/orm/models/track_items_models";
-import { ProjectModel } from "../../../../data/orm/models/project_models";
+import { ProjectModel } from "../project_models";
+import { TrackItemModel, AssetModel, VideoFrameModel } from "../track_items_models";
+import { TrackModel } from "../track_models";
 
 const primaryKey = {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },

@@ -76,7 +76,7 @@ export const handleVideoClick = ({
 
   if (foundTrackItemId != null) {
     const trackItem = tracks.video.find((t) => t.id === foundTrackItemId);
-    const foundAsset = assets.find((a) => a.id === trackItem?.asset_id);
+    const foundAsset = assets.find((a) => a.id === trackItem?.assetId);
     if (foundAsset) {
       setAsset(foundAsset);
     }

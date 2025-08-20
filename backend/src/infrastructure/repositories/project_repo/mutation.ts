@@ -1,6 +1,6 @@
-import { ProjectModel } from "../../database/models";
+import { Project } from "../../../domain/models/project_models";
+import { ProjectModel } from "../../database/models/project_models";
 import { BaseRepo, Constructor } from "../core";
-import { Project } from "../../models/project_models";
 
 export function AddProjectDeletion<TBase extends Constructor<BaseRepo>>(Base: TBase) {
   return class extends Base {

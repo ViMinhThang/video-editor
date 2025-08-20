@@ -1,27 +1,26 @@
+import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
 import { downloadTrackItem } from "@/api/track-api";
 import { download, selectTrackItemContext } from "@/services/timeline-action";
-import {
-  ContextMenuState,
-
-} from "@/types/editor";
+import { ContextMenuState } from "@/types/editor";
 import { TimelineContextType, TimeLineProps } from "@/types/timeline";
-import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
 
-export const TimelineContext = createContext<TimelineContextType | null>(null);
+// ---------- Context ----------
+export const TimelineContext = createContext<TimelineContextType | undefined>(undefined);
 
-const initialContextMenu: ContextMenuState = {
-  visible: false,
-  x: 0,
-  y: 0,
-  trackItemId: null,
-};
-export const TimelineProvider = ({
-  children,
-  frames,
-  setCurrentTime,
-}: TimeLineProps) => {
-  const [contextMenu, setContextMenu] = useState(initialContextMenu);
+// ---------- Provider ----------
+interface TimelineProviderProps extends TimeLineProps {
+  children: ReactNode;
+}
 
+export const TimelineProvider = ({ children, frames, setCurrentTime }: TimelineProviderProps) => {
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    trackItemId: null,
+  });
+
+  // Refs cho highlight animation
   const highlightState = {
     trackItemIdRef: useRef<number | null>(null),
     animLineWidthRef: useRef<number>(2),
@@ -29,10 +28,11 @@ export const TimelineProvider = ({
   };
 
   const resetHighlight = () => {
-    setContextMenu(initialContextMenu);
+    setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
     highlightState.trackItemIdRef.current = null;
     highlightState.animLineWidthRef.current = 0;
   };
+
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     // TODO: implement cursor drag logic
   };
@@ -51,13 +51,13 @@ export const TimelineProvider = ({
 
   const handleDownload = async () => {
     if (!contextMenu.trackItemId) return;
-    const trackItem = frames.find(
-      (f) => f.track_item_id === contextMenu.trackItemId
-    );
+
+    const trackItem = frames.find((f) => f.track_item_id === contextMenu.trackItemId);
     if (!trackItem) return;
+
     const response = await downloadTrackItem(contextMenu.trackItemId);
     download(response.data, "cutted.mp4", "video/mp4");
-    setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
+
     resetHighlight();
   };
 

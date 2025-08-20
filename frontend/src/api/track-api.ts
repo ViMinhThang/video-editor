@@ -6,7 +6,8 @@ export const postTrack = async (
   projectId: string,
   start_time: number
 ) => {
-  await axios.post("/api/trackItems/", {
+  console.log(asset)
+  return  await axios.post("/api/track-items", {
     asset_id: asset.id,
     url: asset.url,
     project_id: projectId,

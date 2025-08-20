@@ -1,8 +1,8 @@
 import { assetRepository } from "../domain/repositories/asset_repository";
-import { videoRepoImpl } from "./orm";
 import { ProjectRepository } from "../domain/repositories/project_repository";
 import { trackRepository } from "../domain/repositories/track_repository";
 import { videoRepository } from "../domain/repositories/video_repository";
+import { videoRepoImpl } from "../infrastructure/repositories";
 
 const repo = new videoRepoImpl();
 

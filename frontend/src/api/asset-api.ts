@@ -11,7 +11,8 @@ export const uploadAsset = async (file: File, projectId: string) => {
   formData.append("file", file);
   formData.append("project_id", projectId);
 
-  await axios.post("/api/upload", formData);
+  const res = await axios.post("/api/upload", formData);
+  return res.data.asset
 };
 
 export const deleteAsset = async (assetId: number) => {

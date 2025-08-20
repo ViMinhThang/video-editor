@@ -27,7 +27,7 @@ export function handleCanvasMouseDown({
     ctx.rotate((t.rotation ?? 0) * (Math.PI / 180));
 
     ctx.font = `${t.fontSize || 24}px sans-serif`;
-    const metrics = ctx.measureText(t.text_content);
+    const metrics = ctx.measureText(t.textContent);
     const textWidth = metrics.width;
     const textHeight =
       (metrics.actualBoundingBoxAscent || t.fontSize || 24) +
@@ -61,7 +61,7 @@ export function handleCanvasMouseDown({
       setDraggingId(t.id);
       setOffset({ x: invX, y: invY });
       setEditingId(t.id);
-      setEditingText(t.text_content);
+      setEditingText(t.textContent);
       ctx.restore();
       break;
     }
@@ -158,12 +158,12 @@ export function drawTextItem({
     const cursor = Math.floor(Date.now() / 500) % 2 === 0 ? "|" : "";
     ctx.fillText(editingText + cursor, 0, 0);
   } else {
-    ctx.fillText(t.text_content, 0, 0);
+    ctx.fillText(t.textContent, 0, 0);
   }
 
   // highlight nếu chọn
   if (t.id === selectedId) {
-    const metrics = ctx.measureText(t.text_content);
+    const metrics = ctx.measureText(t.textContent);
     const textWidth = metrics.width;
     const textHeight =
       metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent || t.fontSize || 24;

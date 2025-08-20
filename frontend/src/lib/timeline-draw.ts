@@ -52,7 +52,7 @@ export async function drawTimeline({
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // sort track theo start_time
-  const sortedTracks = [...videos].sort((a, b) => a.start_time - b.start_time);
+  const sortedTracks = [...videos].sort((a, b) => a.startTime - b.startTime);
 
   // preload tất cả ảnh trong tracks
   const frames = sortedTracks.flatMap((t) => t.video_frames ?? []);
@@ -122,10 +122,10 @@ export function drawSubtitleTimeline({
   const radius = 6;
 
   let xOffset = 0;
-  const sortedTexts = [...texts].sort((a, b) => a.start_time - b.start_time);
+  const sortedTexts = [...texts].sort((a, b) => a.startTime - b.startTime);
   for (const item of sortedTexts) {
-    const x = xOffset + item.start_time * 40;
-    const width = (item.end_time - item.start_time) * 40;
+    const x = xOffset + item.startTime * 40;
+    const width = (item.endTime - item.startTime) * 40;
     // vẽ subtitle block
     drawRoundedImage(
       ctx,
@@ -141,7 +141,7 @@ export function drawSubtitleTimeline({
       "red", // strokeStyle
       2, // lineWidth
       false,
-      item.text_content, // text
+      item.textContent, // text
       "black", // textColor
       "10px Arial" // font
     );

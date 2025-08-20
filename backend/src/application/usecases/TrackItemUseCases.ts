@@ -7,10 +7,9 @@ import { videoFrame } from "../../domain/models/video_frame_models";
 import FF from "../../lib/FF";
 import { getProjectAssetDir, calculateNumbFrames } from "../../lib/util";
 
-
 export class TrackItemUseCases {
   static async createTrackItem(data: {
-    project_id: number;
+    project_id: string;
     asset_id: number;
     start_time: number;
   }): Promise<TrackItem | undefined> {
@@ -18,9 +17,9 @@ export class TrackItemUseCases {
     if (!asset) throw new Error("Asset not found");
 
     const duration = await FF.getDuration(asset.server_path);
-
+    console.log(data);
     const track_item: TrackItem = {
-      project_id: data.project_id,
+      project_id: Number.parseInt(data.project_id),
       asset_id: asset.id,
       track_id: 1,
       start_time: data.start_time,
@@ -45,6 +44,7 @@ export class TrackItemUseCases {
       asset.server_path,
       calculateNumbFrames(duration)
     );
+    const list_frames = [];
 
     for (let i = 0; i < tmpPaths.length; i++) {
       const frame_index = path.join(framesDir, `frame_${i}.jpg`);
@@ -52,14 +52,13 @@ export class TrackItemUseCases {
       await fs.unlink(tmpPaths[i]);
 
       const url_static = `/uploads/projects/${data.project_id}/assets/${videoBaseName}/track_item_${created.id}/frames/frame_${i}.jpg`;
-
       const video_frames: videoFrame = {
         track_item_id: created.id!,
         url: url_static,
       };
-      await video_repo.storeVideoFrame(video_frames);
+      list_frames.push(await video_repo.storeVideoFrame(video_frames));
     }
-
+    (created as any).video_frames = list_frames;
     return created;
   }
 

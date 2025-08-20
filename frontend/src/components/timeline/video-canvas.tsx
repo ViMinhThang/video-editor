@@ -45,8 +45,8 @@ const VideoCanvas = ({
 
       texts.forEach((t) => {
         if (
-          video.currentTime >= t.start_time &&
-          video.currentTime <= t.end_time
+          video.currentTime >= t.startTime &&
+          video.currentTime <= t.endTime
         ) {
           drawTextItem({ ctx, t, canvas, selectedId, editingId, editingText });
         }

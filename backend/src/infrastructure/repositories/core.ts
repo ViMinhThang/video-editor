@@ -3,13 +3,13 @@ import { getConfig } from "../../config";
 
 import {
   initializeModels,
-  ProjectModel,
-  TrackItemModel,
-  TrackModel,
-  UserModel,
 } from "../database/models";
 
 import { readFileSync } from "fs";
+import { ProjectModel } from "../database/models/project_models";
+import { TrackItemModel } from "../database/models/track_items_models";
+import { TrackModel } from "../database/models/track_models";
+import { UserModel } from "../database/models/user_models";
 
 const config = getConfig("videos:orm_repo");
 
