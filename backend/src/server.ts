@@ -4,9 +4,8 @@ import { getConfig } from "./config";
 import helmet from "helmet";
 import { createErrorHandlers } from "./infrastructure/webserver/middleware/errors";
 import path from "path";
-import { cors } from "@feathersjs/express";
 import { createRoutes } from "./infrastructure/webserver/routes";
-
+import cors from "cors";
 const port = getConfig("http:port", 3000);
 
 const expressApp: Express = express();

@@ -15,7 +15,7 @@ export interface EditorContextType {
   setAssets: React.Dispatch<React.SetStateAction<Asset[]>>;
   setTracks: React.Dispatch<React.SetStateAction<Record<string, TrackItem[]>>>;
   setDuration: React.Dispatch<React.SetStateAction<number>>;
-
+  addTextItem: (time: number, asset_id: number) => Promise<void>;
   fetchProject: () => Promise<void>;
   handleUploadFile: () => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;

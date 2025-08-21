@@ -213,8 +213,8 @@ function drawSubtitle(
   const fontSize = cfg.fontSize ?? 12;
   console.log("drawed" + text);
   // Nếu user chưa custom toạ độ → mặc định canh trong rect
-  const x =  xOffset + 6;
-  const y =  height / 2;
+  const x = xOffset + 6;
+  const y = height / 2;
   ctx.fillStyle = color;
   ctx.font = `${fontSize}px ${fontFamily}`;
   ctx.textBaseline = "middle";
@@ -222,3 +222,7 @@ function drawSubtitle(
 
   ctx.fillText(text, x, y);
 }
+export const takeLastItemStart = (videos: TrackItem[]) => {
+  console.log("takelast",videos)
+  return videos[videos.length - 1].startTime;
+};

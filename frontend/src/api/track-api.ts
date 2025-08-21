@@ -70,3 +70,15 @@ export const updateText = async (track: TrackItem) => {
   const res = await axios.put(`/api/track-item/${track.id}`, track);
   return res;
 };
+export const addText = async (
+  time: number,
+  asset_id: number,
+  project_id: number
+) => {
+  const res = await axios.post("/api/track-item/add-text", {
+    time,
+    asset_id,
+    project_id,
+  });
+  return res;
+};

@@ -60,7 +60,7 @@ const EditorLayout: React.FC = () => {
           />
         )}
         {item.type === "text" && <TextPage />}
-        {item.type === "subtitle" && asset && <SubtitlePage asset={asset} />}
+        {item.type === "subtitle" && asset && <SubtitlePage/>}
       </div>
 
       {/* Main content */}

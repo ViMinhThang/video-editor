@@ -21,7 +21,7 @@ export class ExportProjectUseCase {
         (t.config as TextConfig).text?.trim() !== ""
     );
 
-    const assetIds = [...new Set(videoTracks.map((t) => t.asset_id))];
+    const assetIds = Array.from(new Set(videoTracks.map((t) => t.asset_id)));
     const assets: Asset[] = [];
     for (const id of assetIds) {
       const asset = await asset_repo.getAssetById(id!);

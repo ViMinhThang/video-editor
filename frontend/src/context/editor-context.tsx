@@ -1,7 +1,7 @@
 // context/editor-context.tsx
 import React, { createContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { loadProject, postTrack } from "@/api/track-api";
+import { addText, loadProject, postTrack } from "@/api/track-api";
 import { uploadAsset } from "@/api/asset-api";
 import { Asset, Project } from "@/types";
 import { TrackItem, VideoFrame } from "@/types/track_item";
@@ -85,9 +85,17 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Error posting track item", error);
     }
   };
+  const addTextItem = async (time: number, asset_id: number) => {
+    try {
+      const res = await addText(time, asset_id, Number(projectId));
+      await fetchProject();
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
   useEffect(() => {
     fetchProject();
-  }, [projectId, tracks]);
+  }, [projectId]);
 
   return (
     <EditorContext.Provider
@@ -105,6 +113,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
         setTracks,
         setDuration,
         fetchProject,
+        addTextItem,
         handleUploadFile,
         handleFileChange,
         addTrackItem,
