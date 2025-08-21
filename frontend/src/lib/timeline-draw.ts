@@ -23,7 +23,7 @@ interface DrawSubtitleTimelineOptions {
 // cache ảnh global để ko load lại nhiều lần
 const imageCache: Record<string, HTMLImageElement> = {};
 
-const loadImage = (src: string): Promise<HTMLImageElement> =>
+export const loadImage = (src: string): Promise<HTMLImageElement> =>
   new Promise((resolve) => {
     if (imageCache[src]) return resolve(imageCache[src]);
 

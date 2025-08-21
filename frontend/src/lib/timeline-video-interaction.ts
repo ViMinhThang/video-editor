@@ -1,8 +1,8 @@
 import { RefObject } from "react";
-import { findTrackAtX, getClickX } from "@/lib/utils";
+import { drawRoundedImage, findTrackAtX, getClickX } from "@/lib/utils";
 import { Asset } from "@/types";
 import { TrackItem } from "@/types/track_item";
-import { drawTimeline } from "./timeline-draw";
+import { drawTimeline, loadImage } from "./timeline-draw";
 
 type ContextMenuConfig = {
   e: React.MouseEvent;
@@ -27,7 +27,6 @@ type RenderDraggingConfig = {
   highlightTrackItemIdRef: React.MutableRefObject<number | null>;
   animLineWidthRef: React.MutableRefObject<number>;
 };
-
 
 export const handleContextMenuClick = ({
   e,
@@ -112,7 +111,7 @@ export const handleVideoClick = ({
     const foundAsset = assets.find((a) => a.id === trackItem?.assetId);
     if (foundAsset) {
       setAsset(foundAsset);
-      console.log(1)
+      console.log(1);
     }
   }
 };
@@ -149,12 +148,14 @@ export const handleMouseUp = ({
 
   const currentX = getClickX(canvasRef.current, e);
   const newIndex = findTrackAtX(videos, currentX, groupGap, thumbnailWidth);
+  console.log("newIndex", newIndex);
+  console.log("draggred index", dragItemRef.current.id);
   const updatedVideos = [...videos];
 
   const draggedTrack = updatedVideos.find(
     (t) => t.id === dragItemRef.current!.id
   );
-  const targetTrack = updatedVideos[newIndex];
+  const targetTrack = updatedVideos.find((track) => track.id === newIndex);
 
   if (!draggedTrack || !targetTrack) return;
 
@@ -167,13 +168,13 @@ export const handleMouseUp = ({
     targetTrack.endTime,
     draggedTrack.endTime,
   ];
-
+  console.log("updated tracks", updatedVideos);
   setTracks((prev) => ({ ...prev, video: updatedVideos }));
 
   dragItemRef.current = null;
   setIsDragging(false);
 };
-export const renderDraggingItem = ({
+export const renderDraggingItem = async ({
   canvasRef,
   tracks,
   dragItemRef,
@@ -205,15 +206,33 @@ export const renderDraggingItem = ({
   // Tính originalX của track đang kéo
   let xOffset = 0;
   for (const track of tracks) {
-    if (track.id === dragItemRef.current.id) break;
+    if (track.id === dragItemRef.current.id) {
+    }
     const framesInTrack = track.video_frames ?? [];
     xOffset += framesInTrack.length * thumbnailWidth + groupGap;
   }
 
   const framesInDraggedTrack = dragItemRef.current.video_frames ?? [];
   const width = framesInDraggedTrack.length * thumbnailWidth;
-
-  // Vẽ track đang kéo nổi lên với highlight
-  ctx.fillStyle = "rgba(0, 150, 255, 0.7)";
-  ctx.fillRect(xOffset + deltaX, 20, width, thumbnailHeight);
+  const images = await Promise.all(
+    framesInDraggedTrack.map((f) =>
+      loadImage(import.meta.env.VITE_API_BASE_URL + f.url)
+    )
+  );
+  const imageMap: Record<number, HTMLImageElement> = {};
+  framesInDraggedTrack.forEach((f, i) => (imageMap[f.id] = images[i]));
+  framesInDraggedTrack.forEach((frame, idx) => {
+    const img = imageMap[frame.id];
+    drawRoundedImage(
+      ctx,
+      img,
+      xOffset + idx * thumbnailWidth,
+      20,
+      thumbnailWidth,
+      thumbnailHeight,
+      8,
+      idx === 0,
+      idx === framesInDraggedTrack.length - 1
+    );
+  });
 };

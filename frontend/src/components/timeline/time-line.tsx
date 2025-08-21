@@ -12,7 +12,6 @@ export const TimeLine = ({ zoom = 100 }: { zoom?: number }) => {
   const {
     frames,
     contextMenu,
-    handleMouseDown,
     handleDownload,
     setContextMenu,
   } = useTimelineContext();
@@ -47,7 +46,6 @@ export const TimeLine = ({ zoom = 100 }: { zoom?: number }) => {
     >
       <div
         style={{ width: `${width}px`, position: "relative" }}
-        onMouseDown={handleMouseDown}
       >
         <TimelineRuler
           width={width}

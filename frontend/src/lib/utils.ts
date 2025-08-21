@@ -181,7 +181,7 @@ export const takeDuration = (tracks: TrackItem[]) => {
     if (t.assetId != null) {
       durationByAsset[t.assetId] = Math.max(
         durationByAsset[t.assetId] || 0,
-        t.endTime || 0
+        t.endTime - t.startTime || 0
       );
     }
   });

@@ -74,10 +74,10 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
       const tempTrack = await postTrack(asset, projectId, start_time);
       console.log("tempTrack", tempTrack);
 
-      setTracks((prev) => ({
-        ...prev,
-        video: [...(prev.video ?? []), tempTrack],
-      }));
+      // setTracks((prev) => ({
+      //   ...prev,
+      //   video: [...(prev.video ?? []), tempTrack],
+      // }));
 
       // sau đó fetch để đồng bộ thumbnail
       await fetchProject();
