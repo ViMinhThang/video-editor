@@ -1,5 +1,5 @@
-import { TrackItem } from "@/types";
 import { drawRoundedImage } from "@/lib/utils";
+import { TrackItem } from "@/types/track_item";
 
 interface DrawTimelineOptions {
   canvas: HTMLCanvasElement;
@@ -67,7 +67,7 @@ export async function drawTimeline({
   for (const track of sortedTracks) {
     const framesInTrack = track.video_frames ?? [];
     framesInTrack.sort((a, b) => a.start_time - b.start_time);
-
+    console.log(framesInTrack)
     framesInTrack.forEach((frame, idx) => {
       const img = imageMap[frame.id];
       drawRoundedImage(
@@ -119,7 +119,7 @@ export function drawSubtitleTimeline({
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const radius = 6;
+  const radius = 10;
 
   let xOffset = 0;
   const sortedTexts = [...texts].sort((a, b) => a.startTime - b.startTime);
@@ -135,13 +135,13 @@ export function drawSubtitleTimeline({
       width,
       thumbnailHeight,
       radius,
-      true,
-      true,
+      false,
+      false,
       false,
       "red", // strokeStyle
       2, // lineWidth
-      false,
-      item.textContent, // text
+      true,
+      item, // text
       "black", // textColor
       "10px Arial" // font
     );

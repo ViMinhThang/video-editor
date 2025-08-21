@@ -37,8 +37,9 @@ export class CutTrackUseCase {
     // Tạo track item mới
     const new_track_item: TrackItem = {
       project_id: track_item.project_id,
-      track_id: track_item.track_id,
       asset_id: track_item.asset_id,
+      type:track_item.type,
+      config:track_item.config,
       start_time: currentTime,
       end_time: originalEnd,
     };

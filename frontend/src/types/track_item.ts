@@ -1,7 +1,13 @@
-import { VideoFrameModel } from "../../infrastructure/database/models/track_items_models";
+export interface VideoFrame {
+  start_time: number;
+  end_time: number;
+  id: number;
+  track_item_id: number;
+  url: string;
+  created_at: string;
+  updated_at: string;
+}
 
-
-// Config riêng cho từng loại TrackItem
 export interface VideoConfig {
   scale?: number;
   rotation?: number;
@@ -28,17 +34,17 @@ export interface TextConfig {
 export type TrackItemConfig = VideoConfig | AudioConfig | TextConfig;
 
 export interface TrackItem {
-  id?: number;
+  id: number;
   project_id: number;
-  asset_id?: number;
+  assetId?: number;
   type: "video" | "audio" | "text" | "image";
-  start_time: number;
-  end_time: number;
+  startTime: number;
+  endTime: number;
+
   config?: TrackItemConfig;
-  created_at?: Date;
-  updated_at?: Date;
 
-  // Relation
-  video_frames?: VideoFrameModel[];
+  video_frames?: VideoFrame[];
+
+  // state ở frontend
+  loading?: boolean;
 }
-

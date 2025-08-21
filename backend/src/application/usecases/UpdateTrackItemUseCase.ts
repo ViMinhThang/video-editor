@@ -2,7 +2,7 @@ import { track_repo } from "../../domain";
 import { TrackItem } from "../../domain/models/track_items_models";
 
 export class UpdateTrackItemUseCase {
-  static async execute(track: TrackItem) {
+  static async updateTextTrack(track: TrackItem) {
     if (!track.id) {
       throw new Error("Track item id is required");
     }

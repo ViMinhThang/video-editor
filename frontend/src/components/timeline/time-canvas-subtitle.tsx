@@ -6,15 +6,17 @@ import { handleSubtitleContextMenuClick } from "@/lib/timeline-subtitle-interact
 import { TimeCanvasSubtitleProps } from "@/types/timeline";
 import { useResizableCanvas } from "@/hooks/use-canvas-hooks";
 
-
-export const TimeCanvasSubtitle = ({ groupGap, thumbnailHeight = 40 }: TimeCanvasSubtitleProps) => {
-  const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } = useTimelineContext();
+export const TimeCanvasSubtitle = ({
+  groupGap,
+  thumbnailHeight = 30,
+}: TimeCanvasSubtitleProps) => {
+  const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } =
+    useTimelineContext();
   const { tracks } = useEditorContext();
   const texts = tracks.text;
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     drawSubtitleTimeline({
       canvas,
       texts,
@@ -25,11 +27,25 @@ export const TimeCanvasSubtitle = ({ groupGap, thumbnailHeight = 40 }: TimeCanva
     });
   }, [texts, groupGap, highlightTrackItemIdRef, animLineWidthRef]);
 
-  const canvasRef = useResizableCanvas(render, 20);
-
+  const canvasRef = useResizableCanvas(render, 20,tracks.text);
 
   const onContextMenu = (e: React.MouseEvent) =>
-    handleSubtitleContextMenuClick({ e, canvasRef, texts, groupGap, highlightTrackItemIdRef, animLineWidthRef, render, handleContextMenu });
+    handleSubtitleContextMenuClick({
+      e,
+      canvasRef,
+      texts,
+      groupGap,
+      highlightTrackItemIdRef,
+      animLineWidthRef,
+      render,
+      handleContextMenu,
+    });
 
-  return <canvas ref={canvasRef} style={{ display: "block", width: "100%" }} onContextMenu={onContextMenu} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ display: "block", width: "100%" }}
+      onContextMenu={onContextMenu}
+    />
+  );
 };

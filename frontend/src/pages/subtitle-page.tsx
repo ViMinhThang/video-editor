@@ -8,14 +8,19 @@ import { Asset } from "@/types";
 
 const SubtitlePage = ({ asset }: { asset: Asset }) => {
   const { projectId } = useParams<string>();
-  const { fetchProject } = useEditorContext();
+  const { fetchProject, setTracks } = useEditorContext();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadSrt = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !projectId) return;
-    await importSrt(file, projectId, asset.id);
-    await fetchProject();
+    const res = await importSrt(file, projectId, asset.id);
+    if (!res) return;
+    setTracks((prev) => ({
+      ...prev,
+      text: [...prev.text,... res.data.asset],
+    }));
+    await fetchProject()
   };
 
   return (

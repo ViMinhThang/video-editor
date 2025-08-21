@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+// components/editor/editor-layout.tsx
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import EditorMenu from "@/components/bars/editor-menu";
 import AssetsPage from "@/pages/assets-page";
 import SubtitlePage from "@/pages/subtitle-page";
 import TextPage from "@/pages/text-page";
-import { Asset } from "@/types";
 import { CassetteTape } from "lucide-react";
 import { TimelineSection } from "../timeline/time-section";
-import { ProjectProvider } from "@/context/project-context";
-import { useProject } from "@/hooks/use-project";
-import { postTrack } from "@/api/track-api";
-import { VideoProvider } from "@/context/video-context";
 import { useEditorContext } from "@/hooks/use-editor";
-import { EditorProvider } from "@/context/editor-context";
 import VideoCanvas from "../timeline/video-canvas";
+import { EditorProvider } from "@/context/editor-context";
+import { VideoProvider } from "@/context/video-context";
 
 const VITE_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -23,59 +19,30 @@ export interface ItemProps {
   icon: React.ElementType;
   type: string;
 }
-
 export const EditorWrapper = () => (
-  <ProjectProvider>
-    <EditorProvider>
-      <VideoProvider>
-        <EditorLayout />
-      </VideoProvider>
-    </EditorProvider>
-  </ProjectProvider>
+  <EditorProvider>
+    <VideoProvider>
+      <EditorLayout />
+    </VideoProvider>
+  </EditorProvider>
 );
 
-const EditorLayout = () => {
+const EditorLayout: React.FC = () => {
   const {
     assets,
+    asset,
     projectId,
     handleUploadFile,
     handleFileChange,
     fileInputRef,
-  } = useProject();
-  const { tracks, setTracks, asset, setAsset,fetchProject } = useEditorContext();
+    addTrackItem,
+  } = useEditorContext();
 
   const [item, setItem] = useState<ItemProps>({
     title: "Phương tiện",
     icon: CassetteTape,
     type: "asset",
   });
-  const handleAddTrackItem = async (asset: Asset) => {
-    if (asset.type !== "video" || !projectId) return;
-    setAsset(asset);
-
-    if (tracks.video.some((t) => t.assetId === asset.id)) return;
-    console.log("asset",asset)
-    const lastItem = tracks.video[tracks.video.length - 1];
-    const start_time = lastItem ? lastItem.startTime + lastItem.endTime : 0;
-
-    try {
-      const res = await postTrack(asset, projectId, start_time);
-
-      setTracks((prev) => ({
-        ...prev,
-        video: [...prev.video, res.data],
-      }));
-      await fetchProject();
-    } catch (error) {
-      console.log("Error posting track item", error);
-    }
-  };
-
-  useEffect(() => {
-    if (projectId) {
-      fetchProject();
-    }
-  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden w-full">
@@ -89,7 +56,7 @@ const EditorLayout = () => {
             handleUploadFile={handleUploadFile}
             handleFileChange={handleFileChange}
             fileInputRef={fileInputRef}
-            handleAddToTrack={handleAddTrackItem}
+            handleAddToTrack={addTrackItem}
           />
         )}
         {item.type === "text" && <TextPage />}

@@ -1,10 +1,7 @@
 import { takeDuration } from "@/lib/utils";
-import { Asset, TrackItem, VideoFrame } from "@/types";
-export enum TrackType {
-  VIDEO = 1,
-  TEXT = 2,
-  AUDIO = 3,
-}
+import { Asset } from "@/types";
+import { TrackItem, VideoFrame } from "@/types/track_item";
+
 
 export const processAssests = (assets: Asset[]) => {
   const videoTracks: TrackItem[] = [];
@@ -13,21 +10,21 @@ export const processAssests = (assets: Asset[]) => {
   assets.forEach((asset) => {
     if (!asset.trackItems) return;
     asset.trackItems.forEach((ti) => {
-        // avoid mutation
+      // avoid mutation
       const trackItem = { ...ti, loading: false };
 
-      switch (trackItem.trackId) {
-        case TrackType.VIDEO:
+      switch (trackItem.type) {
+        case "video":
           videoTracks.push(trackItem);
           break;
-        case TrackType.AUDIO:
+        case "audio":
           audioTracks.push(trackItem);
           break;
-        case TrackType.TEXT:
+        case "text":
           textTracks.push(trackItem);
           break;
         default:
-          console.warn("Unknown track type:", trackItem.trackId);
+          console.warn("Unknown track type:", trackItem.type);
       }
     });
   });

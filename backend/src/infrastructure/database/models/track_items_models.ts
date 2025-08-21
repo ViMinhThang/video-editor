@@ -4,8 +4,13 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { TrackItem, Asset } from "../../../domain/models/track_items_models";
+import {
+  TrackItem,
+  TrackItemConfig,
+} from "../../../domain/models/track_items_models";
 import { videoFrame } from "../../../domain/models/video_frame_models";
+import { Asset } from "../../../domain/models/asset_models";
+
 export class TrackItemModel
   extends Model<
     InferAttributes<TrackItemModel>,
@@ -14,20 +19,15 @@ export class TrackItemModel
   implements TrackItem
 {
   declare id: CreationOptional<number>;
-  declare track_id: number;
-  declare start_time?: number | undefined;
-  declare end_time: number | undefined;
-  declare asset_id?: number | undefined;
   declare project_id: number;
-  declare width?: number | undefined;
-  declare height?: number | undefined;
-  declare x?: number | undefined;
-  declare y?: number | undefined;
-  declare scale?: number | undefined;
-  declare rotation?: number | undefined;
-  declare text_content?: string | undefined;
-  declare created_at?: CreationOptional<Date>;
-  declare updated_at?: CreationOptional<Date>;
+  declare asset_id?: number | undefined;
+  declare start_time: number;
+  declare end_time: number;
+  declare config?: TrackItemConfig | undefined;
+  declare created_at?: Date | undefined;
+  declare updated_at?: Date | undefined;
+  declare type: "text" | "video" | "audio" | "image";
+  declare video_frames?: VideoFrameModel[] | undefined;
 }
 
 export class AssetModel

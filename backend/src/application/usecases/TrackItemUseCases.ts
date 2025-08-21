@@ -21,9 +21,9 @@ export class TrackItemUseCases {
     const track_item: TrackItem = {
       project_id: Number.parseInt(data.project_id),
       asset_id: asset.id,
-      track_id: 1,
       start_time: data.start_time,
       end_time: data.start_time + duration,
+      type: "video"
     };
 
     const created = await track_repo.storeTrackItem(track_item);

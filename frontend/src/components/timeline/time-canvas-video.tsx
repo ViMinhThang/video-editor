@@ -1,6 +1,5 @@
 import { useResizableCanvas } from "@/hooks/use-canvas-hooks";
 import { useEditorContext } from "@/hooks/use-editor";
-import { useProject } from "@/hooks/use-project";
 import { useTimelineContext } from "@/hooks/use-timeline";
 import { drawTimeline } from "@/lib/timeline-draw";
 import {
@@ -17,13 +16,11 @@ export const TimeCanvasVideo = ({
 }: TimelineCanvasProps) => {
   const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } =
     useTimelineContext();
-  const { tracks, setAsset } = useEditorContext();
-  const { assets } = useProject();
+  const { tracks, setAsset, assets } = useEditorContext();
   const videos = tracks.video;
-
+  console.log("video", videos);
   const render = useCallback(() => {
     const canvas = canvasRef.current;
-    console.log("rendered");
 
     if (!canvas) return;
     drawTimeline({
@@ -43,7 +40,7 @@ export const TimeCanvasVideo = ({
     highlightTrackItemIdRef,
     animLineWidthRef,
   ]);
-  const canvasRef = useResizableCanvas(render, thumbnailHeight);
+  const canvasRef = useResizableCanvas(render, thumbnailHeight, videos);
   const onContextMenu = (e: React.MouseEvent) =>
     handleContextMenuClick({
       e,

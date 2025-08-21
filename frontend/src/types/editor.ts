@@ -1,19 +1,23 @@
-import { Asset, TrackItem, VideoFrame } from ".";
+import { Project, Asset } from ".";
+import { TrackItem, VideoFrame } from "./track_item";
 
 export interface EditorContextType {
-  duration: number;
-  frames: VideoFrame[];
+  project: Project | null;
+  projectId: string;
+  assets: Asset[];
+  asset: Asset | null;
   tracks: Record<string, TrackItem[]>;
-  asset: Asset;
-  fetchProject: () => Promise<void>;
-  setDuration: React.Dispatch<React.SetStateAction<number>>;
-  setTracks: React.Dispatch<React.SetStateAction<Record<string, TrackItem[]>>>;
-  setAsset: React.Dispatch<React.SetStateAction<Asset>>;
-}
+  frames: VideoFrame[];
+  duration: number;
+  fileInputRef: React.RefObject<HTMLInputElement>;
 
-export interface ContextMenuState {
-  visible: boolean;
-  x: number;
-  y: number;
-  trackItemId: number | null;
+  setAsset: React.Dispatch<React.SetStateAction<Asset | null>>;
+  setAssets: React.Dispatch<React.SetStateAction<Asset[]>>;
+  setTracks: React.Dispatch<React.SetStateAction<Record<string, TrackItem[]>>>;
+  setDuration: React.Dispatch<React.SetStateAction<number>>;
+
+  fetchProject: () => Promise<void>;
+  handleUploadFile: () => void;
+  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  addTrackItem: (asset: Asset) => Promise<void>;
 }

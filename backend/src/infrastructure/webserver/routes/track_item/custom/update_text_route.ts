@@ -6,7 +6,7 @@ export const createUpdateTextRoute = (app: Express) => {
     try {
       const track = { ...req.body, id: Number(req.params.id) };
 
-      const track_item = await UpdateTrackItemUseCase.execute(track);
+      const track_item = await UpdateTrackItemUseCase.updateTextTrack(track);
 
       res.status(200).json({
         message: "Track item updated",

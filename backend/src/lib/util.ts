@@ -2,6 +2,7 @@ import path, { basename } from "path";
 import fs from "fs/promises";
 import FF from "./FF";
 import { uploadDir } from "../infrastructure/webserver/middleware/upload";
+import { TextConfig } from "../domain/models/track_items_models";
 export const getProjectAssetDir = (project_id: string, basename: string) => {
   return path.join(uploadDir, "projects", project_id, "assets", basename);
 };
@@ -80,9 +81,9 @@ export const parseSrt = (content: string): SrtItem[] => {
 };
 export const escapeText = (text: string) => {
   return text
-    .replace(/'/g, "\\'")       // escape '
-    .replace(/:/g, '\\:')       // escape :
-    .replace(/\n/g, '\\n');     // escape newline
+    .replace(/'/g, "\\'") // escape '
+    .replace(/:/g, "\\:") // escape :
+    .replace(/\n/g, "\\n"); // escape newline
 };
 export function formatTime(seconds: number) {
   const h = Math.floor(seconds / 3600);
@@ -92,4 +93,15 @@ export function formatTime(seconds: number) {
   return `${h}:${m.toString().padStart(2, "0")}:${s
     .toString()
     .padStart(2, "0")}.${cs.toString().padStart(2, "0")}`;
+}
+export function getDefaultTextConfig(text: string): TextConfig {
+  return {
+    text,
+    font: "Arial",
+    fontSize: 12,
+    color: "#FFFFFF",
+    x: undefined,
+    y: undefined,
+    rotation: 0,
+  };
 }

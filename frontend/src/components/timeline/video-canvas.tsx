@@ -108,6 +108,7 @@ const VideoCanvas = ({
       if (track) {
         try {
           const res = await updateText(track);
+          console.log(res)
         } catch (err) {
           console.error("Update track failed:", err);
         }

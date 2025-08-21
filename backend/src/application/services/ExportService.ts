@@ -3,7 +3,8 @@ import path from "path";
 import os from "os";
 import fs from "fs/promises";
 import FF from "../../lib/FF";
-import { Asset, TrackItem } from "../../domain/models/track_items_models";
+import {  TrackItem } from "../../domain/models/track_items_models";
+import { Asset } from "../../domain/models/asset_models";
 
 export class ExportService {
   static async cutVideos(videoTracks: TrackItem[], assets: Asset[]): Promise<string[]> {

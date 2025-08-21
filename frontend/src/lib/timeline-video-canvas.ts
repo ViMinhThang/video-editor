@@ -1,4 +1,10 @@
-import { DrawTextItemParams, HandleKeyDownParams, MouseDownParams, MouseMoveParams } from "@/types/mouse";
+import {
+  DrawTextItemParams,
+  HandleKeyDownParams,
+  MouseDownParams,
+  MouseMoveParams,
+} from "@/types/mouse";
+import { TextConfig } from "@/types/track_item";
 import axios from "axios";
 
 export function handleCanvasMouseDown({
@@ -19,28 +25,31 @@ export function handleCanvasMouseDown({
   let found: number | null = null;
 
   for (let t of texts) {
-    const tx = t.x ?? canvas.width / 2;
-    const ty = t.y ?? canvas.height - 20;
+    const cfg = t.config as TextConfig;
+    const tx = cfg.x ?? canvas.width / 2;
+    const ty = cfg.y ?? canvas.height - 20;
+    const rotation = cfg.rotation ?? 0;
 
     ctx.save();
     ctx.translate(tx, ty);
-    ctx.rotate((t.rotation ?? 0) * (Math.PI / 180));
+    ctx.rotate(rotation * (Math.PI / 180));
 
-    ctx.font = `${t.fontSize || 24}px sans-serif`;
-    const metrics = ctx.measureText(t.textContent);
+    ctx.font = `${cfg.fontSize ?? 24}px ${cfg.font ?? "sans-serif"}`;
+    const metrics = ctx.measureText(cfg.text ?? "");
     const textWidth = metrics.width;
     const textHeight =
-      (metrics.actualBoundingBoxAscent || t.fontSize || 24) +
+      (metrics.actualBoundingBoxAscent || cfg.fontSize || 24) +
       (metrics.actualBoundingBoxDescent || 0);
 
+    // transform chuột ngược lại local coords
     const invX =
-      (x - tx) * Math.cos(-(t.rotation ?? 0) * (Math.PI / 180)) -
-      (y - ty) * Math.sin(-(t.rotation ?? 0) * (Math.PI / 180));
+      (x - tx) * Math.cos(-rotation * (Math.PI / 180)) -
+      (y - ty) * Math.sin(-rotation * (Math.PI / 180));
     const invY =
-      (x - tx) * Math.sin(-(t.rotation ?? 0) * (Math.PI / 180)) +
-      (y - ty) * Math.cos(-(t.rotation ?? 0) * (Math.PI / 180));
+      (x - tx) * Math.sin(-rotation * (Math.PI / 180)) +
+      (y - ty) * Math.cos(-rotation * (Math.PI / 180));
 
-    // check rotate handle
+    // --- rotate handle ---
     const handleX = 0;
     const handleY = -textHeight / 2 - 30;
     const dist = Math.sqrt((invX - handleX) ** 2 + (invY - handleY) ** 2);
@@ -51,17 +60,18 @@ export function handleCanvasMouseDown({
       return;
     }
 
-    // check text box
+    // --- text box ---
     const left = -textWidth / 2 - 4;
     const right = textWidth / 2 + 4;
     const top = -textHeight / 2;
     const bottom = textHeight / 2;
+
     if (invX >= left && invX <= right && invY >= top && invY <= bottom) {
       found = t.id;
       setDraggingId(t.id);
       setOffset({ x: invX, y: invY });
       setEditingId(t.id);
-      setEditingText(t.textContent);
+      setEditingText(cfg.text ?? "");
       ctx.restore();
       break;
     }
@@ -83,18 +93,40 @@ export function handleCanvasMouseMove({
   if (draggingId) {
     setTracks((prev) => ({
       ...prev,
-      text: prev.text.map((t) => (t.id === draggingId ? { ...t, x, y } : t)),
+      text: prev.text.map((t) =>
+        t.id === draggingId
+          ? {
+              ...t,
+              config: {
+                ...(t.config as TextConfig),
+                x,
+                y,
+              },
+            }
+          : t
+      ),
     }));
   }
 
   if (rotatingId) {
     const t = texts.find((tt) => tt.id === rotatingId);
     if (!t) return;
-    const angle = (Math.atan2(y - t.y!, x - t.x!) * 180) / Math.PI + 90;
+    const cfg = t.config as TextConfig;
+    const angle =
+      (Math.atan2(y - (cfg.y ?? 0), x - (cfg.x ?? 0)) * 180) / Math.PI + 90;
+
     setTracks((prev) => ({
       ...prev,
       text: prev.text.map((tt) =>
-        tt.id === rotatingId ? { ...tt, rotation: angle } : tt
+        tt.id === rotatingId
+          ? {
+              ...tt,
+              config: {
+                ...(tt.config as TextConfig),
+                rotation: angle,
+              },
+            }
+          : tt
       ),
     }));
   }
@@ -120,12 +152,23 @@ export function handleTextEditingKeyDown({
     setTracks((prev) => ({
       ...prev,
       text: prev.text.map((tt) =>
-        tt.id === editingId ? { ...tt, text_content: editingText } : tt
+        tt.id === editingId
+          ? {
+              ...tt,
+              config: {
+                ...(tt.config as TextConfig),
+                text: editingText,
+              },
+            }
+          : tt
       ),
     }));
 
     axios
-      .put(`/api/track-item/${t.id}`, { ...t, text_content: editingText })
+      .put(`/api/track-item/${t.id}`, {
+        ...t,
+        config: { ...(t.config as TextConfig), text: editingText },
+      })
       .catch(console.error);
 
     setEditingId(null);
@@ -144,12 +187,18 @@ export function drawTextItem({
   editingId,
   editingText,
 }: DrawTextItemParams) {
-  ctx.save();
-  ctx.translate(t.x ?? canvas.width / 2, t.y ?? canvas.height - 20);
-  ctx.rotate((t.rotation ?? 0) * (Math.PI / 180));
+  const cfg = t.config as TextConfig;
+  const tx = cfg.x ?? canvas.width / 2;
+  const ty = cfg.y ?? canvas.height - 20;
+  const rotation = cfg.rotation ?? 0;
 
-  ctx.fillStyle = t.color || "white";
-  ctx.font = `${t.fontSize || 24}px sans-serif`;
+  ctx.save();
+  ctx.translate(tx, ty);
+  ctx.rotate(rotation * (Math.PI / 180));
+  ctx.fillStyle = cfg.color || "white";
+  ctx.font = `${cfg.fontSize && cfg.fontSize > 24 ? cfg.fontSize : 24}px ${
+    cfg.font ?? "sans-serif"
+  }`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
@@ -158,15 +207,17 @@ export function drawTextItem({
     const cursor = Math.floor(Date.now() / 500) % 2 === 0 ? "|" : "";
     ctx.fillText(editingText + cursor, 0, 0);
   } else {
-    ctx.fillText(t.textContent, 0, 0);
+    ctx.fillText(cfg.text ?? "", 0, 0);
   }
 
-  // highlight nếu chọn
+  // highlight khi được chọn
   if (t.id === selectedId) {
-    const metrics = ctx.measureText(t.textContent);
+    const metrics = ctx.measureText(cfg.text ?? "");
     const textWidth = metrics.width;
     const textHeight =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent || t.fontSize || 24;
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent ||
+      cfg.fontSize ||
+      24;
 
     const paddingX = 8;
     const paddingY = 6;

@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import { BaseRepo, Constructor } from "../core";
-import {  TrackItemModel } from "../../database/models/track_items_models";
+import { TrackItemModel } from "../../database/models/track_items_models";
 import { TrackItem } from "../../../domain/models/track_items_models";
 import { Track } from "../../../domain/models/track_models";
 import { TrackModel } from "../../database/models/track_models";
@@ -46,7 +46,7 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
           where: {
             start_time: { [Op.lte]: time },
             end_time: { [Op.gt]: time },
-            track_id: 1,
+            type: "video",
           },
         });
         return result ?? undefined;

@@ -1,19 +1,20 @@
-import { Asset, TrackItem } from "@/types";
-import axios from "axios";
+import { Asset } from "@/types";
+import { TrackItem } from "@/types/track_item";
+import axios, { AxiosResponse } from "axios";
 
 export const postTrack = async (
   asset: Asset,
   projectId: string,
   start_time: number
 ) => {
-  console.log(asset)
-  return  await axios.post("/api/track-items", {
+  const res = await axios.post("/api/track-items", {
     asset_id: asset.id,
     url: asset.url,
     project_id: projectId,
     track_id: 1,
     start_time,
   });
+  return res.data;
 };
 export const loadProject = async (projectId: string) => {
   if (!projectId) {
@@ -37,12 +38,15 @@ export const exportProject = async (projectId: string) => {
     responseType: "blob",
   });
 };
+
 export const importSrt = async (
   file: File,
   projectId: string,
   assetId: number
-) => {
-  if (!projectId) return console.log("There is no project id");
+): Promise<AxiosResponse<any>> => {
+  if (!projectId) {
+    throw new Error("There is no project id");
+  }
 
   const formData = new FormData();
   formData.append("file", file);

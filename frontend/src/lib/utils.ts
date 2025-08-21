@@ -1,4 +1,5 @@
-import { TimelineMetricsParams, TrackItem } from "@/types";
+import { TimelineMetricsParams } from "@/types";
+import { TextConfig, TrackItem } from "@/types/track_item";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -36,7 +37,7 @@ export function drawRoundedImage(
   strokeStyle = "red",
   lineWidth = 3,
   roundAllCorners = false,
-  text?: string, // thêm text
+  text?: TrackItem, // thêm text
   textColor = "black", // màu chữ
   font = "12px Arial" // font chữ
 ) {
@@ -87,10 +88,11 @@ export function drawRoundedImage(
 
     // vẽ text nếu có
     if (text) {
-      ctx.fillStyle = textColor;
-      ctx.font = font;
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, x + 6, y + height / 2);
+      // ctx.fillStyle = textColor;
+      // ctx.font = font;
+      // ctx.textBaseline = "middle";
+      // ctx.fillText(text.config.text, x + 6, y + height / 2);
+      drawSubtitle(ctx, text, x, height);
     }
   }
 
@@ -193,3 +195,30 @@ export const getClickX = (canvas: HTMLCanvasElement, e: React.MouseEvent) => {
   const rect = canvas.getBoundingClientRect();
   return e.clientX - rect.left;
 };
+function drawSubtitle(
+  ctx: CanvasRenderingContext2D,
+  item: TrackItem,
+  xOffset: number,
+  height: number
+) {
+  if (item.type !== "text" || !item.config) return;
+
+  const cfg = item.config as TextConfig;
+  const text = cfg.text ?? "";
+  if (!text) return;
+
+  // Config
+  const color = cfg.color ?? "#FFFFFF";
+  const fontFamily = cfg.font ?? "Arial";
+  const fontSize = cfg.fontSize ?? 12;
+  console.log("drawed" + text);
+  // Nếu user chưa custom toạ độ → mặc định canh trong rect
+  const x =  xOffset + 6;
+  const y =  height / 2;
+  ctx.fillStyle = color;
+  ctx.font = `${fontSize}px ${fontFamily}`;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left"; // giữ giống cách cũ, chữ từ trái sang phải
+
+  ctx.fillText(text, x, y);
+}

@@ -1,6 +1,6 @@
 import { BaseRepo, Constructor } from "../core";
 import { AssetModel } from "../../database/models/track_items_models";
-import { Asset } from "../../../domain/models/track_items_models";
+import { Asset } from "../../../domain/models/asset_models";
 
 export function AddQueriesAsset<TBase extends Constructor<BaseRepo>>(
   Base: TBase

@@ -1,3 +1,5 @@
+import { TrackItemConfig } from "./track_items_models";
+
 export interface videoFrame {
   id?: number;
   track_item_id: number;
@@ -6,21 +8,14 @@ export interface videoFrame {
   updated_at?: Date;
 }
 export interface assetsWithTrackItems {
-  video_frames: videoFrame[] | undefined;
-  id?: number;
-  track_id: number;
-  asset_id?: number;
-  start_time?: number;
-  width?: number;
-  height?: number;
-  end_time?: number;
+  id?: number | undefined;
   project_id: number;
-  x?: number;
-  y?: number;
-  scale?: number;
-  rotation?: number;
-  text_content?: string;
-  created_at?: Date;
-  updated_at?: Date;
+  asset_id?: number | undefined;
+  type: "video" | "audio" | "text" | "image";
+  start_time: number|undefined;
+  end_time: number|undefined;
+  config?: TrackItemConfig;
+  created_at?: Date | undefined;
+  updated_at?: Date | undefined;
+  video_frames?: videoFrame[];
 }
-[];

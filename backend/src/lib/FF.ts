@@ -1,20 +1,32 @@
 import { spawn } from "child_process";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { formatTime } from "./util";
-import { TrackItem } from "../domain/models/track_items_models";
-const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
-  return new Promise<void>((resolve, reject) => {
-    console.log("=== FFmpeg makeThumbnail Debug ===");
-    console.log("Full video path:", fullPath);
-    console.log("Thumbnail output path:", thumbnailPath);
-    console.log("File exists?", fs.existsSync(fullPath));
-    if (fs.existsSync(fullPath)) {
-      console.log("File size:", fs.statSync(fullPath).size);
-    }
-    console.log("============================");
+import { TextConfig, TrackItem } from "../domain/models/track_items_models";
+import { access, stat } from "fs/promises";
+import { constants } from "fs";
 
+export const makeThumbnail = async (
+  fullPath: string,
+  thumbnailPath: string
+): Promise<void> => {
+  console.log("=== FFmpeg makeThumbnail Debug ===");
+  console.log("Full video path:", fullPath);
+  console.log("Thumbnail output path:", thumbnailPath);
+
+  try {
+    await access(fullPath, constants.F_OK);
+    const fileStats = await stat(fullPath);
+    console.log("File exists?", true);
+    console.log("File size:", fileStats.size);
+  } catch {
+    console.log("File exists?", false);
+  }
+
+  console.log("============================");
+
+  return new Promise<void>((resolve, reject) => {
     const ffmpeg = spawn("ffmpeg", [
       "-i",
       fullPath,
@@ -26,16 +38,11 @@ const makeThumbnail = (fullPath: string, thumbnailPath: string) => {
     ]);
 
     ffmpeg.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(`FFmpeg exited with code: ${code}`);
-      }
+      if (code === 0) resolve();
+      else reject(new Error(`FFmpeg exited with code: ${code}`));
     });
 
-    ffmpeg.on("error", (err) => {
-      reject(err);
-    });
+    ffmpeg.on("error", reject);
   });
 };
 
@@ -110,7 +117,7 @@ const extractAllFrames = async (
   const duration = await getDuration(fullPath);
   const interval = duration / totalFrames;
 
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "frames-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "frames-"));
   console.log("[extractFrames] Temp dir:", tempDir);
 
   await new Promise<void>((resolve, reject) => {
@@ -128,9 +135,9 @@ const extractAllFrames = async (
     ffmpeg.on("error", reject);
   });
 
-  const allFrames = fs
-    .readdirSync(tempDir)
-    .sort()
+  const allFiles = await fs.readdir(tempDir);
+  const allFrames = allFiles
+    .sort() // giữ thứ tự frame-001, frame-002...
     .map((file) => path.join(tempDir, file));
 
   console.log("[extractFrames] Total frames:", allFrames.length);
@@ -149,7 +156,7 @@ const cutVideoAccurate = async (
     throw new Error("Invalid time range: end must be greater than start");
   }
 
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "cut-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "cut-"));
   console.log("[cutVideoAccurate] Temp dir:", tempDir);
 
   const outputFile = path.join(tempDir, outputName || "cut.mp4");
@@ -201,7 +208,7 @@ const concatVideos = async (cutVideos: string[], outputPath: string) => {
   // Tạo temp file list cho ffmpeg
   const tempListPath = path.join(process.cwd(), `temp_list_${Date.now()}.txt`);
   const fileContent = cutVideos.map((v) => `file '${v}'`).join("\n");
-  fs.writeFileSync(tempListPath, fileContent);
+  fs.writeFile(tempListPath, fileContent);
 
   // Chạy ffmpeg concat
   await new Promise<void>((resolve, reject) => {
@@ -220,7 +227,7 @@ const concatVideos = async (cutVideos: string[], outputPath: string) => {
     ffmpeg.stderr.on("data", (data) => console.log(data.toString()));
 
     ffmpeg.on("close", (code) => {
-      fs.unlinkSync(tempListPath); // xóa temp list
+      fs.unlink(tempListPath); // xóa temp list
       if (code === 0) resolve();
       else reject(new Error(`ffmpeg exited with code ${code}`));
     });
@@ -234,7 +241,7 @@ export async function overlaySubtitles(
   outputVideo: string
 ) {
   // 1️⃣ Tạo file subtitle tạm thời (.ass)
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "subs-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "subs-"));
   const subtitleFile = path.join(tempDir, "subs.ass");
 
   const assHeader = `
@@ -258,12 +265,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     .map((t) => {
       const start = formatTime(t.start_time!);
       const end = formatTime(t.end_time!);
-      const text = t.text_content!.replace(/\n/g, "\\N"); // multi-line
+      const text =
+        t.config &&
+        (t.config as TextConfig).text?.trim()!.replace(/\n/g, "\\N"); // multi-line
       return `Dialogue: 0,${start},${end},Default,,0,0,0,,${text}`;
     })
     .join("\n");
 
-  fs.writeFileSync(subtitleFile, assHeader + assEvents, "utf-8");
+  fs.writeFile(subtitleFile, assHeader + assEvents, "utf-8");
 
   // 3️⃣ Chạy ffmpeg overlay subtitle
   await new Promise<void>((resolve, reject) => {
@@ -296,8 +305,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
   });
 
   // 4️⃣ Xoá tạm
-  fs.unlinkSync(subtitleFile);
-  fs.rmdirSync(tempDir);
+  fs.unlink(subtitleFile);
+  fs.rmdir(tempDir);
 }
 
 export default {

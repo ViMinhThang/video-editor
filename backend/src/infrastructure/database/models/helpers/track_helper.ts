@@ -1,6 +1,10 @@
 import { DataTypes, Sequelize } from "sequelize";
 import { ProjectModel } from "../project_models";
-import { TrackItemModel, AssetModel, VideoFrameModel } from "../track_items_models";
+import {
+  TrackItemModel,
+  AssetModel,
+  VideoFrameModel,
+} from "../track_items_models";
 import { TrackModel } from "../track_models";
 
 const primaryKey = {
@@ -23,41 +27,17 @@ export const initializeTrackModels = (sequelize: Sequelize) => {
   );
   TrackItemModel.init(
     {
-      ...primaryKey,
-      project_id: { type: DataTypes.INTEGER },
-      track_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: "tracks",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-      asset_id: {
-        type: DataTypes.INTEGER,
-        references: {
-          model: "assets",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-      start_time: { type: DataTypes.FLOAT },
-      end_time: { type: DataTypes.FLOAT },
-      x: { type: DataTypes.FLOAT },
-      y: { type: DataTypes.FLOAT },
-      scale: { type: DataTypes.FLOAT },
-      rotation: { type: DataTypes.FLOAT },
-      width: { type: DataTypes.FLOAT },
-      height: { type: DataTypes.FLOAT },
-      text_content: { type: DataTypes.STRING },
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      project_id: DataTypes.INTEGER,
+      asset_id: DataTypes.INTEGER,
+      type: DataTypes.STRING,
+      start_time: DataTypes.FLOAT,
+      end_time: DataTypes.FLOAT,
+      config: DataTypes.JSONB,
+      created_at: DataTypes.DATE,
+      updated_at: DataTypes.DATE,
     },
-    {
-      sequelize,
-      tableName: "track_items",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-    }
+    { sequelize, tableName: "track_items", underscored: true }
   );
   AssetModel.init(
     {

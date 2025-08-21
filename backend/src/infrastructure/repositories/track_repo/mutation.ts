@@ -13,24 +13,22 @@ export function AddStorageTrackItem<Tbase extends Constructor<BaseRepo>>(
         const [_track_item, created] = await TrackItemModel.upsert(
           {
             id: ti.id,
-            track_id: ti.track_id,
+            type: ti.type,
             project_id: ti.project_id,
-            start_time: ti?.start_time,
-            asset_id: ti?.asset_id,
-            end_time: ti?.end_time,
-            x: ti?.x,
-            y: ti?.y,
-            scale: ti?.scale,
-            rotation: ti?.rotation,
-            text_content: ti?.text_content,
+            start_time: ti.start_time,
+            end_time: ti.end_time,
+            asset_id: ti.asset_id,
+            config: ti.config ?? {},
           },
           { transaction }
         );
-        return _track_item.get({ plain: true });
+
+        return _track_item.get({ plain: true }) as TrackItem;
       });
     }
   };
 }
+
 
 export function AddStorageTrack<TBase extends Constructor<BaseRepo>>(
   Base: TBase

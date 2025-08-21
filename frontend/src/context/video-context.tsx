@@ -5,8 +5,8 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { VideoContextType } from "@/types/editor";
 import { trackTime } from "@/services/video-action";
+import { VideoContextType } from "@/types/video";
 
 export const VideoContext = createContext<VideoContextType | undefined>(
   undefined
