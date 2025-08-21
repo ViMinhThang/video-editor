@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useEditorContext } from "@/hooks/use-editor";
 import { useParams } from "react-router-dom";
 import { importSrt } from "@/api/track-api";
@@ -9,7 +9,7 @@ import { takeLastItemStart } from "@/lib/utils";
 
 const SubtitlePage = () => {
   const { projectId } = useParams<string>();
-  const { fetchProject, setTracks, tracks, addTextItem, duration, asset } =
+  const { fetchProject, setTracks, tracks, addTextItem, asset } =
     useEditorContext();
   const inputRef = useRef<HTMLInputElement>(null);
   const texts = tracks.text;
@@ -24,6 +24,41 @@ const SubtitlePage = () => {
     }));
     await fetchProject();
   };
+  if (!asset) {
+    return (
+      <div className="border-none bg-black text-white px-5 w-full h-full">
+        <div className="text-white font-bold border-b border-gray-800 px-5 py-2">
+          <h1>Alice's project</h1>
+        </div>
+        <div className="flex w-full max-w-lg gap-2 py-2 border-b border-gray-800">
+          <input
+            type="file"
+            className="hidden"
+            accept=".srt"
+            ref={inputRef}
+            onChange={handleUploadSrt}
+          />
+          <Button
+            className="flex-1 h-12 flex items-center justify-center rounded-xs cursor-pointer"
+            onClick={() => inputRef.current?.click()}
+          >
+            <Upload /> Tải lên phụ đề
+          </Button>
+          <Button
+            className="flex-1 h-12 flex items-center justify-center rounded-xs cursor-pointer"
+            onClick={() =>
+              addTextItem(takeLastItemStart(tracks.text), asset.id)
+            }
+          >
+            <Plus />
+            Tạo text
+          </Button>
+        </div>
+
+        <div className="mt-5 flex flex-wrap"></div>
+      </div>
+    );
+  }
   console.log(takeLastItemStart(tracks.text));
   return (
     <div className="border-none bg-black text-white px-5 w-full h-full">
@@ -48,6 +83,7 @@ const SubtitlePage = () => {
           className="flex-1 h-12 flex items-center justify-center rounded-xs cursor-pointer"
           onClick={() => addTextItem(takeLastItemStart(tracks.text), asset.id)}
         >
+          <Plus />
           Tạo text
         </Button>
       </div>

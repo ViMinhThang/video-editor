@@ -67,7 +67,6 @@ export async function drawTimeline({
   for (const track of sortedTracks) {
     const framesInTrack = track.video_frames ?? [];
     framesInTrack.sort((a, b) => a.start_time - b.start_time);
-    console.log(framesInTrack)
     framesInTrack.forEach((frame, idx) => {
       const img = imageMap[frame.id];
       drawRoundedImage(

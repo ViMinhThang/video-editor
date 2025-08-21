@@ -80,7 +80,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
       }));
 
       // sau đó fetch để đồng bộ thumbnail
-      // await fetchProject();
+      await fetchProject();
     } catch (error) {
       console.error("Error posting track item", error);
     }

@@ -55,9 +55,7 @@ export const TimeLine = ({ zoom = 100 }: { zoom?: number }) => {
           duration={totalDuration}
           scale={scale}
         />
-        <TimeCanvasSubtitle
-          groupGap={5}
-        />
+        <TimeCanvasSubtitle groupGap={5} />
         <TimeCanvasVideo thumbnailWidth={thumbnailWidth} groupGap={5} />
 
         {/* Cursor */}
@@ -107,7 +105,7 @@ export const TimeLine = ({ zoom = 100 }: { zoom?: number }) => {
         >
           <li
             className="cursor-pointer px-2 py-1 hover:bg-gray-200"
-            onClick={handleDownload}
+            onClick={() => handleDownload}
           >
             Tải xuống
           </li>

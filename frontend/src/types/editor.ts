@@ -21,3 +21,9 @@ export interface EditorContextType {
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   addTrackItem: (asset: Asset) => Promise<void>;
 }
+export interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  trackItemId: number | null;
+}

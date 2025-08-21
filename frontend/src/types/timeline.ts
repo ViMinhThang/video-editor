@@ -19,18 +19,32 @@ export interface TimelineContextType {
   frames: any[];
   setCurrentTime: (time: number) => void;
 
+  // Context menu state
   contextMenu: {
     visible: boolean;
     x: number;
     y: number;
     trackItemId: number | null;
   };
+
+  // Highlight / animation refs
   highlightTrackItemIdRef: React.RefObject<number | null>;
   animLineWidthRef: React.RefObject<number>;
 
-  handleMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
-  handleContextMenu: (e: React.MouseEvent, trackItemId: number) => void;
-  handleDownload: () => void;
+  // Drag / resize refs
+  dragState?: {
+    activeTrackItemId: React.RefObject<number | null>;
+    startX: React.RefObject<number>;
+    startWidth: React.RefObject<number>;
+    isDragging: React.RefObject<boolean>;
+    isResizing: React.RefObject<boolean>;
+  };
+
+  // Handlers
+  handleContextMenu: (e: React.MouseEvent<HTMLDivElement>, trackItemId: number) => void;
+  handleDownload: (trackItemId?: number) => void;
+
+  // State setters
   setContextMenu: React.Dispatch<
     React.SetStateAction<{
       visible: boolean;
@@ -40,6 +54,7 @@ export interface TimelineContextType {
     }>
   >;
 }
+
 export interface TimeCanvasSubtitleProps {
   groupGap: number;
   thumbnailHeight?: number;

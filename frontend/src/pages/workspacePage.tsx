@@ -1,11 +1,11 @@
 import Cardmodi from "@/components/card-custom";
 import { CreateCardButton } from "@/components/CreateButtons";
 import { Button } from "@/components/ui/button";
-import { useProject } from "@/hooks/use-project";
 import { deleteAsset } from "@/api/asset-api";
 import { FileUp, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useEditorContext } from "@/hooks/use-editor";
 
 export default function WorkspacePage() {
   const {
@@ -17,7 +17,7 @@ export default function WorkspacePage() {
     handleFileChange,
     fileInputRef,
     fetchProject,
-  } = useProject();
+  } = useEditorContext();
 
   const navigate = useNavigate();
 

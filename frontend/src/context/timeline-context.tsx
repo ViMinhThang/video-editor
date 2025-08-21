@@ -3,16 +3,23 @@ import { downloadTrackItem } from "@/api/track-api";
 import { download, selectTrackItemContext } from "@/services/timeline-action";
 import { ContextMenuState } from "@/types/editor";
 import { TimelineContextType, TimeLineProps } from "@/types/timeline";
+import { findTrackAtX } from "@/lib/utils";
 
 // ---------- Context ----------
-export const TimelineContext = createContext<TimelineContextType | undefined>(undefined);
+export const TimelineContext = createContext<TimelineContextType | undefined>(
+  undefined
+);
 
 // ---------- Provider ----------
 interface TimelineProviderProps extends TimeLineProps {
   children: ReactNode;
 }
 
-export const TimelineProvider = ({ children, frames, setCurrentTime }: TimelineProviderProps) => {
+export const TimelineProvider = ({
+  children,
+  frames,
+  setCurrentTime,
+}: TimelineProviderProps) => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
     x: 0,
@@ -33,10 +40,6 @@ export const TimelineProvider = ({ children, frames, setCurrentTime }: TimelineP
     highlightState.animLineWidthRef.current = 0;
   };
 
-  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    // TODO: implement cursor drag logic
-  };
-
   const handleContextMenu = (e: MouseEvent, trackItemId: number) => {
     e.preventDefault();
     setContextMenu({ visible: true, x: e.clientX, y: e.clientY, trackItemId });
@@ -52,7 +55,9 @@ export const TimelineProvider = ({ children, frames, setCurrentTime }: TimelineP
   const handleDownload = async () => {
     if (!contextMenu.trackItemId) return;
 
-    const trackItem = frames.find((f) => f.track_item_id === contextMenu.trackItemId);
+    const trackItem = frames.find(
+      (f) => f.track_item_id === contextMenu.trackItemId
+    );
     if (!trackItem) return;
 
     const response = await downloadTrackItem(contextMenu.trackItemId);
@@ -69,7 +74,6 @@ export const TimelineProvider = ({ children, frames, setCurrentTime }: TimelineP
         contextMenu,
         highlightTrackItemIdRef: highlightState.trackItemIdRef,
         animLineWidthRef: highlightState.animLineWidthRef,
-        handleMouseDown,
         handleContextMenu,
         handleDownload,
         setContextMenu,

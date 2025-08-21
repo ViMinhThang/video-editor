@@ -1,4 +1,4 @@
-import { TrackItem } from ".";
+import { TrackItem } from "./track_item";
 
 export interface MouseMoveParams {
   x: number;
