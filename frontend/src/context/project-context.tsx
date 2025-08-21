@@ -52,7 +52,6 @@ export const ProjectProvider = ({
     try {
       const res = await loadProject(projectId);
       setAssets(res.data.assets);
-      console.log(res.data.assets)
       // setProject(res.data.project);
     } catch (err) {
       console.error("Failed to load project", err);

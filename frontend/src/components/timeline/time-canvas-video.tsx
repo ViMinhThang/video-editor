@@ -23,6 +23,8 @@ export const TimeCanvasVideo = ({
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
+    console.log("rendered");
+
     if (!canvas) return;
     drawTimeline({
       canvas,
@@ -34,14 +36,13 @@ export const TimeCanvasVideo = ({
       animLineWidth: animLineWidthRef.current,
     });
   }, [
-    videos,
+    tracks.video,
     thumbnailWidth,
     thumbnailHeight,
     groupGap,
     highlightTrackItemIdRef,
     animLineWidthRef,
   ]);
-
   const canvasRef = useResizableCanvas(render, thumbnailHeight);
   const onContextMenu = (e: React.MouseEvent) =>
     handleContextMenuClick({

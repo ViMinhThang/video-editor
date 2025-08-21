@@ -38,12 +38,11 @@ const EditorLayout = () => {
   const {
     assets,
     projectId,
-    fetchProject,
     handleUploadFile,
     handleFileChange,
     fileInputRef,
   } = useProject();
-  const { tracks, setTracks, asset, setAsset } = useEditorContext();
+  const { tracks, setTracks, asset, setAsset,fetchProject } = useEditorContext();
 
   const [item, setItem] = useState<ItemProps>({
     title: "Phương tiện",

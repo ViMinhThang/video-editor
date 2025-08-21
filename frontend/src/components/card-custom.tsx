@@ -16,7 +16,6 @@ interface CardmodiProps {
 }
 export function AssetThumbnail({ asset }: { asset: Asset }) {
   const mimeType = asset.mime_type;
-  console.log(asset)
   if (mimeType.includes("video/mp4")) {
     return (
       <img
@@ -62,7 +61,7 @@ export default function Cardmodi({ assets, onDelete }: CardmodiProps) {
           <CardFooter className="px-4 flex items-center gap-3">
             <div className="flex flex-col">
               <h1 className="font-semibold text-sm truncate max-w-[180px]">
-                {asset.original_name}
+                {asset.name}
               </h1>
               <p className="text-sm"> {timeSince(asset.created_at)}</p>
             </div>

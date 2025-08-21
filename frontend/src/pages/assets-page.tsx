@@ -24,7 +24,6 @@ const AssetsPage = ({
   handleFileChange,
   handleAddToTrack,
 }: Props) => {
-  console.log(assets)
   return (
     <div className="border-none bg-black text-white px-5 w-full h-full">
       <div className="text-white font-bold border-b-1 border-gray-800 px-5 py-2">
