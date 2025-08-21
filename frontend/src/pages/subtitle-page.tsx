@@ -24,7 +24,7 @@ const SubtitlePage = () => {
     }));
     await fetchProject();
   };
-  console.log(takeLastItemStart(tracks.video));
+  console.log(takeLastItemStart(tracks.text));
   return (
     <div className="border-none bg-black text-white px-5 w-full h-full">
       <div className="text-white font-bold border-b border-gray-800 px-5 py-2">
@@ -46,7 +46,7 @@ const SubtitlePage = () => {
         </Button>
         <Button
           className="flex-1 h-12 flex items-center justify-center rounded-xs cursor-pointer"
-          onClick={() => addTextItem(takeLastItemStart(tracks.video), asset.id)}
+          onClick={() => addTextItem(takeLastItemStart(tracks.text), asset.id)}
         >
           Tạo text
         </Button>

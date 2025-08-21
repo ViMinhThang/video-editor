@@ -222,7 +222,10 @@ function drawSubtitle(
 
   ctx.fillText(text, x, y);
 }
-export const takeLastItemStart = (videos: TrackItem[]) => {
-  console.log("takelast",videos)
-  return videos[videos.length - 1].startTime;
+export const takeLastItemStart = (texts: TrackItem[]) => {
+  if (texts.length > 0) {
+    return texts[texts.length - 1].endTime;
+  } else {
+    return 0;
+  }
 };
