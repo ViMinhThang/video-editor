@@ -1,6 +1,8 @@
 import { RefObject } from "react";
 import { Asset } from ".";
-import { TrackItem, TracksState } from "./track_item";
+import { TrackItem } from "./track_item";
+import { HighlightState } from "./timeline";
+import { TracksState } from "./track";
 
 export type ContextMenuConfig = {
   e: React.MouseEvent;
@@ -53,5 +55,7 @@ export type VideoClickConfig = {
   assets: Asset[];
   setAsset: React.Dispatch<React.SetStateAction<Asset | undefined>>;
   groupGap: number;
+  highlightRef: React.RefObject<HighlightState>;
+
   thumbnailWidth: number;
 };

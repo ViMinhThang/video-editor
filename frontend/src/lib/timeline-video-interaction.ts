@@ -1,7 +1,11 @@
-
 import { drawTimeline, loadImage } from "./timeline-draw";
 import { getClickX, findTrackAtX, drawRoundedImage } from "./canvas-utils";
-import { VideoClickConfig, MouseDownConfig, MouseUpConfig, RenderDraggingConfig } from "@/types/event";
+import {
+  VideoClickConfig,
+  MouseDownConfig,
+  MouseUpConfig,
+  RenderDraggingConfig,
+} from "@/types/event";
 
 export const handleVideoClick = ({
   e,
@@ -11,6 +15,7 @@ export const handleVideoClick = ({
   setAsset,
   groupGap,
   thumbnailWidth,
+  highlightRef,
 }: VideoClickConfig) => {
   if (!canvasRef.current) return;
 
@@ -27,6 +32,7 @@ export const handleVideoClick = ({
     const foundAsset = assets.find((a) => a.id === trackItem?.assetId);
     if (foundAsset) {
       setAsset(foundAsset);
+      highlightRef.current.id = foundTrackItemId;
     }
   }
 };

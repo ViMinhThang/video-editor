@@ -4,10 +4,6 @@ import { useTimelineContext } from "@/hooks/use-timeline";
 import { useTimelineDragDrop } from "@/hooks/use-timeline-drag";
 import { findTrackAtX, getClickX } from "@/lib/canvas-utils";
 import { drawTimeline } from "@/lib/timeline-draw";
-import {
-  handleMouseUp,
-  handleVideoClick,
-} from "@/lib/timeline-video-interaction";
 import { TimelineCanvasProps } from "@/types/timeline";
 import { useCallback } from "react";
 
@@ -16,16 +12,28 @@ export const TimeCanvasVideo = ({
   thumbnailHeight = 60,
   groupGap = 10,
 }: TimelineCanvasProps) => {
-  const { handleContextMenu, highlightRef } = useTimelineContext();
-  const { tracks, setTracks, setAsset, assets } = useEditorContext();
+  const { handleContextMenu, highlightRef, handleOnClick } =
+    useTimelineContext();
+  const { tracks, dispatchTracks, setAsset, assets, updateProjectState } =
+    useEditorContext();
 
-  const videos = tracks.video ?? [];
+  const videos = tracks.video;
 
-  // canvas render
+  const canvasRef = useResizableCanvas(
+    () => renderCanvas(),
+    thumbnailHeight,
+    videos
+  );
+
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || videos.length === 0) return;
-
+    if (!canvas) return;
+    console.log(
+      "Rendering canvas with videos:",
+      videos,
+      "width",
+      thumbnailWidth
+    ); // Debug
     drawTimeline({
       canvas,
       videos,
@@ -37,9 +45,6 @@ export const TimeCanvasVideo = ({
     });
   }, [videos, thumbnailWidth, thumbnailHeight, groupGap, highlightRef]);
 
-  const canvasRef = useResizableCanvas(renderCanvas, thumbnailHeight, videos);
-
-  // hook drag-drop
   const {
     isDragging,
     mouseDown,
@@ -53,21 +58,28 @@ export const TimeCanvasVideo = ({
     thumbnailHeight,
     groupGap,
     canvasRef,
-    onDrop: (track, e) =>
-      handleMouseUp({
-        e,
-        canvasRef,
-        videos: videos,
-        dragItemRef: { current: track },
-        setTracks,
-        setIsDragging: () => {},
-        groupGap,
-        thumbnailWidth,
-        trackType: "video",
-      }),
+    dispatchTracks,
+    trackType: "video",
   });
 
-  // context menu
+  const handleCanvasMouseMove = (e: React.MouseEvent) =>
+    onMouseMove(e, renderCanvas);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isDragging || mouseDown) return;
+    const clickX = getClickX(canvasRef.current, e);
+    const foundTrack = findTrackAtX(videos, clickX, groupGap, thumbnailWidth);
+    if (foundTrack) {
+      const trackItem = tracks.video.find((t) => t.id === foundTrack);
+      const foundAsset = assets.find((a) => a.id === trackItem?.assetId);
+      if (foundAsset) {
+        console.log("asdasdadasd");
+
+        setAsset(foundAsset);
+        handleOnClick(e, foundTrack, "video", renderCanvas);
+      }
+    }
+  };
   const onContextMenu = (e: React.MouseEvent) => {
     if (isDragging) return;
     const clickX = getClickX(canvasRef.current, e); // gọn hơn
@@ -76,38 +88,18 @@ export const TimeCanvasVideo = ({
       handleContextMenu(e, foundTrackId, "video", renderCanvas);
     }
   };
-
-  // click
-  const onVideoClick = (e: React.MouseEvent) => {
-    if (isDragging || mouseDown) return;
-    handleVideoClick({
-      e,
-      canvasRef,
-      tracks,
-      assets,
-      setAsset,
-      groupGap,
-      thumbnailWidth,
-    });
-  };
-
   return (
     <div style={{ position: "relative" }}>
       <canvas
         ref={canvasRef}
-        onContextMenu={onContextMenu}
-        onClick={onVideoClick}
         onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
+        onMouseMove={handleCanvasMouseMove}
         onMouseUp={onMouseUp}
-        style={{
-          display: "block",
-          width: "100%",
-          height: `${thumbnailHeight + 20}px`,
-        }}
+        onContextMenu={onContextMenu}
+        onClick={handleClick}
+        style={{ width: "100%", height: thumbnailHeight + 20 }}
       />
 
-      {/* drag overlay */}
       {dragOverlay && (
         <div
           style={{
@@ -117,7 +109,6 @@ export const TimeCanvasVideo = ({
             width: dragOverlay.width,
             height: dragOverlay.height,
             backgroundColor: "rgba(0,150,255,0.7)",
-            borderRadius: "4px",
             pointerEvents: "none",
           }}
         />

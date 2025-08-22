@@ -16,7 +16,6 @@ export const TimelineSection = () => {
   const [cutTime, setCutTime] = useState<number | null>(null);
   const [zoom, setZoom] = useState(100);
 
-
   const handleCutVideo = async () => {
     try {
       const formatedTime = Math.ceil(currentTime);

@@ -1,5 +1,5 @@
 // context/editor-context.tsx
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useReducer, useState } from "react";
 import { useParams } from "react-router-dom";
 import { addText, loadProject, postTrack } from "@/api/track-api";
 import { uploadAsset } from "@/api/asset-api";
@@ -7,10 +7,11 @@ import { Asset, Project } from "@/types";
 import { TrackItem, VideoFrame } from "@/types/track_item";
 import { processAssests } from "@/services/editor-actions";
 import { EditorContextType } from "@/types/editor";
-import axios from "axios";
 import { takeDuration } from "@/lib/utils";
+import { tracksReducer, TracksState } from "@/types/track";
 
 export const EditorContext = createContext<EditorContextType | null>(null);
+const initialTracks: TracksState = { video: [], audio: [], text: [] };
 
 export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -20,11 +21,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   const [project, setProject] = useState<Project | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [asset, setAsset] = useState<Asset | null>(null);
-  const [tracks, setTracks] = useState<Record<string, TrackItem[]>>({
-    video: [],
-    audio: [],
-    text: [],
-  });
+  const [tracks, dispatchTracks] = useReducer(tracksReducer, initialTracks);
   const [frames, setFrames] = useState<VideoFrame[]>([]);
   const [duration, setDuration] = useState(0);
 
@@ -35,30 +32,24 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const res = await loadProject(projectId);
       const { tracks } = processAssests(res.data.assets);
+      setAssets(res.data.assets);
       updateProjectState(tracks.video, tracks.audio, tracks.text);
     } catch (err) {
       console.error("Failed to load project", err);
     }
   };
+
   const updateProjectState = (
     videoTracks: TrackItem[],
-    audioTracks?: TrackItem[],
-    textTracks?: TrackItem[]
+    audioTracks: TrackItem[] = [],
+    textTracks: TrackItem[] = []
   ) => {
-    const allTracks = [
-      ...videoTracks,
-      ...(audioTracks || []),
-      ...(textTracks || []),
-    ];
-
-    setTracks({
-      video: videoTracks,
-      audio: audioTracks || [],
-      text: textTracks || [],
+    dispatchTracks({
+      type: "SET_TRACKS",
+      payload: { video: videoTracks, audio: audioTracks, text: textTracks },
     });
-
     setFrames(videoTracks.flatMap((t) => t.video_frames || []));
-    setDuration(takeDuration(allTracks));
+    setDuration(takeDuration([...videoTracks, ...audioTracks, ...textTracks]));
   };
 
   const handleUploadFile = () => {
@@ -77,7 +68,12 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Upload failed", error);
     }
   };
+  useEffect(() => {
+    const allTracks = [...tracks.video, ...tracks.audio, ...tracks.text];
 
+    setFrames(tracks.video.flatMap((t) => t.video_frames || []));
+    setDuration(takeDuration(allTracks));
+  }, [tracks]); // tracks thay đổi → tính lại frames & duration
   const addTrackItem = async (asset: Asset) => {
     if (asset.type !== "video" || !projectId) return;
     setAsset(asset);
@@ -89,29 +85,49 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const tempTrack = await postTrack(asset, projectId, start_time);
-
-      if (tracks.video.length === 0) {
-        await fetchProject();
-      } else {
-        const updatedTrack = [...tracks.video, tempTrack];
-        updateProjectState(updatedTrack, tracks.audio, tracks.text);
-      }
+      dispatchTracks({
+        type: "ADD_TRACK",
+        trackType: "video",
+        payload: tempTrack,
+      });
+      setFrames([
+        ...tracks.video.flatMap((t) => t.video_frames || []),
+        ...(tempTrack.video_frames || []),
+      ]);
+      setDuration(
+        takeDuration([
+          ...tracks.video,
+          tempTrack,
+          ...tracks.audio,
+          ...tracks.text,
+        ])
+      );
+      // if (tracks.video.length === 0) {
+      //   await fetchProject();
+      // } else {
+      //   dispatchTracks({ type: "ADD_TRACK", trackType: "video", payload: tempTrack });
+      //   // setFrames([...tracks.video.flatMap((t) => t.video_frames || []), ...(tempTrack.video_frames || [])]);
+      //   // setDuration(takeDuration([...tracks.video, tempTrack, ...tracks.audio, ...tracks.text]));
+      // }
     } catch (error) {
       console.error("Error posting track item", error);
     }
   };
 
   const addTextItem = async (time: number, asset_id: number) => {
+    if (!projectId) return;
     try {
-      const res = await addText(time, asset_id, Number(projectId));
+      await addText(time, asset_id, Number(projectId));
       await fetchProject();
     } catch (error) {
       console.log("error", error);
     }
   };
+
   useEffect(() => {
     fetchProject();
   }, [projectId]);
+
   return (
     <EditorContext.Provider
       value={{
@@ -125,7 +141,8 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
         fileInputRef,
         setAsset,
         setAssets,
-        setTracks,
+        updateProjectState,
+        dispatchTracks,
         setDuration,
         fetchProject,
         addTextItem,

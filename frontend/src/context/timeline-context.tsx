@@ -7,6 +7,7 @@ import {
   TimelineContextType,
   TimeLineProps,
 } from "@/types/timeline";
+import { Asset } from "@/types";
 
 // ---------- Context ----------
 export const TimelineContext = createContext<TimelineContextType | undefined>(
@@ -32,7 +33,6 @@ export const TimelineProvider = ({
     trackItemId: null,
   });
 
-  // Highlight state (chỉ 1 item tại 1 thời điểm)
   const highlightState = {
     ref: useRef<HighlightState>({ id: null, type: null }),
     animationFrameRef: useRef<number | null>(null),
@@ -58,7 +58,17 @@ export const TimelineProvider = ({
 
     render();
   };
+  const handleOnClick = (
+    e: MouseEvent,
+    trackItemId: number,
+    type: "video" | "subtitle",
+    render: () => void
+  ) => {
+    e.preventDefault();
 
+    highlightState.ref.current = { id: trackItemId, type };
+    render();
+  };
   const handleDownload = async () => {
     if (!contextMenu.trackItemId) return;
 
@@ -79,6 +89,7 @@ export const TimelineProvider = ({
         frames,
         setCurrentTime,
         contextMenu,
+        handleOnClick,
         highlightRef: highlightState.ref,
         handleContextMenu,
         handleDownload,

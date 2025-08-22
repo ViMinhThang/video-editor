@@ -1,3 +1,4 @@
+import { Asset } from ".";
 import { ContextMenuState } from "./editor";
 
 export interface TimelineCanvasProps {
@@ -38,6 +39,13 @@ export interface TimelineContextType {
     type: "video" | "subtitle",
     render: () => void
   ) => void;
+  handleOnClick: (
+    e: React.MouseEvent,
+    trackItemId: number,
+    type: "video" | "subtitle",
+    render: () => void
+  ) => void;
+
   handleDownload: () => Promise<void>;
 }
 

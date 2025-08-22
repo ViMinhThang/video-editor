@@ -20,7 +20,6 @@ export function drawRoundedImage(
 ) {
   ctx.save();
   ctx.beginPath();
-
   if (roundAllCorners) {
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);

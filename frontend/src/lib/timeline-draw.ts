@@ -61,6 +61,26 @@ export async function drawTimeline({
   let xOffset = 0;
 
   for (const track of sortedTracks) {
+    console.log(
+      "Drawing track:",
+      track.id,
+      "xOffset:",
+      xOffset,
+      "width:",
+      (track.endTime - track.startTime) * thumbnailWidth,
+      "endtime",
+      track.endTime,
+      "starttime",
+      track.startTime,
+      "thumbnailwitd",
+      thumbnailWidth,
+      "highlightTrackItemId",
+      highlightTrackItemId,
+      "groupgrap",
+      groupGap,
+      "thumbnailHeight",
+      thumbnailHeight
+    );
     const framesInTrack = track.video_frames ?? [];
     framesInTrack.forEach((frame, idx) => {
       const img = imageMap[frame.id];

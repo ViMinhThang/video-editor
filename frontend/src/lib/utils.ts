@@ -39,7 +39,6 @@ export const getTimelineMetrics = ({
   };
 };
 
-
 export const takeDuration = (tracks: TrackItem[]) => {
   const durationByAsset: Record<number, number> = {};
   tracks.forEach((t) => {
@@ -57,7 +56,6 @@ export const takeDuration = (tracks: TrackItem[]) => {
   return totalDuration;
 };
 
-
 export const takeLastItemStart = (texts: TrackItem[]) => {
   if (texts.length > 0) {
     return texts[texts.length - 1].endTime;
@@ -65,3 +63,18 @@ export const takeLastItemStart = (texts: TrackItem[]) => {
     return 0;
   }
 };
+
+export function getResizeHandleAtX(
+  track: TrackItem,
+  clickX: number,
+  thumbnailWidth
+) {
+  const startX = track.startTime * thumbnailWidth;
+  const width = (track.video_frames?.length || 1) * thumbnailWidth;
+  console.log("startX", startX);
+  console.log("width", width);
+  console.log("clickX",clickX)
+  if (Math.abs(clickX - startX) <= 100) return "left";
+  if (Math.abs(clickX - (startX + width)) <= 100) return "right";
+  return null;
+}

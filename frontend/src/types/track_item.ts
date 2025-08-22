@@ -48,10 +48,3 @@ export interface TrackItem {
   // state ở frontend
   loading?: boolean;
 }
-
-export type TracksState = {
-  video: TrackItem[];
-  audio: TrackItem[];
-  text: TrackItem[];
-  subtitle: TrackItem[];
-};

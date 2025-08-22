@@ -54,7 +54,7 @@ export const TimeLine = ({ zoom = 100 }: { zoom?: number }) => {
           scale={scale}
         />
         <TimeCanvasSubtitle groupGap={5} />
-        <TimeCanvasVideo thumbnailWidth={thumbnailWidth} groupGap={5} />
+        <TimeCanvasVideo thumbnailWidth={thumbnailWidth} groupGap={5}/>
 
         {/* Cursor */}
         <div
