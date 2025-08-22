@@ -3,14 +3,14 @@ import { useTimelineContext } from "@/hooks/use-timeline";
 import { drawSubtitleTimeline } from "@/lib/timeline-draw";
 import { useCallback } from "react";
 import { useResizableCanvas } from "@/hooks/use-canvas-hooks";
-import { getClickX, findTrackAtX } from "@/lib/utils";
 import { TimeCanvasSubtitleProps } from "@/types/timeline";
+import { findTrackAtX, getClickX } from "@/lib/canvas-utils";
 
 export const TimeCanvasSubtitle = ({
   groupGap,
   thumbnailHeight = 30,
 }: TimeCanvasSubtitleProps) => {
-  const { handleContextMenu, highlightRef, animLineWidthRef } =
+  const { handleContextMenu, highlightRef } =
     useTimelineContext();
   const { tracks } = useEditorContext();
 

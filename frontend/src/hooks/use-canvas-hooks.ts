@@ -14,8 +14,6 @@ export function useResizableCanvas(
       if (canvasRef.current) resizeCanvas(canvasRef.current, height, renderFn);
     };
     handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, [renderFn, height, tracks]);
 
   return canvasRef;

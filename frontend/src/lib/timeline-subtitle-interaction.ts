@@ -1,6 +1,6 @@
+import { TrackItem } from "@/types/track_item";
 import { RefObject } from "react";
-import { getClickX, findTrackAtX } from "@/lib/utils";
-import { TrackItem } from "@/types";
+import { getClickX, findTrackAtX } from "./canvas-utils";
 
 type SubtitleContextMenuConfig = {
   e: React.MouseEvent;

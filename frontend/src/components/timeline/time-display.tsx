@@ -1,4 +1,4 @@
-import { formatTime } from "@/lib/utils";
+import { formatTime } from "@/lib/time-utils";
 import { TimeDisplayProps } from "@/types/timeline";
 import { useEffect, useState } from "react";
 

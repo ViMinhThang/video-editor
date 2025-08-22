@@ -1,6 +1,6 @@
 import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
 import { downloadTrackItem } from "@/api/track-api";
-import { download, selectTrackItemContext } from "@/services/timeline-action";
+import { download } from "@/services/timeline-action";
 import { ContextMenuState } from "@/types/editor";
 import {
   HighlightState,

@@ -1,10 +1,4 @@
-export interface TimelineRulerDrawOptions {
-  canvas: HTMLCanvasElement;
-  width: number;
-  height: number;
-  duration: number;
-  scale: number;
-}
+import { TimelineRulerDrawOptions } from "@/types/timeline";
 
 export const drawTimelineRuler = ({
   canvas,

@@ -1,12 +1,12 @@
 import { useResizableCanvas } from "@/hooks/use-canvas-hooks";
 import { useEditorContext } from "@/hooks/use-editor";
 import { useTimelineContext } from "@/hooks/use-timeline";
+import { getClickX, findTrackAtX } from "@/lib/canvas-utils";
 import { drawTimeline } from "@/lib/timeline-draw";
 import {
   handleMouseUp,
   handleVideoClick,
 } from "@/lib/timeline-video-interaction";
-import { findTrackAtX, getClickX } from "@/lib/utils";
 import { TimelineCanvasProps } from "@/types/timeline";
 import { TrackItem } from "@/types/track_item";
 import { useCallback, useRef, useState } from "react";
@@ -19,9 +19,8 @@ export const TimeCanvasVideo = ({
   const { handleContextMenu, highlightRef } = useTimelineContext();
   const { tracks, setTracks, setAsset, assets } = useEditorContext();
 
-  const videos = tracks.video;
+  const videos = tracks.video ?? [];
 
-  // refs + states cho drag
   const dragItemRef = useRef<TrackItem | null>(null);
   const dragStartXRef = useRef<number>(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -35,23 +34,26 @@ export const TimeCanvasVideo = ({
     track: TrackItem;
   } | null>(null);
 
-  const DRAG_THRESHOLD = 5; // px
+  const DRAG_THRESHOLD = 0; // px
 
   // Render timeline canvas
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    drawTimeline({
-      canvas,
-      videos,
-      thumbnailWidth,
-      thumbnailHeight,
-      groupGap,
-      highlightTrackItemId:
-        highlightRef.current.type === "video" ? highlightRef.current.id : null,
-    });
-  }, [videos, thumbnailWidth, thumbnailHeight, groupGap, highlightRef]);
+    if (videos.length > 0) {
+      drawTimeline({
+        canvas,
+        videos,
+        thumbnailWidth,
+        thumbnailHeight,
+        groupGap,
+        highlightTrackItemId:
+          highlightRef.current.type === "video"
+            ? highlightRef.current.id
+            : null,
+      });
+    }
+  }, [tracks.video, thumbnailWidth, thumbnailHeight, groupGap, highlightRef]);
 
   const canvasRef = useResizableCanvas(renderCanvas, thumbnailHeight, videos);
 
@@ -89,7 +91,7 @@ export const TimeCanvasVideo = ({
     const clickX = getClickX(canvasRef.current, e);
     const foundTrackId = findTrackAtX(videos, clickX, groupGap, thumbnailWidth);
     if (!foundTrackId) return;
-
+    console.log("foundTrack", foundTrackId);
     const track = videos.find((t) => t.id === foundTrackId);
     if (!track) return;
 
@@ -100,12 +102,11 @@ export const TimeCanvasVideo = ({
 
   // Mouse move → check ngưỡng và drag overlay
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!mouseDown || !dragItemRef.current) return;
+    if (!dragItemRef.current) return;
 
     const currentX = getClickX(canvasRef.current!, e);
     const deltaX = currentX - dragStartXRef.current;
-
-    if (!isDragging && Math.abs(deltaX) > DRAG_THRESHOLD) {
+    if (!isDragging && Math.abs(deltaX) > 0) {
       // bắt đầu drag
       setIsDragging(true);
 

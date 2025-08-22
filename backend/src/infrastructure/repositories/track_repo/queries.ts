@@ -1,6 +1,6 @@
-import { Op } from "sequelize";
+import { Model, Op } from "sequelize";
 import { BaseRepo, Constructor } from "../core";
-import { TrackItemModel } from "../../database/models/track_items_models";
+import { TrackItemModel, VideoFrameModel } from "../../database/models/track_items_models";
 import { TrackItem } from "../../../domain/models/track_items_models";
 import { Track } from "../../../domain/models/track_models";
 import { TrackModel } from "../../database/models/track_models";
@@ -30,7 +30,13 @@ export function AddQueriesTrack<Tbase extends Constructor<BaseRepo>>(
     }
     async getTrackItems(queries: any): Promise<TrackItem[]> {
       const result = await TrackItemModel.findAll({
-        where: { id: queries.id },
+        where: { project_id: queries.project_id },
+        include: [
+          {
+            model: VideoFrameModel,
+            as:"video_frames"
+          },
+        ],
       });
       return result;
     }

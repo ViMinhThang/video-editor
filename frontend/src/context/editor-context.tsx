@@ -7,6 +7,8 @@ import { Asset, Project } from "@/types";
 import { TrackItem, VideoFrame } from "@/types/track_item";
 import { processAssests } from "@/services/editor-actions";
 import { EditorContextType } from "@/types/editor";
+import axios from "axios";
+import { takeDuration } from "@/lib/utils";
 
 export const EditorContext = createContext<EditorContextType | null>(null);
 
@@ -32,16 +34,31 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!projectId) return;
     try {
       const res = await loadProject(projectId);
-      setAssets(res.data.assets);
-      setProject(res.data.project ?? null);
-
-      const { tracks, totalDuration, frames } = processAssests(res.data.assets);
-      setTracks(tracks);
-      setDuration(totalDuration);
-      setFrames(frames);
+      const { tracks } = processAssests(res.data.assets);
+      updateProjectState(tracks.video, tracks.audio, tracks.text);
     } catch (err) {
       console.error("Failed to load project", err);
     }
+  };
+  const updateProjectState = (
+    videoTracks: TrackItem[],
+    audioTracks?: TrackItem[],
+    textTracks?: TrackItem[]
+  ) => {
+    const allTracks = [
+      ...videoTracks,
+      ...(audioTracks || []),
+      ...(textTracks || []),
+    ];
+
+    setTracks({
+      video: videoTracks,
+      audio: audioTracks || [],
+      text: textTracks || [],
+    });
+
+    setFrames(videoTracks.flatMap((t) => t.video_frames || []));
+    setDuration(takeDuration(allTracks));
   };
 
   const handleUploadFile = () => {
@@ -72,24 +89,18 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const tempTrack = await postTrack(asset, projectId, start_time);
-      console.log("tempTrack", tempTrack);
-      const updatedTrack = [...tracks.video];
-      console.log(updatedTrack);
-      updatedTrack.push(tempTrack);
-      setTracks((prev) => ({
-        ...prev,
-        video: updatedTrack,
-      }));
-      // const frames: VideoFrame[] = updatedTrack.flatMap(
-      //   (t) => t.video_frames || []
-      // );
-      // setFrames(frames);
-      // sau đó fetch để đồng bộ thumbnail
-      await fetchProject();
+
+      if (tracks.video.length === 0) {
+        await fetchProject();
+      } else {
+        const updatedTrack = [...tracks.video, tempTrack];
+        updateProjectState(updatedTrack, tracks.audio, tracks.text);
+      }
     } catch (error) {
       console.error("Error posting track item", error);
     }
   };
+
   const addTextItem = async (time: number, asset_id: number) => {
     try {
       const res = await addText(time, asset_id, Number(projectId));
@@ -101,7 +112,6 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     fetchProject();
   }, [projectId]);
-
   return (
     <EditorContext.Provider
       value={{

@@ -10,15 +10,12 @@ import { cutVideo } from "@/api/track-api";
 import { TimeLine } from "./time-line";
 
 export const TimelineSection = () => {
-  const { duration, fetchProject, tracks } = useEditorContext();
+  const { duration, fetchProject, tracks,frames } = useEditorContext();
   const { isPlaying, currentTime, togglePlay, setCurrentTime } = useVideo();
 
   const [cutTime, setCutTime] = useState<number | null>(null);
   const [zoom, setZoom] = useState(100);
-  const frames =
-    tracks.video.length > 0
-      ? tracks.video.flatMap((t) => t.video_frames || [])
-      : [];
+
 
   const handleCutVideo = async () => {
     try {

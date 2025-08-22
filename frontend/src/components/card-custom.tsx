@@ -6,8 +6,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
-import { timeSince } from "@/lib/utils";
 import { Asset } from "@/types";
+import { timeSince } from "@/lib/time-utils";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface CardmodiProps {

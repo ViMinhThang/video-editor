@@ -29,7 +29,7 @@ export interface TimelineContextType {
   setContextMenu: React.Dispatch<React.SetStateAction<ContextMenuState>>;
 
   // highlight item
-  highlightRef: React.MutableRefObject<HighlightState>;
+  highlightRef: React.RefObject<HighlightState>;
 
   // actions
   handleContextMenu: (
@@ -48,4 +48,11 @@ export interface TimeCanvasSubtitleProps {
 export interface TimeDisplayProps {
   currentTime: number;
   duration: number;
+}
+export interface TimelineRulerDrawOptions {
+  canvas: HTMLCanvasElement;
+  width: number;
+  height: number;
+  duration: number;
+  scale: number;
 }

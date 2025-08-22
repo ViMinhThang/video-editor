@@ -99,7 +99,7 @@ export const associateTrackModels = () => {
   AssetModel.belongsTo(ProjectModel, { foreignKey: "project_id" });
   TrackItemModel.hasMany(VideoFrameModel, {
     foreignKey: "track_item_id",
-    as: "frames",
+    as: "video_frames",
   });
   VideoFrameModel.belongsTo(TrackItemModel, {
     foreignKey: "track_item_id",

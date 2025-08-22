@@ -2,7 +2,6 @@ import { takeDuration } from "@/lib/utils";
 import { Asset } from "@/types";
 import { TrackItem, VideoFrame } from "@/types/track_item";
 
-
 export const processAssests = (assets: Asset[]) => {
   const videoTracks: TrackItem[] = [];
   const audioTracks: TrackItem[] = [];
@@ -28,16 +27,12 @@ export const processAssests = (assets: Asset[]) => {
       }
     });
   });
-  const allTracks = [...videoTracks, ...audioTracks];
-  const totalDuration = takeDuration(allTracks);
-  const frames: VideoFrame[] = videoTracks.flatMap((t) => t.video_frames || []);
+
   return {
     tracks: {
       video: videoTracks,
       audio: audioTracks,
       text: textTracks,
     },
-    totalDuration: totalDuration,
-    frames: frames,
   };
 };

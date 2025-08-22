@@ -1,5 +1,5 @@
-import { drawRoundedImage } from "@/lib/utils";
 import { TrackItem } from "@/types/track_item";
+import { drawRoundedImage } from "./canvas-utils";
 
 interface DrawTimelineOptions {
   canvas: HTMLCanvasElement;
@@ -50,7 +50,6 @@ export async function drawTimeline({
 
   // sort track theo start_time
   const sortedTracks = [...videos].sort((a, b) => a.startTime - b.startTime);
-  
   // preload tất cả ảnh trong tracks
   const frames = sortedTracks.flatMap((t) => t.video_frames ?? []);
   const images = await Promise.all(
@@ -63,7 +62,6 @@ export async function drawTimeline({
 
   for (const track of sortedTracks) {
     const framesInTrack = track.video_frames ?? [];
-    framesInTrack.sort((a, b) => a.start_time - b.start_time);
     framesInTrack.forEach((frame, idx) => {
       const img = imageMap[frame.id];
       drawRoundedImage(

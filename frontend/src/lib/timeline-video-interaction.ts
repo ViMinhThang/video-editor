@@ -1,62 +1,7 @@
-import { RefObject } from "react";
-import { applyHighlight, drawRoundedImage, findTrackAtX, getClickX } from "@/lib/utils";
-import { Asset } from "@/types";
-import { TrackItem } from "@/types/track_item";
+
 import { drawTimeline, loadImage } from "./timeline-draw";
-
-type ContextMenuConfig = {
-  e: React.MouseEvent;
-  canvasRef: RefObject<HTMLCanvasElement>;
-  videos: TrackItem[];
-  groupGap: number;
-  thumbnailWidth: number;
-  highlightTrackItemIdRef: React.MutableRefObject<number | null>;
-  animLineWidthRef: React.MutableRefObject<number>;
-  render: () => void;
-  handleContextMenu?: (e: React.MouseEvent, id: number) => void;
-};
-
-type RenderDraggingConfig = {
-  canvasRef: RefObject<HTMLCanvasElement>;
-  tracks: TrackItem[]; // các track đã sort theo timeline
-  dragItemRef: React.MutableRefObject<TrackItem | null>;
-  deltaX: number;
-  thumbnailWidth: number;
-  thumbnailHeight: number;
-  groupGap: number;
-  highlightTrackItemIdRef: React.MutableRefObject<number | null>;
-  animLineWidthRef: React.MutableRefObject<number>;
-};
-
-
-type MouseDownConfig = {
-  e: React.MouseEvent;
-  canvasRef: RefObject<HTMLCanvasElement>;
-  videos: TrackItem[];
-  dragItemRef: React.RefObject<TrackItem | null>;
-  dragStartXRef: React.RefObject<number>;
-  setIsDragging: (value: boolean) => void;
-};
-type MouseUpConfig = {
-  e: React.MouseEvent;
-  canvasRef: RefObject<HTMLCanvasElement>;
-  videos: TrackItem[];
-  dragItemRef: React.MutableRefObject<TrackItem | null>;
-  setTracks: React.Dispatch<React.SetStateAction<{ video: TrackItem[] }>>;
-  setIsDragging: (value: boolean) => void;
-  groupGap: number;
-  thumbnailWidth: number;
-};
-
-type VideoClickConfig = {
-  e: React.MouseEvent;
-  canvasRef: RefObject<HTMLCanvasElement>;
-  tracks: Record<string, TrackItem[]>;
-  assets: Asset[];
-  setAsset: React.Dispatch<React.SetStateAction<Asset | undefined>>;
-  groupGap: number;
-  thumbnailWidth: number;
-};
+import { getClickX, findTrackAtX, drawRoundedImage } from "./canvas-utils";
+import { VideoClickConfig, MouseDownConfig, MouseUpConfig, RenderDraggingConfig } from "@/types/event";
 
 export const handleVideoClick = ({
   e,
@@ -82,7 +27,6 @@ export const handleVideoClick = ({
     const foundAsset = assets.find((a) => a.id === trackItem?.assetId);
     if (foundAsset) {
       setAsset(foundAsset);
-      console.log(1);
     }
   }
 };
@@ -119,32 +63,41 @@ export const handleMouseUp = ({
 
   const currentX = getClickX(canvasRef.current, e);
   const newIndex = findTrackAtX(videos, currentX, groupGap, thumbnailWidth);
-  console.log("newIndex", newIndex);
-  console.log("draggred index", dragItemRef.current.id);
-  const updatedVideos = [...videos];
 
-  const draggedTrack = updatedVideos.find(
-    (t) => t.id === dragItemRef.current!.id
-  );
-  const targetTrack = updatedVideos.find((track) => track.id === newIndex);
+  const draggedId = dragItemRef.current.id;
+  console.log("dragged id", draggedId, " -> target id", newIndex);
+
+  if (newIndex == null || newIndex === draggedId) {
+    // thả ra mà ko có target hoặc thả vào chính nó
+    dragItemRef.current = null;
+    setIsDragging(false);
+    return;
+  }
+
+  const updatedVideos = [...videos];
+  const draggedTrack = updatedVideos.find((t) => t.id === draggedId);
+  const targetTrack = updatedVideos.find((t) => t.id === newIndex);
 
   if (!draggedTrack || !targetTrack) return;
 
-  // Hoán đổi startTime & endTime
-  [draggedTrack.startTime, targetTrack.startTime] = [
-    targetTrack.startTime,
-    draggedTrack.startTime,
-  ];
-  [draggedTrack.endTime, targetTrack.endTime] = [
-    targetTrack.endTime,
-    draggedTrack.endTime,
-  ];
+  // hoán đổi start/end
+  const tmpStart = draggedTrack.startTime;
+  const tmpEnd = draggedTrack.endTime;
+
+  draggedTrack.startTime = targetTrack.startTime;
+  draggedTrack.endTime = targetTrack.endTime;
+
+  targetTrack.startTime = tmpStart;
+  targetTrack.endTime = tmpEnd;
+
   console.log("updated tracks", updatedVideos);
+
   setTracks((prev) => ({ ...prev, video: updatedVideos }));
 
   dragItemRef.current = null;
   setIsDragging(false);
 };
+
 export const renderDraggingItem = async ({
   canvasRef,
   tracks,
