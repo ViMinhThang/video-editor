@@ -58,6 +58,7 @@ export const handleMouseUp = ({
   setIsDragging,
   groupGap,
   thumbnailWidth,
+  trackType,
 }: MouseUpConfig) => {
   if (!dragItemRef.current || !canvasRef.current) return;
 
@@ -68,31 +69,33 @@ export const handleMouseUp = ({
   console.log("dragged id", draggedId, " -> target id", newIndex);
 
   if (newIndex == null || newIndex === draggedId) {
-    // thả ra mà ko có target hoặc thả vào chính nó
     dragItemRef.current = null;
     setIsDragging(false);
     return;
   }
 
-  const updatedVideos = [...videos];
-  const draggedTrack = updatedVideos.find((t) => t.id === draggedId);
-  const targetTrack = updatedVideos.find((t) => t.id === newIndex);
+  const updatedTracks = [...videos];
+  const draggedTrack = updatedTracks.find((t) => t.id === draggedId);
+  const targetTrack = updatedTracks.find((t) => t.id === newIndex);
 
   if (!draggedTrack || !targetTrack) return;
 
-  // hoán đổi start/end
-  const tmpStart = draggedTrack.startTime;
-  const tmpEnd = draggedTrack.endTime;
+  // swap start/end
+  [draggedTrack.startTime, targetTrack.startTime] = [
+    targetTrack.startTime,
+    draggedTrack.startTime,
+  ];
+  [draggedTrack.endTime, targetTrack.endTime] = [
+    targetTrack.endTime,
+    draggedTrack.endTime,
+  ];
 
-  draggedTrack.startTime = targetTrack.startTime;
-  draggedTrack.endTime = targetTrack.endTime;
+  console.log("updated tracks", updatedTracks);
 
-  targetTrack.startTime = tmpStart;
-  targetTrack.endTime = tmpEnd;
-
-  console.log("updated tracks", updatedVideos);
-
-  setTracks((prev) => ({ ...prev, video: updatedVideos }));
+  setTracks((prev) => ({
+    ...prev,
+    [trackType]: updatedTracks,
+  }));
 
   dragItemRef.current = null;
   setIsDragging(false);

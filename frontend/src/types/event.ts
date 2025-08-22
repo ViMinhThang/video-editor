@@ -1,6 +1,6 @@
 import { RefObject } from "react";
 import { Asset } from ".";
-import { TrackItem } from "./track_item";
+import { TrackItem, TracksState } from "./track_item";
 
 export type ContextMenuConfig = {
   e: React.MouseEvent;
@@ -36,13 +36,14 @@ export type MouseDownConfig = {
 };
 export type MouseUpConfig = {
   e: React.MouseEvent;
-  canvasRef: RefObject<HTMLCanvasElement>;
-  videos: TrackItem[];
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  videos: TrackItem[]; // generic: videoTracks hoặc textTracks
   dragItemRef: React.RefObject<TrackItem | null>;
-  setTracks: React.Dispatch<React.SetStateAction<{ video: TrackItem[] }>>;
-  setIsDragging: (value: boolean) => void;
+  setTracks: React.Dispatch<React.SetStateAction<TracksState>>;
+  setIsDragging: (val: boolean) => void;
   groupGap: number;
   thumbnailWidth: number;
+  trackType: keyof TracksState; // "video" | "audio" | "text"
 };
 
 export type VideoClickConfig = {
