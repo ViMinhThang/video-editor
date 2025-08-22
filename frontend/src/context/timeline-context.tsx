@@ -2,13 +2,18 @@ import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
 import { downloadTrackItem } from "@/api/track-api";
 import { download, selectTrackItemContext } from "@/services/timeline-action";
 import { ContextMenuState } from "@/types/editor";
-import { TimelineContextType, TimeLineProps } from "@/types/timeline";
-import { findTrackAtX } from "@/lib/utils";
+import {
+  HighlightState,
+  TimelineContextType,
+  TimeLineProps,
+} from "@/types/timeline";
 
 // ---------- Context ----------
 export const TimelineContext = createContext<TimelineContextType | undefined>(
   undefined
 );
+
+// ---------- Types ----------
 
 // ---------- Provider ----------
 interface TimelineProviderProps extends TimeLineProps {
@@ -27,29 +32,31 @@ export const TimelineProvider = ({
     trackItemId: null,
   });
 
-  // Refs cho highlight animation
+  // Highlight state (chỉ 1 item tại 1 thời điểm)
   const highlightState = {
-    trackItemIdRef: useRef<number | null>(null),
-    animLineWidthRef: useRef<number>(2),
+    ref: useRef<HighlightState>({ id: null, type: null }),
     animationFrameRef: useRef<number | null>(null),
   };
 
   const resetHighlight = () => {
     setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
-    highlightState.trackItemIdRef.current = null;
-    highlightState.animLineWidthRef.current = 0;
+    highlightState.ref.current = { id: null, type: null };
   };
 
-  const handleContextMenu = (e: MouseEvent, trackItemId: number) => {
+  const handleContextMenu = (
+    e: MouseEvent,
+    trackItemId: number,
+    type: "video" | "subtitle",
+    render: () => void
+  ) => {
     e.preventDefault();
+
+    // đảm bảo chỉ 1 item được chọn
+    highlightState.ref.current = { id: trackItemId, type };
+
     setContextMenu({ visible: true, x: e.clientX, y: e.clientY, trackItemId });
 
-    selectTrackItemContext(
-      highlightState.trackItemIdRef,
-      highlightState.animLineWidthRef,
-      highlightState.animationFrameRef,
-      trackItemId
-    );
+    render();
   };
 
   const handleDownload = async () => {
@@ -72,8 +79,7 @@ export const TimelineProvider = ({
         frames,
         setCurrentTime,
         contextMenu,
-        highlightTrackItemIdRef: highlightState.trackItemIdRef,
-        animLineWidthRef: highlightState.animLineWidthRef,
+        highlightRef: highlightState.ref,
         handleContextMenu,
         handleDownload,
         setContextMenu,

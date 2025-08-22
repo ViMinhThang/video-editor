@@ -73,12 +73,17 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const tempTrack = await postTrack(asset, projectId, start_time);
       console.log("tempTrack", tempTrack);
-
-      // setTracks((prev) => ({
-      //   ...prev,
-      //   video: [...(prev.video ?? []), tempTrack],
-      // }));
-
+      const updatedTrack = [...tracks.video];
+      console.log(updatedTrack);
+      updatedTrack.push(tempTrack);
+      setTracks((prev) => ({
+        ...prev,
+        video: updatedTrack,
+      }));
+      // const frames: VideoFrame[] = updatedTrack.flatMap(
+      //   (t) => t.video_frames || []
+      // );
+      // setFrames(frames);
       // sau đó fetch để đồng bộ thumbnail
       await fetchProject();
     } catch (error) {

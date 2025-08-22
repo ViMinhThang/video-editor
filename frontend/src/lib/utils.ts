@@ -136,8 +136,8 @@ export const formatTime = (time: number) => {
 export function findTrackAtX<
   T extends {
     id: number;
-    startTime: number;
-    endTime?: number;
+    startTime: number; // tính bằng giây
+    endTime?: number; // tính bằng giây
     video_frames?: any[];
   }
 >(
@@ -147,34 +147,31 @@ export function findTrackAtX<
   thumbnailWidth: number = 0,
   pxPerSecond: number = 40
 ): number | null {
-  let xOffset = 0;
-
   const sorted = [...items].sort((a, b) => a.startTime - b.startTime);
 
   for (const track of sorted) {
     let width = 0;
+    let startX = 0;
 
-    // Nếu là video (có video_frames)
-    if (track.video_frames) {
-      width = (track.video_frames?.length ?? 0) * thumbnailWidth;
-      if (clickX >= xOffset && clickX <= xOffset + width) {
-        return track.id;
-      }
-      xOffset += width + groupGap;
+    if (track.video_frames && track.video_frames.length > 0) {
+      // Video: tính theo số frame
+      width = track.video_frames.length * thumbnailWidth;
+      startX = track.startTime * pxPerSecond;
+    } else if (track.endTime !== undefined) {
+      // Subtitle/Text: tính theo khoảng thời gian
+      width = (track.endTime - track.startTime) * pxPerSecond;
+      startX = track.startTime * pxPerSecond;
     }
-    // Nếu là subtitle (dựa vào start_time, end_time)
-    else if (track.endTime !== undefined) {
-      width = (track.endTime - track.endTime) * pxPerSecond;
-      const x = xOffset + track.startTime * pxPerSecond;
-      if (clickX >= x && clickX <= x + width) {
-        return track.id;
-      }
-      xOffset += width + groupGap;
+
+    const endX = startX + width;
+    if (clickX >= startX && clickX <= endX) {
+      return track.id;
     }
   }
 
   return null;
 }
+
 export const takeDuration = (tracks: TrackItem[]) => {
   const durationByAsset: Record<number, number> = {};
   tracks.forEach((t) => {
@@ -228,4 +225,14 @@ export const takeLastItemStart = (texts: TrackItem[]) => {
   } else {
     return 0;
   }
+};
+export const applyHighlight = (
+  highlightTrackItemIdRef: React.MutableRefObject<number | null>,
+  animLineWidthRef: React.MutableRefObject<number>,
+  render: () => void,
+  trackItemId: number | null
+) => {
+  highlightTrackItemIdRef.current = trackItemId;
+  animLineWidthRef.current = 0;
+  render();
 };

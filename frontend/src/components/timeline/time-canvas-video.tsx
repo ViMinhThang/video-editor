@@ -3,7 +3,6 @@ import { useEditorContext } from "@/hooks/use-editor";
 import { useTimelineContext } from "@/hooks/use-timeline";
 import { drawTimeline } from "@/lib/timeline-draw";
 import {
-  handleContextMenuClick,
   handleMouseUp,
   handleVideoClick,
 } from "@/lib/timeline-video-interaction";
@@ -17,13 +16,16 @@ export const TimeCanvasVideo = ({
   thumbnailHeight = 60,
   groupGap = 10,
 }: TimelineCanvasProps) => {
-  const { handleContextMenu, highlightTrackItemIdRef, animLineWidthRef } =
-    useTimelineContext();
+  const { handleContextMenu, highlightRef } = useTimelineContext();
   const { tracks, setTracks, setAsset, assets } = useEditorContext();
 
+  const videos = tracks.video;
+
+  // refs + states cho drag
   const dragItemRef = useRef<TrackItem | null>(null);
   const dragStartXRef = useRef<number>(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [mouseDown, setMouseDown] = useState(false);
 
   const [dragOverlay, setDragOverlay] = useState<{
     x: number;
@@ -33,7 +35,7 @@ export const TimeCanvasVideo = ({
     track: TrackItem;
   } | null>(null);
 
-  const videos = tracks.video;
+  const DRAG_THRESHOLD = 5; // px
 
   // Render timeline canvas
   const renderCanvas = useCallback(() => {
@@ -46,36 +48,26 @@ export const TimeCanvasVideo = ({
       thumbnailWidth,
       thumbnailHeight,
       groupGap,
-      highlightTrackItemId: highlightTrackItemIdRef.current,
-      animLineWidth: animLineWidthRef.current,
+      highlightTrackItemId:
+        highlightRef.current.type === "video" ? highlightRef.current.id : null,
     });
-  }, [
-    videos,
-    thumbnailWidth,
-    thumbnailHeight,
-    groupGap,
-    highlightTrackItemIdRef,
-    animLineWidthRef,
-  ]);
+  }, [videos, thumbnailWidth, thumbnailHeight, groupGap, highlightRef]);
+
   const canvasRef = useResizableCanvas(renderCanvas, thumbnailHeight, videos);
 
-  // Context menu
-  const onContextMenu = (e: React.MouseEvent) =>
-    handleContextMenuClick({
-      e,
-      canvasRef,
-      videos,
-      groupGap,
-      thumbnailWidth,
-      highlightTrackItemIdRef,
-      animLineWidthRef,
-      render: renderCanvas,
-      handleContextMenu,
-    });
-
-  // Click
-  const onVideoClick = (e: React.MouseEvent) => {
+  // Context menu (chuột phải)
+  const onContextMenu = (e: React.MouseEvent) => {
     if (isDragging) return;
+    const clickX = getClickX(canvasRef.current!, e);
+    const foundTrackId = findTrackAtX(videos, clickX, groupGap, thumbnailWidth);
+    if (foundTrackId) {
+      handleContextMenu(e, foundTrackId, "video", renderCanvas);
+    }
+  };
+
+  // Click (chuột trái)
+  const onVideoClick = (e: React.MouseEvent) => {
+    if (isDragging || mouseDown) return;
     handleVideoClick({
       e,
       canvasRef,
@@ -87,13 +79,15 @@ export const TimeCanvasVideo = ({
     });
   };
 
-  // Mouse down → bắt đầu drag
+  // Mouse down → chuẩn bị drag
+  // Mouse down → chuẩn bị drag
   const onMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // chỉ xử lý chuột trái
+
     if (!canvasRef.current) return;
 
     const clickX = getClickX(canvasRef.current, e);
     const foundTrackId = findTrackAtX(videos, clickX, groupGap, thumbnailWidth);
-
     if (!foundTrackId) return;
 
     const track = videos.find((t) => t.id === foundTrackId);
@@ -101,37 +95,41 @@ export const TimeCanvasVideo = ({
 
     dragItemRef.current = track;
     dragStartXRef.current = clickX;
-    setIsDragging(true);
-
-    // Tạo overlay
-    const width = (track.video_frames?.length || 1) * thumbnailWidth;
-    setDragOverlay({
-      x: clickX - width / 2,
-      y: 20,
-      width,
-      height: thumbnailHeight,
-      track,
-    });
+    setMouseDown(true);
   };
 
-  // Mouse move → update overlay
+  // Mouse move → check ngưỡng và drag overlay
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !dragItemRef.current || !dragOverlay) return;
+    if (!mouseDown || !dragItemRef.current) return;
 
     const currentX = getClickX(canvasRef.current!, e);
     const deltaX = currentX - dragStartXRef.current;
 
-    setDragOverlay((prev) => prev && { ...prev, x: prev.x + deltaX });
+    if (!isDragging && Math.abs(deltaX) > DRAG_THRESHOLD) {
+      // bắt đầu drag
+      setIsDragging(true);
 
-    dragStartXRef.current = currentX;
+      const width =
+        (dragItemRef.current.video_frames?.length || 1) * thumbnailWidth;
+      setDragOverlay({
+        x: dragStartXRef.current - width / 2,
+        y: 20,
+        width,
+        height: thumbnailHeight,
+        track: dragItemRef.current,
+      });
+    }
+
+    if (isDragging && dragOverlay) {
+      setDragOverlay((prev) => prev && { ...prev, x: prev.x + deltaX });
+      dragStartXRef.current = currentX;
+    }
   };
 
-  // Mouse up → commit drag
+  // Mouse up → kết thúc drag hoặc click
   const onMouseUp = (e: React.MouseEvent) => {
-    setIsDragging(false);
-    setDragOverlay(null);
-
-    if (dragItemRef.current) {
+    if (isDragging && dragItemRef.current) {
+      // commit drag
       handleMouseUp({
         e,
         canvasRef,
@@ -143,6 +141,12 @@ export const TimeCanvasVideo = ({
         thumbnailWidth,
       });
     }
+
+    // reset
+    setIsDragging(false);
+    setMouseDown(false);
+    setDragOverlay(null);
+    dragItemRef.current = null;
   };
 
   return (

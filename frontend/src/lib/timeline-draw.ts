@@ -8,7 +8,6 @@ interface DrawTimelineOptions {
   thumbnailHeight: number;
   groupGap: number;
   highlightTrackItemId: number | null;
-  animLineWidth: number;
   borderColor?: string;
 }
 interface DrawSubtitleTimelineOptions {
@@ -16,7 +15,6 @@ interface DrawSubtitleTimelineOptions {
   texts: TrackItem[]; // track_item dạng text
   groupGap: number;
   highlightTrackItemId: number | null;
-  animLineWidth: number;
   borderColor?: string;
   thumbnailHeight: number;
 }
@@ -43,7 +41,6 @@ export async function drawTimeline({
   thumbnailHeight,
   groupGap,
   highlightTrackItemId,
-  animLineWidth,
   borderColor = "red",
 }: DrawTimelineOptions) {
   const ctx = canvas.getContext("2d");
@@ -53,7 +50,7 @@ export async function drawTimeline({
 
   // sort track theo start_time
   const sortedTracks = [...videos].sort((a, b) => a.startTime - b.startTime);
-
+  
   // preload tất cả ảnh trong tracks
   const frames = sortedTracks.flatMap((t) => t.video_frames ?? []);
   const images = await Promise.all(
@@ -96,7 +93,7 @@ export async function drawTimeline({
         true,
         true,
         borderColor,
-        animLineWidth,
+        3,
         true
       );
     }
@@ -110,7 +107,6 @@ export function drawSubtitleTimeline({
   groupGap,
   highlightTrackItemId,
   thumbnailHeight,
-  animLineWidth,
   borderColor = "red",
 }: DrawSubtitleTimelineOptions) {
   const ctx = canvas.getContext("2d");
@@ -159,7 +155,7 @@ export function drawSubtitleTimeline({
         true,
         true,
         borderColor,
-        animLineWidth,
+        3,
         true
       );
     }
@@ -188,7 +184,7 @@ export const animateHighlight = (
   render: () => void
 ) => {
   const step = () => {
-    animLineWidthRef.current = Math.min(animLineWidthRef.current + 0.5, 6);
+    animLineWidthRef.current = Math.min(animLineWidthRef.current + 0.5, 2);
     render();
     if (animLineWidthRef.current < 6) requestAnimationFrame(step);
   };

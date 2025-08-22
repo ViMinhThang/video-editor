@@ -1,3 +1,5 @@
+import { ContextMenuState } from "./editor";
+
 export interface TimelineCanvasProps {
   thumbnailWidth?: number;
   thumbnailHeight?: number;
@@ -10,49 +12,33 @@ export interface TimelineRulerProps {
   scale: number;
 }
 export interface TimeLineProps {
-  children: React.ReactNode;
   frames: any[];
   setCurrentTime: (time: number) => void;
 }
 
+// highlight state: chỉ 1 item tại 1 thời điểm
+export type HighlightState = {
+  id: number | null;
+  type: "video" | "subtitle" | null;
+};
 export interface TimelineContextType {
   frames: any[];
   setCurrentTime: (time: number) => void;
 
-  // Context menu state
-  contextMenu: {
-    visible: boolean;
-    x: number;
-    y: number;
-    trackItemId: number | null;
-  };
+  contextMenu: ContextMenuState;
+  setContextMenu: React.Dispatch<React.SetStateAction<ContextMenuState>>;
 
-  // Highlight / animation refs
-  highlightTrackItemIdRef: React.RefObject<number | null>;
-  animLineWidthRef: React.RefObject<number>;
+  // highlight item
+  highlightRef: React.MutableRefObject<HighlightState>;
 
-  // Drag / resize refs
-  dragState?: {
-    activeTrackItemId: React.RefObject<number | null>;
-    startX: React.RefObject<number>;
-    startWidth: React.RefObject<number>;
-    isDragging: React.RefObject<boolean>;
-    isResizing: React.RefObject<boolean>;
-  };
-
-  // Handlers
-  handleContextMenu: (e: React.MouseEvent<HTMLDivElement>, trackItemId: number) => void;
-  handleDownload: (trackItemId?: number) => void;
-
-  // State setters
-  setContextMenu: React.Dispatch<
-    React.SetStateAction<{
-      visible: boolean;
-      x: number;
-      y: number;
-      trackItemId: number | null;
-    }>
-  >;
+  // actions
+  handleContextMenu: (
+    e: React.MouseEvent,
+    trackItemId: number,
+    type: "video" | "subtitle",
+    render: () => void
+  ) => void;
+  handleDownload: () => Promise<void>;
 }
 
 export interface TimeCanvasSubtitleProps {

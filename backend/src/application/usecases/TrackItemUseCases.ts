@@ -6,13 +6,14 @@ import { TrackItem } from "../../domain/models/track_items_models";
 import { videoFrame } from "../../domain/models/video_frame_models";
 import FF from "../../lib/FF";
 import { getProjectAssetDir, calculateNumbFrames } from "../../lib/util";
+import { ProjectStateMapper, TrackItemDTO } from "../dto/ProjectStateDTO";
 
 export class TrackItemUseCases {
   static async createTrackItem(data: {
     project_id: string;
     asset_id: number;
     start_time: number;
-  }): Promise<TrackItem | undefined> {
+  }): Promise<TrackItemDTO | undefined> {
     const asset = await asset_repo.getAssetById(data.asset_id);
     if (!asset) throw new Error("Asset not found");
 
@@ -23,7 +24,7 @@ export class TrackItemUseCases {
       asset_id: asset.id,
       start_time: data.start_time,
       end_time: data.start_time + duration,
-      type: "video"
+      type: "video",
     };
 
     const created = await track_repo.storeTrackItem(track_item);
@@ -59,7 +60,7 @@ export class TrackItemUseCases {
       list_frames.push(await video_repo.storeVideoFrame(video_frames));
     }
     (created as any).video_frames = list_frames;
-    return created;
+    return ProjectStateMapper.toTrackItemDTO(created);
   }
 
   static async getTrackItem(id: number): Promise<TrackItem | undefined> {

@@ -1,6 +1,5 @@
 import { useRef, useEffect } from "react";
 import { resizeCanvas } from "@/lib/timeline-draw";
-import { animateHighlight } from "@/lib/timeline-draw";
 import { TrackItem } from "@/types/track_item";
 
 export function useResizableCanvas(

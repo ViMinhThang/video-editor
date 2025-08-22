@@ -1,5 +1,5 @@
 import { RefObject } from "react";
-import { drawRoundedImage, findTrackAtX, getClickX } from "@/lib/utils";
+import { applyHighlight, drawRoundedImage, findTrackAtX, getClickX } from "@/lib/utils";
 import { Asset } from "@/types";
 import { TrackItem } from "@/types/track_item";
 import { drawTimeline, loadImage } from "./timeline-draw";
@@ -28,36 +28,7 @@ type RenderDraggingConfig = {
   animLineWidthRef: React.MutableRefObject<number>;
 };
 
-export const handleContextMenuClick = ({
-  e,
-  canvasRef,
-  videos,
-  groupGap,
-  thumbnailWidth,
-  highlightTrackItemIdRef,
-  animLineWidthRef,
-  render,
-  handleContextMenu,
-}: ContextMenuConfig) => {
-  e.preventDefault();
-  if (!canvasRef.current) return;
 
-  const clickX = getClickX(canvasRef.current, e);
-  const foundTrackItemId = findTrackAtX(
-    videos,
-    clickX,
-    groupGap,
-    thumbnailWidth
-  );
-
-  highlightTrackItemIdRef.current = foundTrackItemId;
-  animLineWidthRef.current = 0;
-  render();
-
-  if (foundTrackItemId != null) {
-    handleContextMenu?.(e, foundTrackItemId);
-  }
-};
 type MouseDownConfig = {
   e: React.MouseEvent;
   canvasRef: RefObject<HTMLCanvasElement>;
@@ -200,7 +171,6 @@ export const renderDraggingItem = async ({
     thumbnailHeight,
     groupGap,
     highlightTrackItemId: highlightTrackItemIdRef.current,
-    animLineWidth: animLineWidthRef.current,
   });
 
   // Tính originalX của track đang kéo
