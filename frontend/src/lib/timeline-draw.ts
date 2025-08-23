@@ -1,23 +1,7 @@
-import { TrackItem } from "@/types/track_item";
+import { DrawSubtitleTimelineOptions, DrawTimelineOptions } from "@/types/draw";
 import { drawRoundedImage } from "./canvas-utils";
 
-interface DrawTimelineOptions {
-  canvas: HTMLCanvasElement;
-  videos: TrackItem[];
-  thumbnailWidth: number;
-  thumbnailHeight: number;
-  groupGap: number;
-  highlightTrackItemId: number | null;
-  borderColor?: string;
-}
-interface DrawSubtitleTimelineOptions {
-  canvas: HTMLCanvasElement;
-  texts: TrackItem[]; // track_item dạng text
-  groupGap: number;
-  highlightTrackItemId: number | null;
-  borderColor?: string;
-  thumbnailHeight: number;
-}
+
 // cache ảnh global để ko load lại nhiều lần
 const imageCache: Record<string, HTMLImageElement> = {};
 
