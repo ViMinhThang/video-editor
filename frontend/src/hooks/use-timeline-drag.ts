@@ -25,7 +25,9 @@ export function useTimelineDragDrop({
 }: UseTimelineDragDropProps) {
   const dragItemRef = useRef<TrackItem | null>(null);
   const dragStartXRef = useRef<number>(0);
-  const resizeItemRef = useRef<TrackItem | null>(null);
+
+  // chỉ lưu id + start/end, không copy nguyên object (tránh flickering)
+  const resizeItemRef = useRef<{ id: number; startTime: number; endTime: number } | null>(null);
   const resizeModeRef = useRef<"left" | "right" | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -41,19 +43,20 @@ export function useTimelineDragDrop({
   const onMouseDown = (e: React.MouseEvent) => {
     const clickX = getClickX(canvasRef.current, e);
     const foundTrackId = findTrackAtX(videos, clickX, groupGap, thumbnailWidth);
-    console.log("found track",foundTrackId)
     if (!foundTrackId) return;
 
     const track = videos.find((t) => t.id === foundTrackId);
-    console.log("adsdfsdfddfsdf",track)
     if (!track) return;
 
     // resize check
     const handle = getResizeHandleAtX(track, clickX, thumbnailWidth);
     if (handle) {
-      console.log(handle)
       resizeModeRef.current = handle;
-      resizeItemRef.current = { ...track };
+      resizeItemRef.current = {
+        id: track.id,
+        startTime: track.startTime,
+        endTime: track.endTime,
+      };
       setMouseDown(true);
       return;
     }
@@ -64,41 +67,39 @@ export function useTimelineDragDrop({
     setMouseDown(true);
   };
 
-  const onMouseMove = (e: React.MouseEvent, render: () => void) => {
+  const onMouseMove = (e: React.MouseEvent) => {
     const currentX = getClickX(canvasRef.current!, e);
 
-    // resize
+    // ================= RESIZE =================
     if (resizeItemRef.current && resizeModeRef.current) {
-      const frameIndex = Math.round(currentX / thumbnailWidth);
-      const step = 2; // hoặc 2 để mượt hơn
-
-      let newStart = resizeItemRef.current.startTime;
-      let newEnd = resizeItemRef.current.endTime;
+      const pxToTime = 1 / thumbnailWidth;
+      let { startTime, endTime } = resizeItemRef.current;
 
       if (resizeModeRef.current === "left") {
-        const stepIndex = Math.floor(frameIndex / step) * step;
-        newStart = Math.max(0, Math.min(stepIndex, newEnd - 1));
+        startTime = Math.max(0, Math.min(currentX * pxToTime, endTime - 0.1));
       } else {
-        const stepIndex = Math.floor(frameIndex / step) * step;
-        newEnd = Math.max(newStart + 1, stepIndex);
+        endTime = Math.max(startTime + 0.1, currentX * pxToTime);
       }
 
-      resizeItemRef.current.startTime = newStart;
-      resizeItemRef.current.endTime = newEnd;
+      // lưu vào ref để tránh lệch khi kéo tiếp
+      resizeItemRef.current.startTime = startTime;
+      resizeItemRef.current.endTime = endTime;
 
+      // dispatch realtime → state update liên tục, không flicker
       dispatchTracks({
         type: "RESIZE_TRACK",
         trackType,
         id: resizeItemRef.current.id,
-        startTime: newStart,
-        endTime: newEnd,
+        startTime,
+        endTime,
       });
       return;
     }
 
-    // drag
+    // ================= DRAG =================
     if (dragItemRef.current) {
       const deltaX = currentX - dragStartXRef.current;
+
       if (!isDragging && Math.abs(deltaX) > 2) {
         setIsDragging(true);
         const width =
@@ -119,11 +120,12 @@ export function useTimelineDragDrop({
     }
   };
 
-  const onMouseUp = (e: React.MouseEvent) => {
-    // TODO: gọi drop nếu cần
+  const onMouseUp = () => {
     setIsDragging(false);
     setMouseDown(false);
     setDragOverlay(null);
+
+    // reset refs
     resizeItemRef.current = null;
     resizeModeRef.current = null;
     dragItemRef.current = null;

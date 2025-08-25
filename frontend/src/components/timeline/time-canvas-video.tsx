@@ -63,7 +63,7 @@ export const TimeCanvasVideo = ({
   });
 
   const handleCanvasMouseMove = (e: React.MouseEvent) =>
-    onMouseMove(e, renderCanvas);
+    onMouseMove(e);
 
   const handleClick = (e: React.MouseEvent) => {
     if (isDragging || mouseDown) return;
