@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import type { Asset, TrackItem, VideoFrame } from "@/types";
 import { loadProject } from "@/api/track-api";
 import { processAssets } from "../features/editor/services/EditorActions";
+import { preloadProjectImages } from "../lib/timeline-draw";
 import type { EditorContextType } from "@/types/editor";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
@@ -27,12 +28,16 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
     text: [],
   });
 
-  const handleAssets = (assets: Asset[]) => {
+  const handleAssets = async (assets: Asset[]) => {
     const { tracks: processedTracks, totalDuration, frames: processedFrames } = processAssets(assets);
 
     setTracks(processedTracks);
     setDuration(totalDuration);
     setFrames(processedFrames);
+
+    // Optimized: Pre-load all frames for the timeline once per data change
+    // This allows the canvas render loop to stay synchronous and jank-free
+    await preloadProjectImages(processedTracks.video);
   };
 
   const fetchProject = async () => {
