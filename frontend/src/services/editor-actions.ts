@@ -6,7 +6,7 @@ export enum TrackType {
   AUDIO = 3,
 }
 
-export const processAssests = (assets: Asset[]) => {
+export const processAssets = (assets: Asset[]) => {
   const videoTracks: TrackItem[] = [];
   const audioTracks: TrackItem[] = [];
   const textTracks: TrackItem[] = [];

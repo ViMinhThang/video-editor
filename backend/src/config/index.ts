@@ -3,12 +3,12 @@ import { config as dotenvconfig } from "dotenv";
 import { getEnvironment, Env } from "./environment";
 import { merge } from "./merge";
 
-const file = process.env.SERVER_CONFIG ?? "backend/server.config.json";
-const data = JSON.parse(readFileSync(file).toString());
-
 dotenvconfig({
   path: getEnvironment().toString() + ".env",
 });
+
+const file = process.env.SERVER_CONFIG ?? "backend/server.config.json";
+const data = JSON.parse(readFileSync(file).toString());
 
 try {
   const envFile = getEnvironment().toString() + "." + file;
@@ -27,7 +27,7 @@ export const getConfig = (path: string, defaultVal: any = undefined): any => {
 export const getSecret = (name: string) => {
   const secret = process.env[name];
   if (secret == undefined) {
-    throw new Error(`Undefiled secret:${name}`);
+    throw new Error(`Undefined secret:${name}`);
   }
   return secret;
 };

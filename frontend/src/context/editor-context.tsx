@@ -2,7 +2,7 @@ import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Asset, TrackItem, VideoFrame } from "@/types";
 import { loadProject } from "@/api/track-api";
-import { processAssests } from "@/services/editor-actions";
+import { processAssets } from "@/services/editor-actions";
 import { EditorContextType } from "@/types/editor";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
@@ -21,7 +21,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const handleAssets = (assets: Asset[]) => {
-    const { tracks, totalDuration, frames } = processAssests(assets);
+    const { tracks, totalDuration, frames } = processAssets(assets);
 
     setTracks(tracks);
     setDuration(totalDuration);
@@ -44,7 +44,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <EditorContext.Provider
-      value={{ duration, frames,asset, tracks, fetchProject, setDuration, setTracks,setAsset }}
+      value={{ duration, frames, asset, tracks, fetchProject, setDuration, setTracks, setAsset }}
     >
       {children}
     </EditorContext.Provider>

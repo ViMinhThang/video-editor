@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "@feathersjs/express": "^5.0.34",
-    "@feathersjs/feathers": "^5.0.34",
     "@tsconfig/node20": "^20.1.6",
     "concurrently": "^9.2.0",
     "cors": "^2.8.5",
@@ -9,6 +7,7 @@
     "express": "^4.21.2",
     "fast-json-patch": "^3.1.1",
     "helmet": "^8.1.0",
+    "latest": "^0.2.0",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7"
@@ -18,13 +17,17 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^24.1.0",
     "@types/sequelize": "^4.28.20",
+    "@types/supertest": "^6.0.2",
     "nodemon": "^3.1.10",
+    "supertest": "^7.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.0.0"
   },
   "scripts": {
     "server": "nodemon --watch backend/src --ext ts --exec ts-node backend/src/server.ts",
     "client": "npm run dev --prefix frontend",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "vitest"
   }
 }
