@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/bars/app-sidebar";
+import { AppSidebar } from "@/components/shared/nav/AppSidebar";
 import { Outlet } from "react-router-dom";
 import axios from "axios";
 import { Calendar, Loader2 } from "lucide-react";

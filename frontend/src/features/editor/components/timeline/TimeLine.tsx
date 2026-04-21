@@ -1,18 +1,17 @@
 /**
  * @what The core visual representation of the video timeline.
  * @why Renders tracks for video and subtitles, and manages a synchronized playhead ('cursor') across all tiers.
- * @how Coordinates spatial metrics (zoom, scale) and renders track-specific canvases ('TimeCanvasVideo', 'TimeCanvasSubtitle').
+ * @how Coordinates spatial metrics and renders the unified 'TimelineStage' which replaces legacy canvases.
  */
 
 import React, { useRef, useEffect } from "react";
-import { useTimelineContext } from "@/hooks/use-timeline";
+import { useTimelineContext } from "@/hooks/useTimeline";
 import { useVideo } from "../../hooks/useVideo";
 import { getTimelineMetrics } from "@/lib/utils";
-import { ArrowBigDown, Download } from "lucide-react";
-import { TimeCanvasSubtitle } from "./TimeCanvasSubtitle";
-import { TimeCanvasVideo } from "./TimeCanvasVideo";
+import { Download } from "lucide-react";
 import { TimeRuler } from "./TimeRuler";
 import { useEditorContext } from "../../hooks/useEditor";
+import { TimelineStage } from "./konva/TimelineStage";
 
 interface TimeLineProps {
   zoom?: number;
@@ -22,22 +21,23 @@ export const TimeLine = ({ zoom = 100 }: TimeLineProps) => {
   const {
     frames,
     contextMenu,
-    handleMouseDown,
     handleDownload,
     setContextMenu,
   } = useTimelineContext();
   const { duration } = useEditorContext();
   const { currentTime } = useVideo();
 
-  const { totalDuration, scale, thumbnailWidth, width, cursorX } =
+  const { totalDuration, scale, width, cursorX } =
     getTimelineMetrics({
       framesLength: frames.length,
       duration,
       zoom,
       currentTime,
     });
+    
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll logic to follow the playhead
   useEffect(() => {
     if (!scrollRef.current) return;
     const container = scrollRef.current;
@@ -53,40 +53,25 @@ export const TimeLine = ({ zoom = 100 }: TimeLineProps) => {
   return (
     <div
       ref={scrollRef}
-      className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative scrollbar-hide bg-zinc-50 border border-zinc-100 rounded-xl shadow-inner scroll-smooth"
+      className="w-full overflow-x-auto overflow-y-hidden whitespace-nowrap relative scrollbar-hide bg-zinc-950 border border-white/5 rounded-2xl shadow-2xl scroll-smooth"
     >
       <div
         style={{ width: `${width}px`, position: "relative" }}
-        onMouseDown={handleMouseDown}
         className="py-4"
       >
-        <TimeRuler
-          width={width}
-          height={20}
-          duration={totalDuration}
-          scale={scale}
-        />
-        <TimeCanvasSubtitle
-          groupGap={5}
-        />
-        <TimeCanvasVideo thumbnailWidth={thumbnailWidth} groupGap={5} />
+        {/* Time Ruler remains a separate canvas for now for architectural separation */}
+        <div className="px-4">
+           <TimeRuler
+             width={width}
+             height={20}
+             duration={totalDuration}
+             scale={scale}
+           />
+        </div>
 
-        {/* Playhead Cursor */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: `${cursorX}px`,
-            width: "2px",
-            height: "100%",
-            backgroundColor: "#3b82f6", // blue-500
-            pointerEvents: "none",
-            zIndex: 50,
-          }}
-        >
-          <div className="absolute top-0 -left-2 text-blue-600">
-            <ArrowBigDown className="w-5 h-5 fill-current" />
-          </div>
+        {/* The New Unified Konva Stage - Replaces separate canvases */}
+        <div className="mt-2">
+           <TimelineStage zoom={zoom} />
         </div>
       </div>
 

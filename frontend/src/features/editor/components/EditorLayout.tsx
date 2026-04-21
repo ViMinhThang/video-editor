@@ -14,7 +14,7 @@ import SubtitleSidebar from "./sidebars/SubtitleSidebar";
 import TextSidebar from "./sidebars/TextSidebar";
 import { TimeSection } from "./timeline/TimeSection";
 import { ProjectProvider } from "@/context/project-context";
-import { useProject } from "@/hooks/use-project";
+import { useProject } from "@/hooks/useProject";
 import { postTrack } from "@/api/track-api";
 import { VideoProvider } from "@/context/video-context";
 import { useEditorContext } from "../hooks/useEditor";

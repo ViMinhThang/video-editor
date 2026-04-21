@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 import type { Asset, TrackItem, VideoFrame } from "@/types";
 import { loadProject } from "@/api/track-api";
 import { processAssets } from "../features/editor/services/EditorActions";
-import { preloadProjectImages } from "../lib/timeline-draw";
+import { preloadProjectImages } from "@/lib/utils";
 import type { EditorContextType } from "@/types/editor";
 
 export const EditorContext = createContext<EditorContextType | undefined>(

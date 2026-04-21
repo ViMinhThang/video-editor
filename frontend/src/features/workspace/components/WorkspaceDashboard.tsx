@@ -8,7 +8,7 @@ import React from "react";
 import AssetCardGrid from "./AssetCardGrid";
 import { CreateCardButton } from "./CreateButtons";
 import { Button } from "@/components/ui/button";
-import { useProject } from "@/hooks/use-project";
+import { useProject } from "@/hooks/useProject";
 import { deleteAsset } from "@/api/asset-api";
 import { FileUp, Plus, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";

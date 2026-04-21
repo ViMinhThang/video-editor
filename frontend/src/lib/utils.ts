@@ -33,6 +33,39 @@ export function getAssetType(mime: string) {
   return "text";
 }
 
+// --- Asset Preloading & Caching ---
+
+// Global image cache for high-frequency rendering contexts (e.g. Konva)
+export const imageCache: Record<string, HTMLImageElement> = {};
+
+/**
+ * Pre-fetches frames into the cache to ensure synchronous, jank-free rendering.
+ */
+export const preloadProjectImages = async (tracks: TrackItem[]) => {
+  const frames = tracks.flatMap((t) => t.video_frames ?? []);
+  const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const loadPromises = frames.map((frame) => {
+    const src = API_URL + frame.url;
+    if (imageCache[src]) return Promise.resolve();
+
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        imageCache[src] = img;
+        resolve();
+      };
+      img.onerror = () => {
+        console.error("Failed to preload frame:", src);
+        resolve();
+      };
+    });
+  });
+
+  await Promise.all(loadPromises);
+};
+
 // --- Canvas Drawing Utilities ---
 
 export interface DrawRoundedOptions {

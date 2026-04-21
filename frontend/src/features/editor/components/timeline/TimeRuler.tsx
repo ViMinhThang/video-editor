@@ -5,7 +5,7 @@
  */
 
 import React, { useRef, useEffect } from "react";
-import { drawTimelineRuler } from "@/lib/timeline-ruler-draw";
+import { drawTimelineRuler } from "@/lib/RulerRenderer";
 import type { TimelineRulerProps } from "@/types/timeline";
 
 export const TimeRuler = ({

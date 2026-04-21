@@ -7,8 +7,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Task from "@/components/task";
-import Notification from "@/components/notification";
 import { ChevronRight, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -40,10 +38,7 @@ export default function TopBar({ projectTitle }: TopBarProps) {
           Upgrade
         </Button>
 
-        <Task />
-        <Notification />
-        
-        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 ml-2">
           <Avatar>
             <AvatarImage
               src="https://github.com/evilrabbit.png"
