@@ -1,9 +1,16 @@
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+/**
+ * @what The primary state provider for the video editor scene.
+ * @why Manages project-level data including visual tracks, total duration, and currently selected assets.
+ * @how Synchronizes with the backend API and processes raw asset data into usable track models for the timeline.
+ */
+
+import React, { createContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Asset, TrackItem, VideoFrame } from "@/types";
+import type { ReactNode } from "react";
+import type { Asset, TrackItem, VideoFrame } from "@/types";
 import { loadProject } from "@/api/track-api";
-import { processAssets } from "@/services/editor-actions";
-import { EditorContextType } from "@/types/editor";
+import { processAssets } from "../features/editor/services/EditorActions";
+import type { EditorContextType } from "@/types/editor";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
   undefined
@@ -21,11 +28,11 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const handleAssets = (assets: Asset[]) => {
-    const { tracks, totalDuration, frames } = processAssets(assets);
+    const { tracks: processedTracks, totalDuration, frames: processedFrames } = processAssets(assets);
 
-    setTracks(tracks);
+    setTracks(processedTracks);
     setDuration(totalDuration);
-    setFrames(frames);
+    setFrames(processedFrames);
   };
 
   const fetchProject = async () => {

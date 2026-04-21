@@ -1,3 +1,4 @@
+import "express-async-errors";
 import { createServer } from "http";
 import express, { Express } from "express";
 import { getConfig } from "./config";

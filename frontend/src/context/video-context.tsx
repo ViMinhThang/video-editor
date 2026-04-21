@@ -1,29 +1,25 @@
-import React, {
-  createContext,
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { VideoContextType } from "@/types/editor";
-import { trackTime } from "@/services/video-action";
+/**
+ * @what Context provider for managing the core video playback engine.
+ * @why Synchronizes the state between the hidden HTML5 video element (source) and multiple visual consumers (Konva preview, Timeline playhead).
+ * @how Exposes refs and playback controls (toggle, seek) using React 'useCallback' and 'useEffect' for consistent performance.
+ */
 
-export const VideoContext = createContext<VideoContextType | undefined>(
-  undefined
-);
+import React, { createContext, useRef, useState, useEffect, useCallback } from "react";
+import type { ReactNode } from "react";
+import type { VideoContextType } from "@/types/editor";
+import { trackTime } from "../features/editor/services/VideoActions";
+
+export const VideoContext = createContext<VideoContextType | undefined>(undefined);
 
 const initialVideoState = {
   isPlaying: false,
   currentTime: 0,
 };
 
-
-export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
+export const VideoProvider = ({ children }: { children: ReactNode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(initialVideoState.isPlaying);
-  const [currentTime, setCurrentTimeState] = useState(
-    initialVideoState.currentTime
-  );
+  const [currentTime, setCurrentTimeState] = useState(initialVideoState.currentTime);
 
   const play = useCallback(() => {
     if (!videoRef.current) return;
@@ -57,7 +53,13 @@ export const VideoProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <VideoContext.Provider
-      value={{ videoRef, isPlaying, currentTime, togglePlay, setCurrentTime }}
+      value={{ 
+        videoRef: videoRef as React.RefObject<HTMLVideoElement>, 
+        isPlaying, 
+        currentTime, 
+        togglePlay, 
+        setCurrentTime 
+      }}
     >
       {children}
     </VideoContext.Provider>

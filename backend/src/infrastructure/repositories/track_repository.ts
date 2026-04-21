@@ -2,16 +2,16 @@ import { Op } from "sequelize";
 import { TrackItem } from "../../domain/interfaces/track_items_models";
 import { Track } from "../../domain/interfaces/track_models";
 import { TrackItemModel, TrackModel } from "../database/models";
-import { TrackRepository } from "../../domain/repositories/track_repository";
+import { TrackRepository, TrackItemQuery, TrackQuery } from "../../domain/repositories/track_repository";
 import { db } from "../database/core";
 
 export class TrackRepoImpl implements TrackRepository {
-  async getTrackById(id: any): Promise<Track | undefined> {
+  async getTrackById(id: number | string): Promise<Track | undefined> {
     const result = await TrackModel.findOne({ where: { id: id } });
     return result ?? undefined;
   }
 
-  async getTracks(query: any): Promise<Track[]> {
+  async getTracks(query: TrackQuery): Promise<Track[]> {
     const where: any = {};
     if (query?.id) where.id = query.id;
     
@@ -22,20 +22,20 @@ export class TrackRepoImpl implements TrackRepository {
     });
   }
 
-  async getTrackItemsByProjectId(query: any): Promise<TrackItem[]> {
+  async getTrackItemsByProjectId(query: TrackItemQuery): Promise<TrackItem[]> {
     return await TrackItemModel.findAll({
-      where: { project_id: query.projectId },
+      where: query.projectId ? { project_id: query.projectId } : {},
       raw: true,
     });
   }
 
-  async getTrackItems(queries: any): Promise<TrackItem[]> {
+  async getTrackItems(queries: TrackItemQuery): Promise<TrackItem[]> {
     return await TrackItemModel.findAll({
-      where: { id: queries.id },
+      where: queries.id ? { id: queries.id } : {},
     });
   }
 
-  async getTrackItemById(id: string): Promise<TrackItem | undefined> {
+  async getTrackItemById(id: number | string): Promise<TrackItem | undefined> {
     const result = await TrackItemModel.findOne({
       where: { id: id },
     });
@@ -58,21 +58,21 @@ export class TrackRepoImpl implements TrackRepository {
     }
   }
 
-  async storeTrackItem(ti: any): Promise<TrackItem> {
+  async storeTrackItem(ti: Partial<TrackItem>): Promise<TrackItem> {
     return await db.sequelize.transaction(async (transaction) => {
       const [_track_item] = await TrackItemModel.upsert(
         {
           id: ti.id,
-          track_id: ti.track_id,
-          project_id: ti.project_id,
-          start_time: ti?.start_time,
-          asset_id: ti?.asset_id,
-          end_time: ti?.end_time,
-          x: ti?.x,
-          y: ti?.y,
-          scale: ti?.scale,
-          rotation: ti?.rotation,
-          text_content: ti?.text_content,
+          track_id: ti.track_id as number,
+          project_id: ti.project_id as number,
+          start_time: ti.start_time,
+          asset_id: ti.asset_id,
+          end_time: ti.end_time,
+          x: ti.x,
+          y: ti.y,
+          scale: ti.scale,
+          rotation: ti.rotation,
+          text_content: ti.text_content,
         },
         { transaction }
       );
@@ -80,26 +80,26 @@ export class TrackRepoImpl implements TrackRepository {
     });
   }
 
-  async storeTrack(paramsOrId: any, data?: { order: any }): Promise<any> {
+  async storeTrack(params: Partial<Track>): Promise<Track> {
     return await db.sequelize.transaction(async (transaction) => {
-        if (typeof paramsOrId === 'object' && !data) {
-            // Case: storeTrack(params: { project_id: number; type: string })
-            const [stored] = await TrackModel.upsert(
-                {
-                  type: paramsOrId.type,
-                  order: 1, // Defaulting as in original
-                },
-                { transaction }
-              );
-              return stored.get({ plain: true });
-        } else {
-            // Case: storeTrack(id: any, arg1: { order: any })
-            const [count] = await TrackModel.update({ order: data?.order }, {
-                where: { id: paramsOrId },
-                transaction
-            });
-            return count > 0;
-        }
+      const [stored] = await TrackModel.upsert(
+        {
+          type: params.type as string,
+          order: params.order || 1, 
+        },
+        { transaction }
+      );
+      return stored.get({ plain: true });
+    });
+  }
+
+  async updateTrackOrder(id: number | string, data: { order: number }): Promise<boolean> {
+    return await db.sequelize.transaction(async (transaction) => {
+      const [count] = await TrackModel.update({ order: data.order }, {
+          where: { id },
+          transaction
+      });
+      return count > 0;
     });
   }
 

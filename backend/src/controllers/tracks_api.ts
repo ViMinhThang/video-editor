@@ -17,7 +17,7 @@ export class TrackWebService implements WebService<Track> {
   }
   async replace(id: any, data: any): Promise<Track | undefined> {
     const { order } = data;
-    const success = await track_repo.storeTrack(id, { order });
+    const success = await track_repo.updateTrackOrder(id, { order });
     if (success) {
       return track_repo.getTrackById(id);
     }

@@ -1,11 +1,15 @@
-import { downloadTrackItem } from "@/api/track-api";
-import { download, selectTrackItemContext } from "@/services/timeline-action";
-import {
-  ContextMenuState,
+/**
+ * @what Context provider for the visual timeline interaction layer.
+ * @why Manages ephemeral state like context menus, playhead dragging, and visual highlights for selected track items.
+ * @how Synchronizes interacton logic with the 'TimelineActions' service and coordinates with context-aware canvases.
+ */
 
-} from "@/types/editor";
-import { TimelineContextType, TimeLineProps } from "@/types/timeline";
-import { createContext, useState, useRef, ReactNode, MouseEvent } from "react";
+import React, { createContext, useState, useRef } from "react";
+import type { ReactNode, MouseEvent } from "react";
+import { downloadTrackItem } from "@/api/track-api";
+import { download, selectTrackItemContext } from "../features/editor/services/TimelineActions";
+import type { ContextMenuState } from "@/types/editor";
+import type { TimelineContextType, TimeLineProps } from "@/types/timeline";
 
 export const TimelineContext = createContext<TimelineContextType | null>(null);
 
@@ -15,6 +19,7 @@ const initialContextMenu: ContextMenuState = {
   y: 0,
   trackItemId: null,
 };
+
 export const TimelineProvider = ({
   children,
   frames,
@@ -33,8 +38,9 @@ export const TimelineProvider = ({
     highlightState.trackItemIdRef.current = null;
     highlightState.animLineWidthRef.current = 0;
   };
+
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    // TODO: implement cursor drag logic
+    // Implement cursor movement logic if required
   };
 
   const handleContextMenu = (e: MouseEvent, trackItemId: number) => {
@@ -55,10 +61,14 @@ export const TimelineProvider = ({
       (f) => f.track_item_id === contextMenu.trackItemId
     );
     if (!trackItem) return;
-    const response = await downloadTrackItem(contextMenu.trackItemId);
-    download(response.data, "cutted.mp4", "video/mp4");
-    setContextMenu({ visible: false, x: 0, y: 0, trackItemId: null });
-    resetHighlight();
+    try {
+      const response = await downloadTrackItem(contextMenu.trackItemId);
+      download(response.data, "video-export.mp4", "video/mp4");
+      setContextMenu(initialContextMenu);
+      resetHighlight();
+    } catch (err) {
+      console.error("Failed to download track item:", err);
+    }
   };
 
   return (

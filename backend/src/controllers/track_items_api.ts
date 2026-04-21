@@ -3,13 +3,12 @@ import { asset_repo, track_repo, video_repo } from "../infrastructure/repositori
 import { TrackItem } from "../domain/interfaces/track_items_models";
 import { uploadDir } from "../routes/upload_routes";
 import { WebService } from "./web_service";
-import FF from "../../lib/FF";
+import FF from "../infrastructure/services/FFmpegService";
 import fs from "fs/promises";
 import {
   calculateNumbFrames,
-  getNextRunIndex,
   getProjectAssetDir,
-} from "../../lib/util";
+} from "../utils/util";
 import { videoFrame } from "../domain/interfaces/video_frame_models";
 
 export class TrackItemWebService implements WebService<TrackItem> {

@@ -1,5 +1,4 @@
-import { Asset, TrackItem } from "../models/track_items_models";
-import { TrackItemModel } from "../orm/models";
+import { Asset, TrackItem } from "../interfaces/track_items_models";
 
 export interface AssetRepository {
   storeTrackItem(ti: TrackItem): Promise<TrackItem | undefined>;

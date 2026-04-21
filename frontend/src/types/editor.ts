@@ -17,3 +17,11 @@ export interface ContextMenuState {
   y: number;
   trackItemId: number | null;
 }
+
+export interface VideoContextType {
+  videoRef: React.RefObject<HTMLVideoElement>;
+  isPlaying: boolean;
+  currentTime: number;
+  togglePlay: () => void;
+  setCurrentTime: (time: number) => void;
+}
